@@ -1,0 +1,8 @@
+node_modules/
+dist/
+/.vercel/
+.env
+config.local.js
+*.local
+/.cache
+/.DS_Store
