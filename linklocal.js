@@ -951,7 +951,7 @@ function setLocalBookmarks(arr){
   try{ DATA = normalized; } catch(e){}
   try{ window.DATA = normalized; } catch(e){}
   // Do not persist bookmarks to localStorage in UI-only mode
-  try{ console.log('setLocalBookmarks: updated in-memory DATA; not saved to localStorage (UI-only mode)'); }catch(e){}
+  try{ console.log('setLocalBookmarks: updated in-memory DATA; items=', (normalized||[]).length, 'not saved to localStorage (UI-only mode)'); }catch(e){}
   try { renderTags(); renderList(); } catch(e){ /* ignore */ }
 }
 
@@ -1001,15 +1001,19 @@ function startSyncForUser(uid){
       console.log('startSyncForUser: attempting REST fetch', url);
       fetch(url, { method: 'GET', cache: 'no-store' }).then(async r => {
         if(!r.ok){ console.warn('startSyncForUser REST fetch failed', r.status); return; }
-        const remoteVal = await r.json();
-        try{
-          if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
-            let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
-            setLocalBookmarks(arr);
-          } else {
-            console.log('startSyncForUser: remote empty (REST) — no data to display');
-          }
-        }catch(e){ console.error('startSyncForUser REST parse error', e); }
+          const remoteVal = await r.json();
+          try{
+            console.log('startSyncForUser: REST fetched type=', typeof remoteVal, 'isArray=', Array.isArray(remoteVal));
+            if(Array.isArray(remoteVal)) console.log('startSyncForUser: REST array length=', remoteVal.length);
+            else if(remoteVal && typeof remoteVal === 'object') console.log('startSyncForUser: REST object keys=', Object.keys(remoteVal).length);
+            if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
+              let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
+              console.log('startSyncForUser: parsed items=', (arr||[]).length);
+              setLocalBookmarks(arr);
+            } else {
+              console.log('startSyncForUser: remote empty (REST) — no data to display');
+            }
+          }catch(e){ console.error('startSyncForUser REST parse error', e); }
       }).catch(e=>{ console.warn('startSyncForUser REST fetch error', e); });
     }catch(e){ console.warn('startSyncForUser REST fallback error', e); }
     return;
@@ -1542,3 +1546,11 @@ if (window.firebase) {
 
 /* unload 保険 */
 window.addEventListener('beforeunload', ()=>{ try{ saveBookmarksToRemote(); } catch(e){} });
+
+// If Firebase SDK is not present (public build), start REST-based sync now
+try{
+  if(!window.firebase){
+    console.log('Firebase not present — invoking startSyncForUser for REST fallback');
+    try{ startSyncForUser(null); }catch(e){ console.warn('startSyncForUser invocation failed', e); }
+  }
+}catch(e){ /* ignore */ }
