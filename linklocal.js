@@ -987,11 +987,34 @@ function deepEqualMaps(a,b){
 
 /* sync */
 function startSyncForUser(uid){
-  if (!db) return;
   // Always use OWNER_UID for read-only public view
   firebaseUid = OWNER_UID;
   console.log('startSyncForUser (read-only mode) owner uid=', OWNER_UID);
   const path = 'bookmarks/' + OWNER_UID;
+
+  // If Firebase SDK / db is not available, try REST API fallback (no API key required for public DB read)
+  if (!db){
+    try{
+      const base = (typeof firebaseConfig !== 'undefined' && firebaseConfig && firebaseConfig.databaseURL) ? String(firebaseConfig.databaseURL).replace(/\/$/, '') : null;
+      if(!base){ console.warn('startSyncForUser: no databaseURL available for REST fallback'); return; }
+      const url = base + '/bookmarks/' + OWNER_UID + '.json';
+      console.log('startSyncForUser: attempting REST fetch', url);
+      fetch(url, { method: 'GET', cache: 'no-store' }).then(async r => {
+        if(!r.ok){ console.warn('startSyncForUser REST fetch failed', r.status); return; }
+        const remoteVal = await r.json();
+        try{
+          if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
+            let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
+            setLocalBookmarks(arr);
+          } else {
+            console.log('startSyncForUser: remote empty (REST) — no data to display');
+          }
+        }catch(e){ console.error('startSyncForUser REST parse error', e); }
+      }).catch(e=>{ console.warn('startSyncForUser REST fetch error', e); });
+    }catch(e){ console.warn('startSyncForUser REST fallback error', e); }
+    return;
+  }
+
   const ref = db.ref(path);
 
   if (currentRemoteRef && typeof currentRemoteRef.off === 'function') {
@@ -1006,9 +1029,6 @@ function startSyncForUser(uid){
         let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
         setLocalBookmarks(arr);
       } else {
-        // リモートにデータが無い場合: 単純にローカルを上書きして消さないようにする
-        // 既にローカルにアイテムがある場合はそれをリモート側へ保存して初期化する
-        // Read-only mode: do not upload data
         console.log('Remote empty (read-only mode) — no data to display');
       }
     }catch(e){ console.error(e); }
@@ -1017,7 +1037,6 @@ function startSyncForUser(uid){
   ref.on('value', snapshot => {
     const remoteVal = snapshot.val();
     try {
-      // If remoteVal is empty/null, do not overwrite local data to avoid accidental data loss
       if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
         let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
         setLocalBookmarks(arr);
