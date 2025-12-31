@@ -1169,21 +1169,29 @@ function updateAuthUI(user){
     userInfoText.textContent = 'ユーザー: ゲスト';
     if(userMiniAvatar) userMiniAvatar.innerHTML = '👤';
     if(userAvatarLarge) userAvatarLarge.innerHTML = '👤';
-    // 未ログイン時はローカルの一覧をクリアしてログイン促進メッセージを表示
-    try{ setLocalBookmarks([]); } catch(e){}
+    // 未ログイン時でも、既に読み込まれた公開データは消さない（公開閲覧モード）
     try{
-      if(el && el.countText) el.countText.textContent = 'ログインして下さい';
-      if(el && el.list) el.list.innerHTML = '<div id="guestLoginPrompt" style="color:var(--muted);padding:14px;border-radius:10px;background:var(--card);cursor:pointer">ログインして下さい</div>';
-      // attach click handler to the guest login prompt area to open user settings modal
-      setTimeout(()=>{
-        const wrap = document.getElementById('guestLoginPrompt');
-        if(wrap){ wrap.addEventListener('click', ()=>{ openUserSettingsModal(); }); }
-      },50);
+      // カウント表示は既存データに基づくかログイン促進メッセージを出す
+      const cnt = (DATA || []).length;
+      if(el && el.countText) el.countText.textContent = (cnt > 0) ? (cnt + ' 件') : 'ログインして下さい';
+      if(el && el.list){
+        if(cnt === 0){
+          el.list.innerHTML = '<div id="guestLoginPrompt" style="color:var(--muted);padding:14px;border-radius:10px;background:var(--card);cursor:pointer">ログインして下さい</div>';
+          setTimeout(()=>{
+            const wrap = document.getElementById('guestLoginPrompt');
+            if(wrap){ wrap.addEventListener('click', ()=>{ openUserSettingsModal(); }); }
+          },50);
+        } else {
+          // データがあれば再レンダリング
+          renderTags(); renderList();
+        }
+      }
       // 非ログイン時は追加や編集ボタンを隠す
       if(el && el.openAdd) el.openAdd.style.display = 'none';
       if(el && el.topOpenAdd) el.topOpenAdd.style.display = 'none';
       if(el && el.editModeBtn) el.editModeBtn.style.display = 'none';
       if(el && el.topEditModeBtn) el.topEditModeBtn.style.display = 'none';
+      if(el && el.topDeleteSelectedBtn) el.topDeleteSelectedBtn.style.display = 'none';
     }catch(e){}
   } else {
     // ログイン時は UI を有効化
