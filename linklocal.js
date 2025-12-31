@@ -889,7 +889,8 @@ if (window.location.hostname === '127.0.0.1') {
 
 /* ensure firebase SDK loaded */
 if (!window.firebase) {
-  console.error('Firebase SDK が読み込まれていません。index.html で SDK を一度だけ読み込んでください。');
+  // Firebase SDK not present — run in read-only guest mode without logging an error
+  try{ console.info('Firebase SDK not detected: running in read-only mode'); }catch(e){}
 } else {
   if (!firebase.apps.length) {
     console.log('Initializing Firebase app...');

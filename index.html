@@ -206,11 +206,7 @@
         <button id="uploadAvatarBtn" class="small-btn" style="margin-top:12px;">📷 アイコンを変更</button>
       </div>
       <div id="loginSection" style="margin-top:16px;">
-        <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;">Googleでログインするとデータが同期されます</p>
-        <button id="googleSignInBtn2" class="open-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:18px;height:18px;">
-          Googleでログイン
-        </button>
+        <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;">公開ビルドではログイン機能を無効化しています（閲覧のみ）。</p>
       </div>
       <div id="logoutSection" style="display:none;margin-top:16px;">
         <p id="loggedInEmail" style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;"></p>
@@ -233,11 +229,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK（compat）: これを一度だけ読み込む -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+  <!-- Firebase SDK removed in public build to avoid exposing API keys -->
   <!-- 外部スクリプト本体 -->
  <script src="linklocal.js" defer></script>
 
