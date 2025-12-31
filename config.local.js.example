@@ -1,5 +1,0 @@
-// Copy to config.local.js (do NOT commit)
-window.APP_CONFIG = {
-  FIREBASE_API_KEY: "<YOUR_FIREBASE_API_KEY_HERE>",
-  // Optionally add other client config values here
-};
