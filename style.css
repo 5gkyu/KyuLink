@@ -3,7 +3,7 @@
 :root{
   --bg: #f6fbfb;
   --card: #ffffff;
-  --accent-1: #39C5D6; /* 初音ミク色 */
+  --accent-1: #0fb8bf;
   --accent-2: #8fe3dd;
   --text: #073a46;
   --muted: #57727a;
@@ -16,7 +16,7 @@
 html.dark-mode{
   --bg: #07181a;
   --card: #071e1f;
-  --accent-1: #39C5D6; /* dark-mode also use initial accent */
+  --accent-1: #17c3c6;
   --accent-2: #5fbfc0;
   --text: #e6fbfb;
   --muted: #9fb5b7;

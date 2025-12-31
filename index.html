@@ -19,21 +19,21 @@
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://5gkyu.github.io/Kyulink/" />
+  <meta property="og:url" content="https://5gkyu.github.io/KyuLink/" />
   <meta property="og:title" content="KyuLink" />
   <meta property="og:description" content="きゅーがよく使うリンクまとめ" />
-  <meta property="og:image" content="https://5gkyu.github.io/Kyulink/ogp.png" />
+  <meta property="og:image" content="/ogp.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="KyuLink — きゅーがよく使うリンクまとめ" />
-  <link rel="image_src" href="https://5gkyu.github.io/Kyulink/ogp.png" />
+  <link rel="image_src" href="/ogp.png" />
   
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://5gkyu.github.io/Kyulink/" />
+  <meta property="twitter:url" content="https://5gkyu.github.io/KyuLink/" />
   <meta property="twitter:title" content="KyuLink" />
   <meta property="twitter:description" content="きゅーがよく使うリンクまとめ" />
-  <meta property="twitter:image" content="https://5gkyu.github.io/Kyulink/ogp.png" />
+  <meta property="twitter:image" content="/ogp.png" />
   <meta name="twitter:image:alt" content="KyuLink — きゅーがよく使うリンクまとめ" />
   
   <link rel="stylesheet" href="style.css">
@@ -206,7 +206,11 @@
         <button id="uploadAvatarBtn" class="small-btn" style="margin-top:12px;">📷 アイコンを変更</button>
       </div>
       <div id="loginSection" style="margin-top:16px;">
-        <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;">公開ビルドではログイン機能を無効化しています（閲覧のみ）。</p>
+        <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;">Googleでログインするとデータが同期されます</p>
+        <button id="googleSignInBtn2" class="open-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:18px;height:18px;">
+          Googleでログイン
+        </button>
       </div>
       <div id="logoutSection" style="display:none;margin-top:16px;">
         <p id="loggedInEmail" style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;"></p>
@@ -229,7 +233,11 @@
     </div>
   </div>
 
-  <!-- Firebase SDK removed in public build to avoid exposing API keys -->
+  <!-- Firebase SDK（compat）: これを一度だけ読み込む -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <!-- 外部スクリプト本体 -->
  <script src="linklocal.js" defer></script>
 

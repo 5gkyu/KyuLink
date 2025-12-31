@@ -101,11 +101,11 @@ const OGP_PROXY = 'https://ogp-proxy.kyu68002.workers.dev';
 function getOgpProxy(){ try{ return (localStorage.getItem('ogp_proxy') || OGP_PROXY || '').toString(); }catch(e){ return OGP_PROXY || ''; } }
 function saveToStorage(){
   try{
-    // UI 設定のみを localStorage に保存（ブックマーク本体は保存しない）
-    try{ localStorage.setItem(VIEW_MODE_KEY, state.viewMode || 'medium'); }catch(e){ console.warn('saveToStorage: set VIEW_MODE failed', e); }
-    try{ localStorage.setItem(SORT_KEY, state.sort || 'alpha_en_asc'); }catch(e){ console.warn('saveToStorage: set SORT_KEY failed', e); }
-    // dark_mode / ogp_proxy / userAvatar などはそれぞれのハンドラで管理されているためここでは触らない
-    console.log('saveToStorage: saved UI settings');
+    // ブックマーク関連はローカルに保存しない仕様に変更
+    // ここでは UI 関連のレンダリングのみ行う（保存は行わない）
+    try{ DATA = dedupeData(DATA || []); }catch(e){}
+    
+    console.log('saveToStorage: skipped writing bookmark_data_v1 to localStorage (UI-only mode)');
   }catch(e){ console.warn('saveToStorage (UI-only) error', e); }
 }
 // 正規化して比較用のキーを作る（簡易）
@@ -141,13 +141,13 @@ function dedupeData(arr){
   return res;
 }
 function loadFromStorage(){
-  // ブックマークデータの読み込みは行わず、UI 用の設定は個別のロード関数を使う
+  // ブックマークはローカルに保存しないため、読み込みは行わない
   return false;
 }
 
 // load and dedupe: called at init to ensure duplicates removed
 function loadAndDedupeFromStorage(){
-  // ブックマークは Database から取得する設計のため、ここでは何もしない
+  // localStorage からブックマークをロードしない（UIのみローカル保持）
   return false;
 }
 
@@ -865,8 +865,7 @@ document.addEventListener('keydown', async (e)=>{
 
 /* --- your firebaseConfig --- */
 const firebaseConfig = {
-  // apiKey should be provided via config.local.js (generated from .env)
-  apiKey: (window.APP_CONFIG && window.APP_CONFIG.FIREBASE_API_KEY) || "<REMOVED_FROM_REPO>",
+  apiKey: "AIzaSyDJjrwdBvHp5nGCVggO77vLIfobfFAVwWA",
   authDomain: "link-fd2f7.firebaseapp.com",
   databaseURL: "https://link-fd2f7-default-rtdb.firebaseio.com",
   projectId: "link-fd2f7",
@@ -889,8 +888,7 @@ if (window.location.hostname === '127.0.0.1') {
 
 /* ensure firebase SDK loaded */
 if (!window.firebase) {
-  // Firebase SDK not present — run in read-only guest mode without logging an error
-  try{ console.info('Firebase SDK not detected: running in read-only mode'); }catch(e){}
+  console.error('Firebase SDK が読み込まれていません。index.html で SDK を一度だけ読み込んでください。');
 } else {
   if (!firebase.apps.length) {
     console.log('Initializing Firebase app...');
@@ -951,7 +949,7 @@ function setLocalBookmarks(arr){
   try{ DATA = normalized; } catch(e){}
   try{ window.DATA = normalized; } catch(e){}
   // Do not persist bookmarks to localStorage in UI-only mode
-  try{ console.log('setLocalBookmarks: updated in-memory DATA; items=', (normalized||[]).length, 'not saved to localStorage (UI-only mode)'); }catch(e){}
+  try{ console.log('setLocalBookmarks: updated in-memory DATA; not saved to localStorage (UI-only mode)'); }catch(e){}
   try { renderTags(); renderList(); } catch(e){ /* ignore */ }
 }
 
@@ -987,38 +985,11 @@ function deepEqualMaps(a,b){
 
 /* sync */
 function startSyncForUser(uid){
+  if (!db) return;
   // Always use OWNER_UID for read-only public view
   firebaseUid = OWNER_UID;
   console.log('startSyncForUser (read-only mode) owner uid=', OWNER_UID);
   const path = 'bookmarks/' + OWNER_UID;
-
-  // If Firebase SDK / db is not available, try REST API fallback (no API key required for public DB read)
-  if (!db){
-    try{
-      const base = (typeof firebaseConfig !== 'undefined' && firebaseConfig && firebaseConfig.databaseURL) ? String(firebaseConfig.databaseURL).replace(/\/$/, '') : null;
-      if(!base){ console.warn('startSyncForUser: no databaseURL available for REST fallback'); return; }
-      const url = base + '/bookmarks/' + OWNER_UID + '.json';
-      console.log('startSyncForUser: attempting REST fetch', url);
-      fetch(url, { method: 'GET', cache: 'no-store' }).then(async r => {
-        if(!r.ok){ console.warn('startSyncForUser REST fetch failed', r.status); return; }
-          const remoteVal = await r.json();
-          try{
-            console.log('startSyncForUser: REST fetched type=', typeof remoteVal, 'isArray=', Array.isArray(remoteVal));
-            if(Array.isArray(remoteVal)) console.log('startSyncForUser: REST array length=', remoteVal.length);
-            else if(remoteVal && typeof remoteVal === 'object') console.log('startSyncForUser: REST object keys=', Object.keys(remoteVal).length);
-            if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
-              let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
-              console.log('startSyncForUser: parsed items=', (arr||[]).length);
-              setLocalBookmarks(arr);
-            } else {
-              console.log('startSyncForUser: remote empty (REST) — no data to display');
-            }
-          }catch(e){ console.error('startSyncForUser REST parse error', e); }
-      }).catch(e=>{ console.warn('startSyncForUser REST fetch error', e); });
-    }catch(e){ console.warn('startSyncForUser REST fallback error', e); }
-    return;
-  }
-
   const ref = db.ref(path);
 
   if (currentRemoteRef && typeof currentRemoteRef.off === 'function') {
@@ -1033,6 +1004,9 @@ function startSyncForUser(uid){
         let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
         setLocalBookmarks(arr);
       } else {
+        // リモートにデータが無い場合: 単純にローカルを上書きして消さないようにする
+        // 既にローカルにアイテムがある場合はそれをリモート側へ保存して初期化する
+        // Read-only mode: do not upload data
         console.log('Remote empty (read-only mode) — no data to display');
       }
     }catch(e){ console.error(e); }
@@ -1041,6 +1015,7 @@ function startSyncForUser(uid){
   ref.on('value', snapshot => {
     const remoteVal = snapshot.val();
     try {
+      // If remoteVal is empty/null, do not overwrite local data to avoid accidental data loss
       if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
         let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
         setLocalBookmarks(arr);
@@ -1173,29 +1148,21 @@ function updateAuthUI(user){
     userInfoText.textContent = 'ユーザー: ゲスト';
     if(userMiniAvatar) userMiniAvatar.innerHTML = '👤';
     if(userAvatarLarge) userAvatarLarge.innerHTML = '👤';
-    // 未ログイン時でも、既に読み込まれた公開データは消さない（公開閲覧モード）
+    // 未ログイン時はローカルの一覧をクリアしてログイン促進メッセージを表示
+    try{ setLocalBookmarks([]); } catch(e){}
     try{
-      // カウント表示は既存データに基づくかログイン促進メッセージを出す
-      const cnt = (DATA || []).length;
-      if(el && el.countText) el.countText.textContent = (cnt > 0) ? (cnt + ' 件') : 'ログインして下さい';
-      if(el && el.list){
-        if(cnt === 0){
-          el.list.innerHTML = '<div id="guestLoginPrompt" style="color:var(--muted);padding:14px;border-radius:10px;background:var(--card);cursor:pointer">ログインして下さい</div>';
-          setTimeout(()=>{
-            const wrap = document.getElementById('guestLoginPrompt');
-            if(wrap){ wrap.addEventListener('click', ()=>{ openUserSettingsModal(); }); }
-          },50);
-        } else {
-          // データがあれば再レンダリング
-          renderTags(); renderList();
-        }
-      }
+      if(el && el.countText) el.countText.textContent = 'ログインして下さい';
+      if(el && el.list) el.list.innerHTML = '<div id="guestLoginPrompt" style="color:var(--muted);padding:14px;border-radius:10px;background:var(--card);cursor:pointer">ログインして下さい</div>';
+      // attach click handler to the guest login prompt area to open user settings modal
+      setTimeout(()=>{
+        const wrap = document.getElementById('guestLoginPrompt');
+        if(wrap){ wrap.addEventListener('click', ()=>{ openUserSettingsModal(); }); }
+      },50);
       // 非ログイン時は追加や編集ボタンを隠す
       if(el && el.openAdd) el.openAdd.style.display = 'none';
       if(el && el.topOpenAdd) el.topOpenAdd.style.display = 'none';
       if(el && el.editModeBtn) el.editModeBtn.style.display = 'none';
       if(el && el.topEditModeBtn) el.topEditModeBtn.style.display = 'none';
-      if(el && el.topDeleteSelectedBtn) el.topDeleteSelectedBtn.style.display = 'none';
     }catch(e){}
   } else {
     // ログイン時は UI を有効化
@@ -1546,11 +1513,3 @@ if (window.firebase) {
 
 /* unload 保険 */
 window.addEventListener('beforeunload', ()=>{ try{ saveBookmarksToRemote(); } catch(e){} });
-
-// If Firebase SDK is not present (public build), start REST-based sync now
-try{
-  if(!window.firebase){
-    console.log('Firebase not present — invoking startSyncForUser for REST fallback');
-    try{ startSyncForUser(null); }catch(e){ console.warn('startSyncForUser invocation failed', e); }
-  }
-}catch(e){ /* ignore */ }
