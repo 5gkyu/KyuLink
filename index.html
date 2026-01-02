@@ -143,7 +143,7 @@
   </div>
 
   
-  <button class="fab" id="openAdd" title="ブックマークを追加" style="display:none">＋</button>
+  <button class="fab" id="openAdd" title="ブックマークを追加" aria-hidden="true" style="display:none;position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:28px;align-items:center;justify-content:center;z-index:1200;font-size:28px;line-height:0;border:none;background:#39C5D6;color:#fff;box-shadow:0 8px 18px rgba(2,18,22,0.12);">＋</button>
 
   <!-- (削除) 旧・編集モードフローティングボタンは廃止 -->
 
@@ -266,7 +266,50 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <!-- 外部スクリプト本体 -->
- <script src="linklocal.js" defer></script>
+  <script src="linklocal.js" defer></script>
+
+  <script>
+  // オーナーであれば常に右下にFABを表示する（mobile Safariのsafe-area考慮）
+  (function(){
+    const fab = document.getElementById('openAdd');
+    if(!fab) return;
+
+    function applyVisible(visible){
+      try{
+        if(visible){
+          fab.style.display = 'flex';
+          fab.setAttribute('aria-hidden','false');
+        }else{
+          fab.style.display = 'none';
+          fab.setAttribute('aria-hidden','true');
+        }
+      }catch(e){ /* ignore */ }
+    }
+
+    // 初期は非表示、linklocal.js 側でグローバル変数 `isReadOnlyMode` を設定します。
+    applyVisible(false);
+
+    // 変化をポーリングで監視（linklocal.js の処理が完了したら反映される）
+    let last;
+    const iv = setInterval(()=>{
+      let v;
+      try{
+        if(typeof isReadOnlyMode === 'boolean') v = isReadOnlyMode; // top-level let を参照
+        else if(typeof window.isReadOnlyMode === 'boolean') v = window.isReadOnlyMode; // もし var で公開されている場合
+      }catch(e){ v = undefined; }
+      if(typeof v === 'boolean' && v !== last){
+        last = v;
+        // オーナーなら編集可能 (= false の場合) として表示
+        applyVisible(!v);
+        // 値が確定したらポーリングは不要
+        clearInterval(iv);
+      }
+    }, 250);
+
+    // バックアップ: 30秒後に強制停止
+    setTimeout(()=> clearInterval(iv), 30000);
+  })();
+  </script>
 
 <!-- Cookie consent banner (inserted by assistant) -->
 <style>

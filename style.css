@@ -199,6 +199,15 @@ body.edit-mode .actions .small-btn{white-space:nowrap;overflow:hidden;text-overf
 }
 .fab:active{transform:translateY(2px)}
 
+/* Owner-visible FAB: bottom-right, safe-area aware and high z-index so it's always tappable */
+.fab.owner-visible{
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  top: auto;
+  display:flex !important;
+  z-index:3000 !important;
+}
+
 /* (削除済) 旧・編集モードのフローティングボタンは廃止 */
 
 /* action buttons visibility in edit mode */
