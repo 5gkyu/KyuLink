@@ -60,26 +60,29 @@
   </style>
     <script>
     (function(){
+      let lastH = 0;
+      let scheduled = false;
       function updateHeaderHeight(){
         try{
           const header = document.querySelector('header.card');
           if(!header) return;
           const h = header.offsetHeight || 0;
+          if(h === lastH) return;
+          lastH = h;
           document.documentElement.style.setProperty('--hdr-h', h + 'px');
-          const wrap = document.querySelector('.wrap');
-          if(wrap) wrap.style.paddingTop = (h + 8) + 'px';
         }catch(e){console.warn('updateHeaderHeight failed', e)}
       }
+      function scheduleUpdate(){ if(scheduled) return; scheduled = true; requestAnimationFrame(()=>{ scheduled = false; updateHeaderHeight(); }); }
       updateHeaderHeight();
-      window.addEventListener('resize', updateHeaderHeight);
-      window.addEventListener('orientationchange', updateHeaderHeight);
+      window.addEventListener('resize', scheduleUpdate);
+      window.addEventListener('orientationchange', scheduleUpdate);
       if(window.visualViewport){
         try{
-          visualViewport.addEventListener('resize', updateHeaderHeight);
-          visualViewport.addEventListener('scroll', updateHeaderHeight);
+          visualViewport.addEventListener('resize', scheduleUpdate);
+          // avoid reacting to visualViewport.scroll to prevent layout thrash on mobile
         }catch(e){}
       }
-      window.addEventListener('load', ()=> setTimeout(updateHeaderHeight,120));
+      window.addEventListener('load', ()=> setTimeout(scheduleUpdate,120));
     })();
     </script>
 </head>
@@ -107,14 +110,20 @@
       </div>
 
       <!-- mid-row removed: display-size and sort moved to hamburger menu -->
-      <!-- count row moved into header for persistent visibility on mobile -->
+      <!-- count row (kept outside header for transparent background) -->
+    </header>
+
+    <div class="content-row">
+      <main>
       <div id="count">
-        <div class="count-row">
+        <div class="count-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
           <div style="display:flex;align-items:center;gap:8px;">
+            <!-- View size select -->
             <select id="viewSizeSelect">
               <option value="small">🔍 小</option>
               <option value="medium">📋 中</option>
             </select>
+            <!-- Sort select -->
             <select id="sortSelect">
               <option value="alpha_en_asc">名前順（昇順）</option>
               <option value="alpha_en_desc">名前順（降順）</option>
@@ -128,17 +137,13 @@
           </div>
         </div>
       </div>
-    </header>
-
-    <div class="content-row">
-      <main>
       <div class="list" id="list"></div>
       </main>
     </div>
   </div>
 
   
-  <button class="fab" id="openAdd" title="ブックマークを追加">＋</button>
+  <button class="fab" id="openAdd" title="ブックマークを追加" style="display:none">＋</button>
 
   <!-- (削除) 旧・編集モードフローティングボタンは廃止 -->
 

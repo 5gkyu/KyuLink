@@ -314,13 +314,17 @@ body.edit-mode .row .open-btn{display:none}
 
 
 
-/* Keep the count/actions row visible by placing it inside the fixed header */
-  /* When #count is moved into header, render it as a part of header and ensure it
-     sits above content. Header height is published to --hdr-h by script. */
-  header.card #count{position:relative;z-index:1001;padding:6px 0;margin:0}
-  header.card #count .count-row{
-    background: rgba(230,235,237,0.9); /* slightly more solid when part of header */
-    padding:8px 12px;border-radius:8px;border:1px solid rgba(6,50,58,0.04);
+/* Keep the count/actions row visible while scrolling */
+  /* make count row sticky and reduce horizontal padding to save space
+    top will be set dynamically to the header height via --hdr-h */
+  #count{position:sticky;top:var(--hdr-h,0px);z-index:995;padding:8px 0;margin:0 !important}
+  /* Slight gray translucent background, single-line layout */
+  #count .count-row{
+    background: rgba(230,235,237,0.55); /* soft gray translucency */
+    padding:8px 12px;
+    border-radius:6px;
+    box-shadow: none;
+    border: 1px solid rgba(6,50,58,0.04);
     display:flex;align-items:center;justify-content:space-between;gap:10px;
   }
   

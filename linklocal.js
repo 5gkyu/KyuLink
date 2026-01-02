@@ -431,8 +431,8 @@ function updateHeaderControls(){
   try{
     const hasSelection = (state.selectedIds && state.selectedIds.size > 0);
     if(el.topDeleteSelectedBtn) el.topDeleteSelectedBtn.style.display = (hasSelection || state.editMode) ? 'inline-block' : 'none';
-    if(el.topOpenAdd) el.topOpenAdd.style.display = hasSelection ? 'none' : (state.editMode ? 'none' : 'inline-block');
-    if(el.openAdd) el.openAdd.style.display = hasSelection ? 'none' : '';
+    if(el.topOpenAdd) el.topOpenAdd.style.display = (hasSelection || state.editMode || isReadOnlyMode) ? 'none' : 'inline-block';
+    if(el.openAdd) el.openAdd.style.display = (hasSelection || isReadOnlyMode) ? 'none' : '';
     if(el.topEditModeBtn) el.topEditModeBtn.classList.toggle('active', state.editMode);
     if(el.editModeBtn) el.editModeBtn.classList.toggle('active', state.editMode);
   }catch(e){/* ignore */}
@@ -928,12 +928,14 @@ function updateEditPermissions(user){
     if(el.topOpenAdd) el.topOpenAdd.style.display = 'inline-block';
     if(el.topEditModeBtn) el.topEditModeBtn.style.display = 'inline-block';
     if(el.editModeBtn) el.editModeBtn.style.display = 'inline-block';
+    if(el.openAdd) el.openAdd.style.display = '';
   } else {
     // Not owner: hide edit buttons
     if(el.topOpenAdd) el.topOpenAdd.style.display = 'none';
     if(el.topEditModeBtn) el.topEditModeBtn.style.display = 'none';
     if(el.editModeBtn) el.editModeBtn.style.display = 'none';
     if(el.topDeleteSelectedBtn) el.topDeleteSelectedBtn.style.display = 'none';
+    if(el.openAdd) el.openAdd.style.display = 'none';
   }
 }
 
