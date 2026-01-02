@@ -58,6 +58,30 @@
       display: none !important;
     }
   </style>
+    <script>
+    (function(){
+      function updateHeaderHeight(){
+        try{
+          const header = document.querySelector('header.card');
+          if(!header) return;
+          const h = header.offsetHeight || 0;
+          document.documentElement.style.setProperty('--hdr-h', h + 'px');
+          const wrap = document.querySelector('.wrap');
+          if(wrap) wrap.style.paddingTop = (h + 8) + 'px';
+        }catch(e){console.warn('updateHeaderHeight failed', e)}
+      }
+      updateHeaderHeight();
+      window.addEventListener('resize', updateHeaderHeight);
+      window.addEventListener('orientationchange', updateHeaderHeight);
+      if(window.visualViewport){
+        try{
+          visualViewport.addEventListener('resize', updateHeaderHeight);
+          visualViewport.addEventListener('scroll', updateHeaderHeight);
+        }catch(e){}
+      }
+      window.addEventListener('load', ()=> setTimeout(updateHeaderHeight,120));
+    })();
+    </script>
 </head>
 <body>
   <div id="loadingOverlay" aria-hidden="true">
@@ -83,19 +107,14 @@
       </div>
 
       <!-- mid-row removed: display-size and sort moved to hamburger menu -->
-    </header>
-
-    <div class="content-row">
-      <main>
+      <!-- count row moved into header for persistent visibility on mobile -->
       <div id="count">
-        <div class="count-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div class="count-row">
           <div style="display:flex;align-items:center;gap:8px;">
-            <!-- View size select -->
             <select id="viewSizeSelect">
               <option value="small">🔍 小</option>
               <option value="medium">📋 中</option>
             </select>
-            <!-- Sort select -->
             <select id="sortSelect">
               <option value="alpha_en_asc">名前順（昇順）</option>
               <option value="alpha_en_desc">名前順（降順）</option>
@@ -106,10 +125,13 @@
           </div>
           <div class="count-actions" style="display:flex;gap:8px;align-items:center">
             <button class="more-btn tag-btn" id="moreTagsBtn" aria-haspopup="dialog">🏷️ タグ</button>
-            <!-- Read-only mode: hide edit buttons -->
           </div>
         </div>
       </div>
+    </header>
+
+    <div class="content-row">
+      <main>
       <div class="list" id="list"></div>
       </main>
     </div>

@@ -314,17 +314,14 @@ body.edit-mode .row .open-btn{display:none}
 
 
 
-/* Keep the count/actions row visible while scrolling */
-  /* make count row sticky and reduce horizontal padding to save space
-    top will be set dynamically to the header height via --hdr-h */
-  #count{position:sticky;top:var(--hdr-h,0px);z-index:995;padding:8px 0;margin:0 !important}
-  /* Slight gray translucent background, single-line layout */
-  #count .count-row{
-    background: rgba(230,235,237,0.55); /* soft gray translucency */
-    padding:8px 12px;
-    border-radius:6px;
-    box-shadow: none;
-    border: 1px solid rgba(6,50,58,0.04);
+/* Keep the count/actions row visible by placing it inside the fixed header */
+  /* When #count is moved into header, render it as a part of header and ensure it
+     sits above content. Header height is published to --hdr-h by script. */
+  header.card #count{position:relative;z-index:1001;padding:6px 0;margin:0}
+  header.card #count .count-row{
+    background: rgba(230,235,237,0.9); /* slightly more solid when part of header */
+    padding:8px 12px;border-radius:8px;border:1px solid rgba(6,50,58,0.04);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
   }
   
   /* Custom select styling */
@@ -361,6 +358,19 @@ body.edit-mode .row .open-btn{display:none}
     color:var(--text);
     padding:4px 8px;
   }
+
+/* --- Safe area: ensure bottom UI (iOS home indicator / browser bar) doesn't hide list items --- */
+/* add extra bottom padding to main scrollable areas and account for rows so last item is visible */
+.wrap, main, .list{
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.list{
+  padding-bottom: calc(var(--row-h,72px) + 24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Ensure header stays on top when fixed and content spacing uses --hdr-h */
+header.card{z-index:1100}
+.wrap{box-sizing:border-box;padding-top:calc(var(--hdr-h,72px) + 8px)}
 
   /* ユーザー設定モーダル */
   .user-avatar-large{
