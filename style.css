@@ -91,6 +91,14 @@ html.dark-mode .small-btn{
   border: 1px solid rgba(255,255,255,0.04);
 }
 
+/* Ensure active chip highlight appears in dark mode */
+html.dark-mode .chip.active{
+  background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  color: #ffffff;
+  border-color: transparent;
+  font-weight:700;
+}
+
 html.dark-mode #count .count-row{
   /* Make count/action row darker than cards so it remains distinct when scrolled */
   background: rgba(0,0,0,0.5);
@@ -151,7 +159,7 @@ header.card{position:fixed;left:0;right:0;top:0;z-index:1000;background:linear-g
 .search{flex:1 1 auto;min-width:0}
 .search input{box-sizing:border-box}
 .search input::placeholder{color:#9fb5b7}
-.search .icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);opacity:0.9}
+.search .icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);opacity:0.9;font-weight:600;color:var(--muted);white-space:nowrap;pointer-events:none}
 .selector{display:flex;gap:8px;align-items:center}
 .selector{flex:0 0 auto}
 select, button, input[type="url"]{padding:10px 12px;border-radius:10px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text)}
@@ -159,9 +167,9 @@ select, button, input[type="url"]{padding:10px 12px;border-radius:10px;border:1p
 /* Header controls: ensure selector and top-buttons are visible in header */
 header.card .selector{display:flex;align-items:center}
   
-.list{display:flex;flex-direction:column;gap:8px}
+.list{display:flex;flex-direction:column;gap:8px;padding-top:8px}
 
-.row{display:flex;align-items:center;height:var(--row-h);gap:12px;padding:8px;border-radius:12px;background:linear-gradient(180deg, var(--card), #fbffff);border:1px solid rgba(6,50,58,0.04);box-shadow:0 2px 8px rgba(2,18,22,0.04)}
+.row{display:flex;align-items:center;height:var(--row-h);gap:0;padding:8px 6px;border-radius:12px;background:linear-gradient(180deg, var(--card), #fbffff);border:1px solid rgba(6,50,58,0.04);box-shadow:0 2px 8px rgba(2,18,22,0.04)}
 .row:hover{box-shadow:0 8px 24px rgba(6,50,58,0.08)}
 /* prevent selection from changing layout: ensure selected rows don't alter size */
 .row.selected{transform:none !important; box-sizing:border-box;}
@@ -169,26 +177,47 @@ header.card .selector{display:flex;align-items:center}
 /* Edit-mode specific: avoid hover/transform effects and keep actions width fixed so grid doesn't reflow */
 body.edit-mode .row{transform:none !important;transition:none !important;}
 body.edit-mode .row:hover{box-shadow:0 4px 10px rgba(6,50,58,0.06)}
-body.edit-mode .actions{min-width:110px;flex:0 0 110px}
+body.edit-mode .actions{min-width:auto;flex:0 0 auto}
 /* ensure action buttons don't expand the card when toggled */
 body.edit-mode .actions .small-btn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.icon-wrap{flex:0 0 56px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));font-weight:700;color:#ffffff}
+.icon-wrap{flex:0 0 56px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));font-weight:700;color:#ffffff;margin-right:4px}
 .icon-wrap img{width:44px;height:44px;border-radius:8px;object-fit:cover}
-.meta{flex:1 1 auto;min-width:0}
-.title{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);padding-right:6px}
-.desc{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
+.meta{flex:1 1 auto;min-width:0;margin-right:0}
+.title{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);padding-right:0}
+.desc{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:0}
 .tags{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
 .tag{background:#eafffb;padding:4px 8px;border-radius:999px;font-size:12px;color:var(--text);border:1px solid rgba(6,50,58,0.06);font-weight:700}
 
-/* Actions area: don't reserve fixed width unless in edit-mode */
-.actions{flex:0 0 auto;min-width:0;display:flex;justify-content:flex-end;gap:8px}
+/* Actions area: compact layout for minimal footprint */
+.actions{flex:0 0 44px;min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-left:0;height:44px}
 /* If actions container is empty (non-owner), hide it so title can use full width */
 .actions:empty{display:none}
-/* drag state visuals (removed - drag&drop feature disabled) */
-.open-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#ffffff;border:none;cursor:pointer;font-weight:700;box-shadow:0 6px 18px rgba(6,50,58,0.06)}
-.open-btn:active{transform:translateY(1px)}
-.small-btn{padding:8px 10px;border-radius:8px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text);cursor:pointer;font-weight:700}
+
+/* Actions buttons: restore flexible sizing (no forced height) */
+.actions button,
+.actions .open-btn,
+.actions .small-btn{
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  line-height:1;
+  border-radius:6px;
+  height:100%;
+  padding:0 8px;
+}
+
+/* Provide slightly larger visual for primary open button while keeping compact footprint */
+.actions .open-btn{gap:4px;padding:0 10px;height:100%}
+.actions .open-btn:active{transform:translateY(1px)}
+
+/* Small buttons (secondary) */
+.actions .small-btn{padding:4px 8px}
+
+/* Override edit-mode fixed width to avoid forcing extra space */
+body.edit-mode .actions{min-width:auto !important;flex:0 0 auto !important}
 /* Tag button: distinct color to stand out from other buttons */
 .tag-btn{padding:6px 14px;border-radius:8px;background:linear-gradient(90deg,#ffd7a8,#ffb199);color:#0b2b2a;border:none;cursor:pointer;font-weight:800;font-size:13px;box-shadow:0 3px 10px rgba(6,50,58,0.08);transition:transform 0.12s ease, box-shadow 0.12s ease}
 .tag-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(6,50,58,0.12)}
@@ -211,7 +240,7 @@ body.edit-mode .actions .small-btn{white-space:nowrap;overflow:hidden;text-overf
 /* (削除済) 旧・編集モードのフローティングボタンは廃止 */
 
 /* action buttons visibility in edit mode */
-.actions{flex:0 0 110px;display:flex;justify-content:flex-end;gap:8px}
+.actions{display:flex;justify-content:flex-end;gap:4px;flex:0 0 44px;height:44px}
 .small-btn{padding:8px 10px;border-radius:8px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text);cursor:pointer;font-weight:700;display:none}
 body.edit-mode .small-btn{display:inline-block}
 /* Modal buttons should always be visible regardless of edit-mode */
@@ -244,13 +273,23 @@ body.edit-mode .row .open-btn{display:none}
 .list--small .meta{flex:1;min-width:0}
 .list--small .title{font-size:13px;font-weight:700}
 .list--small .desc, .list--small .tags{display:none} /* 説明とタグを非表示 */
-.list--small .actions{flex:0 0 76px}
+.list--small .actions{flex:0 0 44px;height:24px}
+
+/* medium list: match icon-wrap (40px) */
+.list--medium .actions{flex:0 0 36px;height:36px}
 /* 小表示で編集ボタンをよりコンパクトにする（行の高さ増加を防止） */
 .list--small .open-btn{padding:6px 8px;font-size:12px;border-radius:6px}
 .list--small .open-btn span{display:none}
 
-/* 表示モード: medium（既存：デフォルト） */
-/* .list--medium .row は既存スタイルを継承するため、明示的な上書きは不要です */
+/* 表示モード: medium（既存：デフォルト）— 余白を削減してより多く表示 */
+.list--medium .row{height:auto;min-height:48px;padding:6px 8px;gap:8px}
+.list--medium .icon-wrap{flex:0 0 40px;height:40px;border-radius:6px}
+.list--medium .icon-wrap img{width:32px;height:32px;border-radius:6px}
+.list--medium .title{font-size:14px}
+.list--medium .desc{font-size:12px;margin-top:2px}
+.list--medium .tags{margin-top:3px;gap:4px}
+.list--medium .tag{padding:2px 6px;font-size:11px}
+.list--medium .open-btn{padding:6px 10px;font-size:13px}
 
 @media(max-width:560px){
   .header-toggle{display:inline-flex}
@@ -414,8 +453,19 @@ header.card{z-index:1100}
 .top-buttons{order:unset}
     .top-buttons{display:flex;gap:8px;margin-top:8px}
     .fab{display:none}
-    /* reduce action width on narrow screens to give meta more room */
-    .actions{flex:0 0 96px}
+    /* mobile: compact actions area (width x height = 32px x 36px) */
+    .actions{flex:0 0 32px;width:32px;min-width:32px;max-width:32px;height:36px;overflow:hidden}
+    .actions button,
+    .actions .open-btn,
+    .actions .small-btn{
+      padding:0 !important;
+      min-width:0 !important;
+      width:100% !important;
+      height:100% !important;
+      display:inline-flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
     /* auth-ui をコンパクトに */
     #auth-ui{flex-wrap:nowrap;}
   }
@@ -430,22 +480,14 @@ header.card{z-index:1100}
 /* When add/edit modal is open, hide header and top UI to focus on modal */
 body.modal-add-open header.card,
 body.modal-add-open .fab,
-body.modal-add-open #count,
 body.modal-add-open .sidebar {
   display: none !important;
 }
 /* Prevent body from scrolling when modal open */
 body.modal-add-open { overflow: hidden; }
 
-/* When tag modal is open, hide count control */
-body.modal-tag-open #count {
-  display: none !important;
-}
+/* When tag/user-settings modal is open, avoid hiding count to prevent layout shift */
 
-/* When user settings modal (icon modal) is open, hide count control */
-body.modal-settings-open #count {
-  display: none !important;
-}
 
 /* Cookie consent banner styles */
 #cookieBanner {
@@ -502,3 +544,22 @@ body.modal-settings-open #count {
 @keyframes spinner{to{transform:rotate(360deg)}}
 
 /* Hide overlay when JS sets display:none (no extra class needed) */
+
+/* 詳細ボタン（一般ユーザー用） */
+.detail-btn {
+  background: var(--accent-1);
+  color: #fff;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight:700;
+  min-width:32px;
+  height:auto;
+}
+.detail-btn:hover{ opacity:0.9 }
+
+
+/* 詳細値のスタイル */
+.detail-value { color: var(--text); font-size:14px; line-height:1.4 }
+.detail-value:empty::before { content: '（なし）'; color: var(--muted); }
