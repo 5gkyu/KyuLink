@@ -1,3 +1,4 @@
+
 function toHiragana(str){
   if(!str) return '';
   str = str.normalize('NFKC');
@@ -355,21 +356,15 @@ function renderList(){
       actions.appendChild(detailBtn);
     } else {
       // Owner can edit: show edit/delete buttons
-      const btn = document.createElement('button'); btn.className = 'open-btn'; btn.setAttribute('aria-label', item.title + ' を編集する');
-      btn.textContent = '編集';
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); openEdit(item); });
-      
-      const del = document.createElement('button'); del.className='small-btn'; del.textContent='削除';
-      del.addEventListener('click',(e)=>{ e.stopPropagation(); if(confirm('このリンクを削除しますか？')){ DATA = DATA.filter(d=>d.id !== item.id); saveToStorage(); renderTags(); renderList(); saveBookmarksToRemote(); } });
-      
-      const edit = document.createElement('button'); edit.className='small-btn'; edit.textContent='編集';
-      edit.addEventListener('click',(e)=>{ e.stopPropagation(); openEdit(item); });
-      
-      if(!state.editMode){
-        actions.appendChild(edit);
-        actions.appendChild(del);
-      }
-      actions.appendChild(btn);
+      // 置換する owner 部分
+// 新: 行内には編集ボタン（モーダルを開く）だけを残す
+const btn = document.createElement('button');
+btn.className = 'open-btn';
+btn.setAttribute('aria-label', item.title + ' を編集する');
+btn.textContent = '編集';
+btn.addEventListener('click', (e)=>{ e.stopPropagation(); openEdit(item); });
+
+actions.appendChild(btn);
     }
 
     iconWrap.style.cursor = 'default';
@@ -606,21 +601,13 @@ function closeAddModal(){
 /* ------------------ 詳細モーダル（閲覧のみ） ------------------ */
 function openDetailModal(item){
   if(!el.detailModal) return;
-  try{
+    try{
     // order: タイトル, URL, 説明, タグ
     el.detailTitleText.textContent = item.title || '（なし）';
     el.detailUrl.textContent = item.url || '（なし）';
     el.detailDesc.textContent = item.desc || '（なし）';
     el.detailTags.textContent = (item.tags && item.tags.length) ? item.tags.join(', ') : '（なし）';
-    // detailOpenLink may have been removed from the HTML; guard against null
-    if(el.detailOpenLink){
-      if(item.url){
-        try{ el.detailOpenLink.href = item.url; }catch(e){}
-        try{ el.detailOpenLink.style.display = ''; }catch(e){}
-      } else {
-        try{ el.detailOpenLink.style.display = 'none'; }catch(e){}
-      }
-    }
+    if(item.url){ el.detailOpenLink.href = item.url; el.detailOpenLink.style.display = ''; } else { el.detailOpenLink.style.display = 'none'; }
   }catch(e){ console.warn('openDetailModal error', e); }
   el.detailModal.style.display = 'flex';
   try{ document.body.classList.add('modal-detail-open'); }catch(e){}
@@ -1290,6 +1277,8 @@ if(avatarUploadInput) avatarUploadInput.addEventListener('change', (e)=>{
   reader.readAsDataURL(file);
 });
 
+/* OGP proxy UI bindings removed — using hidden default proxy set in OGP_PROXY constant */
+
 async function signInWithGoogle(){
   if (!window.firebase) return alert('Firebase SDKが読み込まれていません');
   
@@ -1531,7 +1520,7 @@ if (window.firebase) {
         firebaseUid = user.uid;
         startSyncForUser(user.uid);
       
-      // リダイレクト後ならメッセージ表示（wasRedirectingは既にクリア済みなので、別の方法で判定）
+      // リダイレクト後ならメッセージ表示（wasRedirectingは既にクリア済みなので別の方法で判定）
       // onAuthStateChangedは複数回発火するので、初回のみ通知
       const notifiedKey = 'auth_login_notified_' + user.uid;
       const alreadyNotified = sessionStorage.getItem(notifiedKey);
