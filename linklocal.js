@@ -1,4 +1,3 @@
-
 function toHiragana(str){
   if(!str) return '';
   str = str.normalize('NFKC');
@@ -607,13 +606,21 @@ function closeAddModal(){
 /* ------------------ 詳細モーダル（閲覧のみ） ------------------ */
 function openDetailModal(item){
   if(!el.detailModal) return;
-    try{
+  try{
     // order: タイトル, URL, 説明, タグ
     el.detailTitleText.textContent = item.title || '（なし）';
     el.detailUrl.textContent = item.url || '（なし）';
     el.detailDesc.textContent = item.desc || '（なし）';
     el.detailTags.textContent = (item.tags && item.tags.length) ? item.tags.join(', ') : '（なし）';
-    if(item.url){ el.detailOpenLink.href = item.url; el.detailOpenLink.style.display = ''; } else { el.detailOpenLink.style.display = 'none'; }
+    // detailOpenLink may have been removed from the HTML; guard against null
+    if(el.detailOpenLink){
+      if(item.url){
+        try{ el.detailOpenLink.href = item.url; }catch(e){}
+        try{ el.detailOpenLink.style.display = ''; }catch(e){}
+      } else {
+        try{ el.detailOpenLink.style.display = 'none'; }catch(e){}
+      }
+    }
   }catch(e){ console.warn('openDetailModal error', e); }
   el.detailModal.style.display = 'flex';
   try{ document.body.classList.add('modal-detail-open'); }catch(e){}
@@ -1283,8 +1290,6 @@ if(avatarUploadInput) avatarUploadInput.addEventListener('change', (e)=>{
   reader.readAsDataURL(file);
 });
 
-/* OGP proxy UI bindings removed — using hidden default proxy set in OGP_PROXY constant */
-
 async function signInWithGoogle(){
   if (!window.firebase) return alert('Firebase SDKが読み込まれていません');
   
@@ -1526,7 +1531,7 @@ if (window.firebase) {
         firebaseUid = user.uid;
         startSyncForUser(user.uid);
       
-      // リダイレクト後ならメッセージ表示（wasRedirectingは既にクリア済みなので別の方法で判定）
+      // リダイレクト後ならメッセージ表示（wasRedirectingは既にクリア済みなので、別の方法で判定）
       // onAuthStateChangedは複数回発火するので、初回のみ通知
       const notifiedKey = 'auth_login_notified_' + user.uid;
       const alreadyNotified = sessionStorage.getItem(notifiedKey);
