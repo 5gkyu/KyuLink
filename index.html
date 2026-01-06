@@ -41,22 +41,13 @@
     /* When add/edit modal is open, hide header and top UI to focus on modal */
     body.modal-add-open header.card,
     body.modal-add-open .fab,
-    body.modal-add-open #count,
     body.modal-add-open .sidebar {
       display: none !important;
     }
     /* Prevent body from scrolling when modal open */
     body.modal-add-open { overflow: hidden; }
     
-    /* When tag modal is open, hide count control */
-    body.modal-tag-open #count {
-      display: none !important;
-    }
-    
-    /* When user settings modal (icon modal) is open, hide count control */
-    body.modal-settings-open #count {
-      display: none !important;
-    }
+ 
   </style>
     <script>
     (function(){
@@ -98,8 +89,10 @@
       <div class="top-row">
         <div class="search" aria-hidden="false" style="flex:1;min-width:0;margin:0;">
           <input id="q" placeholder="検索" autocomplete="off" />
-          <div class="icon">🔎</div>
+          <div class="icon" id="countText" style="font-size:12px;opacity:0.8;">0 件</div>
         </div>
+
+        <button class="more-btn tag-btn" id="moreTagsBtn" aria-haspopup="dialog" style="flex-shrink:0;margin-left:8px;">🏷️ タグ</button>
 
         <div id="authRight" style="flex-shrink:0;z-index:1010;">
           <div class="user-info-row" id="userInfoBtn" title="ユーザー設定">
@@ -113,33 +106,9 @@
       <!-- count row (kept outside header for transparent background) -->
     </header>
 
-    <div class="content-row">
-      <main>
-      <div id="count">
-        <div class="count-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <!-- View size select -->
-            <select id="viewSizeSelect">
-              <option value="small">🔍 小</option>
-              <option value="medium">📋 中</option>
-            </select>
-            <!-- Sort select -->
-            <select id="sortSelect">
-              <option value="alpha_en_asc">名前順（昇順）</option>
-              <option value="alpha_en_desc">名前順（降順）</option>
-              <option value="date-new">📅 新しい順</option>
-              <option value="date-old">📅 古い順</option>
-            </select>
-            <div id="countText">読み込み中…</div>
-          </div>
-          <div class="count-actions" style="display:flex;gap:8px;align-items:center">
-            <button class="more-btn tag-btn" id="moreTagsBtn" aria-haspopup="dialog">🏷️ タグ</button>
-          </div>
-        </div>
-      </div>
+    <main>
       <div class="list" id="list"></div>
-      </main>
-    </div>
+    </main>
   </div>
 
   
@@ -221,7 +190,39 @@
     </div>
   </div>
 
-  <!-- JSON import/export UI removed -->
+      <!-- 一般ユーザー用詳細モーダル（閲覧のみ） -->
+      <div class="modal" id="detailModal" role="dialog" aria-modal="true">
+        <div class="panel" role="document" aria-labelledby="detailTitle">
+          <h3 id="detailTitle">ブックマーク詳細</h3>
+
+          <div class="form-row">
+            <label>タイトル</label>
+            <div class="detail-value" id="detailTitleText" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;user-select:text;"></div>
+          </div>
+
+          <div class="form-row">
+            <label>URL</label>
+            <div class="detail-value" id="detailUrl" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;word-break:break-all;user-select:text;"></div>
+          </div>
+
+          <div class="form-row">
+            <label>説明</label>
+            <div class="detail-value" id="detailDesc" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;min-height:40px;user-select:text;white-space:pre-wrap;"></div>
+          </div>
+
+          <div class="form-row">
+            <label>タグ</label>
+            <div class="detail-value" id="detailTags" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;user-select:text;"></div>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <a id="detailOpenLink" href="#" target="_blank" rel="noopener noreferrer" class="open-btn" style="text-decoration:none;">🔗 開く</a>
+            <button id="closeDetailModal" class="small-btn" type="button">閉じる</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- JSON import/export UI removed -->
 
   <!-- ユーザー設定モーダル -->
   <div class="modal" id="userSettingsModal" role="dialog" aria-modal="true">
@@ -242,6 +243,30 @@
       <div id="logoutSection" style="display:none;margin-top:16px;">
         <p id="loggedInEmail" style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;"></p>
         <button id="signOutBtn2" class="small-btn" style="width:100%;background:#e74c3c;color:#fff;border-color:#e74c3c;">ログアウト</button>
+      </div>
+      <!-- 表示設定: view size と sort をここに移動 -->
+      <div style="margin-top:12px;">
+        <div class="form-row" style="margin-bottom:6px">
+          <label style="font-weight:700">表示設定</label>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="min-width:80px;">表示サイズ:</label>
+              <select id="viewSizeSelect">
+                <option value="small">🔍 小</option>
+                <option value="medium">📋 中</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="min-width:80px;">並び順:</label>
+              <select id="sortSelect">
+                <option value="alpha_en_asc">名前順（昇順）</option>
+                <option value="alpha_en_desc">名前順（降順）</option>
+                <option value="date-new">📅 新しい順</option>
+                <option value="date-old">📅 古い順</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- Appearance: Dark mode toggle -->
       <div style="margin-top:12px;">
@@ -363,6 +388,16 @@
     const acceptBtn = document.getElementById('cookieAccept');
     const moreBtn = document.getElementById('cookieMore');
 
+    // localStorage利用可否をチェック
+    function isStorageAvailable(){
+      try{
+        const test = '__storage_test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+      }catch(e){ return false; }
+    }
+
     function showBanner(){
       if(!banner) return;
       banner.hidden = false;
@@ -376,13 +411,18 @@
     }
 
     function hasConsent(){
-      try{ return localStorage.getItem(BANNER_KEY) === '1'; }catch(e){ return false; }
+      if(!isStorageAvailable()) return true; // ストレージが使えない場合は同意済みとみなす
+      try{ return localStorage.getItem(BANNER_KEY) === '1'; }catch(e){ return true; }
     }
     function setConsent(){
+      if(!isStorageAvailable()) return;
       try{ localStorage.setItem(BANNER_KEY, '1'); }catch(e){}
     }
 
-    if(!hasConsent()) window.requestAnimationFrame(()=>{ showBanner(); }); else hideBanner();
+    // ストレージが使えない場合はバナーを表示しない
+    if(!isStorageAvailable()){ hideBanner(); }
+    else if(!hasConsent()) window.requestAnimationFrame(()=>{ showBanner(); }); 
+    else hideBanner();
 
     // Use both addEventListener and onclick assignment to be robust
     if(acceptBtn){

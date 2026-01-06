@@ -88,6 +88,13 @@ const el = {
   viewModeModal: null,
   viewModeCancel: null,
   viewModeSave: null,
+  detailModal: document.getElementById('detailModal'),
+  closeDetailModal: document.getElementById('closeDetailModal'),
+  detailUrl: document.getElementById('detailUrl'),
+  detailTitleText: document.getElementById('detailTitleText'),
+  detailDesc: document.getElementById('detailDesc'),
+  detailTags: document.getElementById('detailTags'),
+  detailOpenLink: document.getElementById('detailOpenLink'),
   deleteInModal: document.getElementById('deleteInModal'),
   viewSizeSelect: document.getElementById('viewSizeSelect'),
   sortSelect: document.getElementById('sortSelect'),
@@ -340,11 +347,17 @@ function renderList(){
     const actions = document.createElement('div'); actions.className = 'actions';
     
     if(isReadOnlyMode){
-      // Read-only: no action buttons (row click opens link)
+      // 一般ユーザー: 編集ボタンの代わりに詳細ボタンを表示（省スペース: '?'）
+      const detailBtn = document.createElement('button');
+      detailBtn.className = 'detail-btn';
+      detailBtn.textContent = 'i';
+      detailBtn.title = '詳細を表示';
+      detailBtn.addEventListener('click', (e)=>{ e.stopPropagation(); openDetailModal(item); });
+      actions.appendChild(detailBtn);
     } else {
       // Owner can edit: show edit/delete buttons
       const btn = document.createElement('button'); btn.className = 'open-btn'; btn.setAttribute('aria-label', item.title + ' を編集する');
-      btn.innerHTML = '編集 <span style="opacity:0.85">✎</span>';
+      btn.textContent = '編集';
       btn.addEventListener('click', (e)=>{ e.stopPropagation(); openEdit(item); });
       
       const del = document.createElement('button'); del.className='small-btn'; del.textContent='削除';
@@ -590,6 +603,24 @@ function closeAddModal(){
   try{ document.body.classList.remove('modal-add-open'); }catch(e){}
   el.addModal.style.display='none';
 }
+
+/* ------------------ 詳細モーダル（閲覧のみ） ------------------ */
+function openDetailModal(item){
+  if(!el.detailModal) return;
+    try{
+    // order: タイトル, URL, 説明, タグ
+    el.detailTitleText.textContent = item.title || '（なし）';
+    el.detailUrl.textContent = item.url || '（なし）';
+    el.detailDesc.textContent = item.desc || '（なし）';
+    el.detailTags.textContent = (item.tags && item.tags.length) ? item.tags.join(', ') : '（なし）';
+    if(item.url){ el.detailOpenLink.href = item.url; el.detailOpenLink.style.display = ''; } else { el.detailOpenLink.style.display = 'none'; }
+  }catch(e){ console.warn('openDetailModal error', e); }
+  el.detailModal.style.display = 'flex';
+  try{ document.body.classList.add('modal-detail-open'); }catch(e){}
+}
+function closeDetailModal(){ if(!el.detailModal) return; el.detailModal.style.display = 'none'; try{ document.body.classList.remove('modal-detail-open'); }catch(e){} }
+if(el.closeDetailModal) el.closeDetailModal.addEventListener('click', closeDetailModal);
+if(el.detailModal) el.detailModal.addEventListener('click', (e)=>{ if(e.target === el.detailModal) closeDetailModal(); });
 
 /* export/import JSON UI removed */
 
@@ -1502,7 +1533,6 @@ if (window.firebase) {
       
       if(!alreadyNotified){
         console.log('First login detection in this session');
-        setTimeout(()=>{ alert('ログインしました！'); }, 300);
         try{ sessionStorage.setItem(notifiedKey, '1'); }catch(e){}
         
         // ローカルデータを同期
