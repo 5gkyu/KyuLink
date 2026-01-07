@@ -1,4 +1,6 @@
+
 /* Extracted from linklocal.html - combined styles */
+/* X.htmlの配色に合わせたカラーパレット */
 :root{
   --bg: #f6fbfb;
   --card: #ffffff;
@@ -149,29 +151,7 @@ body{background-image: url('backimage.png');background-attachment:fixed;backgrou
   main{max-width:calc(100% - 280px);}
 }
   /* Footer styling removed - footer will not be rendered in this build */
-/* スマートフォンでのスクロール改善 */
-body {
-  overscroll-behavior: contain; /* ページ全体のバウンススクロールを抑制 */
-}
 
-main {
-  touch-action: pan-y; /* 垂直スクロールのみを許可 */
-  overscroll-behavior-y: contain; /* 縦方向のオーバースクロールを抑制 */
-  -webkit-overflow-scrolling: touch; /* iOSでスムーズスクロール */
-}
-
-.list {
-  touch-action: pan-y; /* リストエリアでも垂直スクロールのみ */
-}
-
-/* カード要素がスクロールを妨げないようにする */
-.card {
-  touch-action: manipulation; /* ダブルタップズームを無効化 */
-}
-
-.item {
-  touch-action: manipulation; /* アイテム内でのタッチ操作を最適化 */
-}
 /* Sticky header so search is always visible */
 header.card{position:fixed;left:0;right:0;top:0;z-index:1000;background:linear-gradient(180deg, var(--card), #fbffff);backdrop-filter: blur(6px);padding:12px;border-radius:0;box-shadow:0 10px 30px rgba(2,18,22,0.06);border:1px solid rgba(6,50,58,0.04);display:flex;flex-direction:column;align-items:stretch;gap:8px}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
