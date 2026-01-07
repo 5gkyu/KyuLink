@@ -45,8 +45,12 @@
     }
     /* Prevent body from scrolling when modal open */
     body.modal-add-open { overflow: hidden; }
-    
- 
+
+    /* Ensure main content sits below the fixed header (uses --hdr-h set by script) */
+    .wrap {
+      box-sizing: border-box;
+      padding-top: calc(var(--hdr-h, 72px) + 8px);
+    }
   </style>
     <script>
     (function(){
