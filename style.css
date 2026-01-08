@@ -49,17 +49,31 @@ html.dark-mode .row:hover{
   box-shadow: 0 10px 30px rgba(2,8,10,0.65);
 }
 /* Reduce card inner gradient/shine for open button and other elements */
-html.dark-mode .open-btn{ box-shadow: none; }
+html.dark-mode .open-btn,
+html.dark-mode .actions .open-btn,
+html.dark-mode .row .open-btn,
+html.dark-mode .panel .open-btn,
+html.dark-mode .row .actions .open-btn{
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2)) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 /* Make icon-wrap use a subdued solid background in dark mode */
 html.dark-mode .icon-wrap{ background: rgba(23,195,198,0.12); color: var(--text); }
 html.dark-mode .icon-wrap img{ filter: none; }
 
 /* Dark-mode: controls (selects, buttons, chip area, count row) */
 html.dark-mode select,
-html.dark-mode button,
 html.dark-mode input[type="url"],
 html.dark-mode input,
 html.dark-mode textarea{
+  background: #0b2a2a;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+/* General button dark mode - but NOT .open-btn which has its own gradient */
+html.dark-mode button:not(.open-btn):not(.bottom-nav-btn){
   background: #0b2a2a;
   color: var(--text);
   border: 1px solid rgba(255,255,255,0.06);
@@ -214,6 +228,24 @@ body.edit-mode .actions .small-btn{white-space:nowrap;overflow:hidden;text-overf
 .actions .open-btn{gap:4px;padding:0 10px;height:100%}
 .actions .open-btn:active{transform:translateY(1px)}
 
+/* Primary action button (編集ボタン・モーダル内保存ボタン) */
+.open-btn{
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color: #ffffff;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(2,18,22,0.08);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+.open-btn:hover{ transform: translateY(-1px); opacity: 0.97; }
+/* Ensure modal primary button looks the same and is clearly visible */
+.modal .open-btn{ background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); color: #ffffff; }
+/* Keep dark-mode appearance consistent and ensure focus visibility */
+html.dark-mode .open-btn{ background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); color: #ffffff; box-shadow: none; }
+.open-btn:focus{ outline: 3px solid rgba(255,255,255,0.12); outline-offset: 2px; }
+.modal .open-btn:focus{ outline: 3px solid rgba(255,255,255,0.12); outline-offset: 2px; }
+
 /* Small buttons (secondary) */
 .actions .small-btn{padding:4px 8px}
 
@@ -223,9 +255,25 @@ body.edit-mode .actions{min-width:auto !important;flex:0 0 auto !important}
 .tag-btn{padding:6px 14px;border-radius:8px;background:linear-gradient(90deg,#ffd7a8,#ffb199);color:#0b2b2a;border:none;cursor:pointer;font-weight:800;font-size:13px;box-shadow:0 3px 10px rgba(6,50,58,0.08);transition:transform 0.12s ease, box-shadow 0.12s ease}
 .tag-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(6,50,58,0.12)}
 
-/* floating add button (top-right) */
 .fab{
-  position:fixed;right:20px;top:20px;z-index:240;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#ffffff;font-weight:900;font-size:28px;border:none;box-shadow:0 8px 24px rgba(6,50,58,0.12);cursor:pointer;
+  /* default: bottom-right placement to avoid conflicting top/bottom rules */
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 240;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 28px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(6,50,58,0.12);
+  cursor: pointer;
 }
 .fab:active{transform:translateY(2px)}
 
@@ -423,7 +471,7 @@ body.edit-mode .row .open-btn{display:none}
 
 /* Ensure header stays on top when fixed and content spacing uses --hdr-h */
 header.card{z-index:1100}
-.wrap{box-sizing:border-box;padding-top:calc(var(--hdr-h,72px) + 8px)}
+.wrap{box-sizing:border-box;padding-top:calc(var(--hdr-h,72px) + 16px)}
 
   /* ユーザー設定モーダル */
   .user-avatar-large{
@@ -564,3 +612,130 @@ body.modal-add-open { overflow: hidden; }
 /* 詳細値のスタイル */
 .detail-value { color: var(--text); font-size:14px; line-height:1.4 }
 .detail-value:empty::before { content: '（なし）'; color: var(--muted); }
+
+/* ========== Bottom Navigation (Mobile) ========== */
+.bottom-nav {
+  display: none; /* hidden on desktop by default */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: linear-gradient(180deg, var(--card), #fbffff);
+  border-top: 1px solid rgba(6,50,58,0.08);
+  box-shadow: 0 -4px 16px rgba(2,18,22,0.06);
+  z-index: 9999;
+  justify-content: space-around;
+  align-items: center;
+}
+
+html.dark-mode .bottom-nav {
+  background: linear-gradient(180deg, var(--card), #0a2424);
+  border-top-color: rgba(255,255,255,0.06);
+}
+
+.bottom-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  height: 100%;
+}
+
+.bottom-nav-btn:hover,
+.bottom-nav-btn:active {
+  background: rgba(15,184,191,0.1);
+  color: var(--accent-1);
+}
+
+.bottom-nav-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Show bottom nav only on mobile (max-width 768px) */
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex !important;
+  }
+  /* Add extra padding to list to avoid overlap with bottom nav */
+  .list {
+    padding-bottom: calc(var(--row-h, 72px) + 80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Always hide FAB since we use bottom nav on mobile */
+.fab {
+  display: none !important;
+}
+
+/* ========== Search Overlay (Mobile) ========== */
+.search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1300;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20vh;
+}
+
+.search-overlay.open {
+  display: flex;
+}
+
+/* DEBUG: 强制表示 — テスト用。本番では削除してください */
+.bottom-nav{
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+}
+
+.search-overlay-content {
+  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 40px rgba(2,12,20,0.3);
+}
+
+html.dark-mode .search-overlay-content {
+  background: #0c2c2c;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.search-overlay-content input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(6,50,58,0.1);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+}
+
+html.dark-mode .search-overlay-content input {
+  background: #062525;
+  border-color: rgba(255,255,255,0.08);
+}

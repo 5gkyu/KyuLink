@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" />  <title>KyuLink</title>
-  <title>KyuLink</title>
   <meta name="description" content="きゅーがよく使うリンクまとめ" />
   
   <!-- Favicon: use local image files (favicon.ico, apple-touch-icon, android-chrome) -->
@@ -38,16 +37,24 @@
   
   <link rel="stylesheet" href="style.css">
   <style>
-    /* When add/edit modal is open, hide header and top UI to focus on modal */
-    body.modal-add-open header.card,
+    /* When add/edit modal is open, make header visible but disabled (cannot interact) */
+    body.modal-add-open header.card {
+      pointer-events: none;
+      opacity: 0.4;
+      filter: blur(1px);
+    }
     body.modal-add-open .fab,
     body.modal-add-open .sidebar {
       display: none !important;
     }
     /* Prevent body from scrolling when modal open */
     body.modal-add-open { overflow: hidden; }
-    
- 
+
+    /* Ensure main content sits below the fixed header (uses --hdr-h set by script) */
+    .wrap {
+      box-sizing: border-box;
+      padding-top: calc(var(--hdr-h, 72px) + 16px);
+    }
   </style>
     <script>
     (function(){
@@ -111,10 +118,7 @@
     </main>
   </div>
 
-  
-  <button class="fab" id="openAdd" title="ブックマークを追加" aria-hidden="true" style="display:none;position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:28px;align-items:center;justify-content:center;z-index:1200;font-size:28px;line-height:0;border:none;background:#39C5D6;color:#fff;box-shadow:0 8px 18px rgba(2,18,22,0.12);">＋</button>
-
-  <!-- (削除) 旧・編集モードフローティングボタンは廃止 -->
+  <!-- FABボタンは削除済み - ボトムナビを使用 -->
 
   <!-- modal for adding a bookmark -->
   <div class="modal" id="addModal" role="dialog" aria-modal="true">
@@ -125,7 +129,8 @@
         <label>URL（必須）</label>
         <div class="form-inline">
           <input id="addUrl" type="url" placeholder="https://example.com" style="flex:1" />
-          <button id="pasteUrlBtn" class="small-btn" type="button">ペースト</button>
+          <button id="pasteUrlBtn" class="small-btn" type="button">URL</button>
+          <button id="pasteJsonBtn" class="small-btn" type="button">JSON</button>
         </div>
       </div>
 
@@ -444,6 +449,29 @@
 
 <!-- テスト用コードは削除されました -->
 
+<!-- Bottom Navigation for Mobile -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-btn" id="bottomSearchBtn" type="button">
+    <span class="bottom-nav-icon">🔍</span>
+    <span class="bottom-nav-label">検索</span>
+  </button>
+  <button class="bottom-nav-btn" id="bottomTagsBtn" type="button">
+    <span class="bottom-nav-icon">🏷️</span>
+    <span class="bottom-nav-label">タグ</span>
+  </button>
+  <button class="bottom-nav-btn" id="bottomAddBtn" type="button">
+    <span class="bottom-nav-icon">➕</span>
+    <span class="bottom-nav-label">追加</span>
+  </button>
+</nav>
+
+<!-- Search overlay for mobile bottom nav -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-overlay-content">
+    <input type="text" id="mobileSearchInput" placeholder="検索..." autocomplete="off" />
+    <button id="closeSearchOverlay" class="small-btn" type="button">閉じる</button>
+  </div>
+</div>
+
 </body>
 </html>
-

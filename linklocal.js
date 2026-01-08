@@ -98,7 +98,16 @@ const el = {
   deleteInModal: document.getElementById('deleteInModal'),
   viewSizeSelect: document.getElementById('viewSizeSelect'),
   sortSelect: document.getElementById('sortSelect'),
-  quickTagsContainer: document.getElementById('quickTagsContainer')
+  quickTagsContainer: document.getElementById('quickTagsContainer'),
+  // Bottom navigation elements
+  bottomNav: document.getElementById('bottomNav'),
+  bottomSearchBtn: document.getElementById('bottomSearchBtn'),
+  bottomTagsBtn: document.getElementById('bottomTagsBtn'),
+  bottomAddBtn: document.getElementById('bottomAddBtn'),
+  searchOverlay: document.getElementById('searchOverlay'),
+  mobileSearchInput: document.getElementById('mobileSearchInput'),
+  closeSearchOverlay: document.getElementById('closeSearchOverlay'),
+  pasteJsonBtn: document.getElementById('pasteJsonBtn')
 };
 
 const STORAGE_KEY = 'bookmark_data_v1';
@@ -165,7 +174,8 @@ function buildAllTags(data){
  
 function renderTags(){
   const all = buildAllTags(DATA);
-  const showN = 8;
+  // Show all tags inline (previously limited to a preview of 8)
+  const showN = all.length;
   try{
     if(el.chipContainer){
       el.chipContainer.innerHTML = '';
@@ -560,11 +570,27 @@ if(el.closeModal) el.closeModal.addEventListener('click', ()=>{ if(el.tagModal) 
 if(el.tagModal) el.tagModal.addEventListener('click', (e)=>{ if(e.target === el.tagModal){ el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); setTimeout(adjustWrapForHeader, 50); } });
 if(el.tagSearch) el.tagSearch.addEventListener('input', ()=>{ const q=el.tagSearch.value.trim().toLowerCase(); const all=buildAllTags(DATA); const filtered = all.filter(t=>t.toLowerCase().includes(q)); renderModalTags(filtered); });
 
+// 直近で使用されたタグを追跡 (最大5つ)
+let recentlyUsedTags = JSON.parse(localStorage.getItem('recentTags') || '[]');
+function trackRecentTag(tag){
+  if(!tag) return;
+  recentlyUsedTags = recentlyUsedTags.filter(t => t !== tag);
+  recentlyUsedTags.unshift(tag);
+  if(recentlyUsedTags.length > 5) recentlyUsedTags = recentlyUsedTags.slice(0, 5);
+  localStorage.setItem('recentTags', JSON.stringify(recentlyUsedTags));
+}
+
 function renderQuickTags(){
   if(!el.quickTagsContainer) return;
   el.quickTagsContainer.innerHTML = '';
   const existingTags = buildAllTags(DATA);
-  existingTags.forEach(tag => {
+  // 直近5つのタグを優先表示（存在するタグのみ）
+  const tagsToShow = recentlyUsedTags.filter(t => existingTags.includes(t)).slice(0, 5);
+  // 履歴がない場合は既存タグから最大5つ表示
+  if(tagsToShow.length === 0){
+    existingTags.slice(0, 5).forEach(tag => tagsToShow.push(tag));
+  }
+  tagsToShow.forEach(tag => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'small-btn';
@@ -578,6 +604,7 @@ function renderQuickTags(){
         currentTags.push(tag);
         el.addTags.value = currentTags.join(', ');
       }
+      trackRecentTag(tag); // クリックしたタグを履歴に追加
     });
     el.quickTagsContainer.appendChild(btn);
   });
@@ -1549,3 +1576,176 @@ if (window.firebase) {
 
 /* unload 保険 */
 window.addEventListener('beforeunload', ()=>{ try{ saveBookmarksToRemote(); } catch(e){} });
+
+// Ensure bottom navigation is attached to body and visible (defensive: fixes cases
+// where CSS or containers prevent correct sizing). This is a lightweight fallback
+// for environments where fixed positioning becomes constrained.
+(function ensureBottomNavVisible(){
+  try{
+    const bn = document.getElementById('bottomNav');
+    if(!bn) return;
+    // move to body to avoid being inside transformed/limited container
+    if(bn.parentNode !== document.body) document.body.appendChild(bn);
+    const r = bn.getBoundingClientRect();
+    if(r.width === 0 || r.height === 0){
+      Object.assign(bn.style, {
+        display: 'flex',
+        position: 'fixed',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        height: '56px',
+        padding: '8px 0',
+        background: '#39C5D6',
+        color: '#fff',
+        zIndex: '99999'
+      });
+      // ensure child buttons are visible
+      Array.from(bn.querySelectorAll('button')).forEach(b=>{
+        try{ b.style.display = b.style.display || 'flex'; b.style.flex = '1'; }catch(e){}
+      });
+    }
+  }catch(e){ console.warn('ensureBottomNavVisible failed', e); }
+})();
+/* ========== Bottom Navigation Handlers ========== */
+// 全モーダルを閉じるヘルパー
+function closeAllModals(){
+  if(el.addModal) { el.addModal.style.display='none'; document.body.classList.remove('modal-add-open'); }
+  if(el.tagModal) { el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); }
+  if(el.searchOverlay) el.searchOverlay.classList.remove('open');
+  if(el.detailModal) el.detailModal.style.display='none';
+  if(el.viewModeModal) el.viewModeModal.style.display='none';
+}
+
+// Search button - open search overlay with keyboard
+if(el.bottomSearchBtn){
+  el.bottomSearchBtn.addEventListener('click', ()=>{
+    closeAllModals(); // 先に他のモーダルを全て閉じる
+    if(el.searchOverlay){
+      el.searchOverlay.classList.add('open');
+      if(el.mobileSearchInput){
+        el.mobileSearchInput.value = state.q || '';
+        try{ el.mobileSearchInput.focus(); }catch(e){}
+        // 一部ブラウザでは遅延が必要な場合があるため、フォールバックで短遅延でも再フォーカス
+        setTimeout(()=>{ try{ el.mobileSearchInput.focus(); }catch(e){} }, 50);
+      }
+    }
+  });
+}
+
+// Close search overlay
+if(el.closeSearchOverlay){
+  el.closeSearchOverlay.addEventListener('click', ()=>{
+    if(el.searchOverlay) el.searchOverlay.classList.remove('open');
+  });
+}
+
+// Mobile search input - sync with main search
+if(el.mobileSearchInput){
+  el.mobileSearchInput.addEventListener('input', ()=>{
+    state.q = el.mobileSearchInput.value;
+    if(el.q) el.q.value = state.q;
+    renderList();
+  });
+  el.mobileSearchInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === 'Escape'){
+      if(el.searchOverlay) el.searchOverlay.classList.remove('open');
+    }
+  });
+}
+
+// Click outside search overlay to close
+if(el.searchOverlay){
+  el.searchOverlay.addEventListener('click', (e)=>{
+    if(e.target === el.searchOverlay){
+      el.searchOverlay.classList.remove('open');
+    }
+  });
+}
+
+// Tags button - open tag modal
+if(el.bottomTagsBtn){
+  el.bottomTagsBtn.addEventListener('click', ()=>{
+    closeAllModals(); // 先に他のモーダルを全て閉じる
+    if(el.tagModal){
+      el.tagModal.style.display = 'flex';
+      document.body.classList.add('modal-tag-open');
+      if(el.tagSearch){
+        el.tagSearch.value = '';
+        el.tagSearch.focus();
+      }
+    }
+  });
+}
+
+// Add button - open add modal or show permission error
+if(el.bottomAddBtn){
+  el.bottomAddBtn.addEventListener('click', ()=>{
+    if(isReadOnlyMode){
+      alert('リンクを追加するには、オーナーとしてログインしてください。');
+      return;
+    }
+    closeAllModals(); // 先に他のモーダルを全て閉じる
+    openAddModal();
+  });
+}
+
+/* ========== JSON Paste Handler ========== */
+if(el.pasteJsonBtn){
+  el.pasteJsonBtn.addEventListener('click', async ()=>{
+    try{
+      const text = await navigator.clipboard.readText();
+      if(!text || !text.trim()){
+        alert('クリップボードにテキストがありません。');
+        return;
+      }
+      
+      // Try to parse as JSON
+      let jsonData = null;
+      try{
+        jsonData = JSON.parse(text.trim());
+      }catch(e){
+        alert('クリップボードのテキストがJSON形式ではありません。');
+        return;
+      }
+      
+      // Handle both single object and array
+      const item = Array.isArray(jsonData) ? jsonData[0] : jsonData;
+      
+      if(!item || typeof item !== 'object'){
+        alert('有効なJSONオブジェクトが見つかりません。');
+        return;
+      }
+      
+      // Fill in the form fields
+      if(item.url && el.addUrl){
+        el.addUrl.value = item.url;
+      }
+      if(item.title && el.addTitleInput){
+        el.addTitleInput.value = item.title;
+      }
+      if(item.desc && el.addDesc){
+        el.addDesc.value = item.desc;
+      } else if(item.description && el.addDesc){
+        el.addDesc.value = item.description;
+      }
+      if(item.tags && el.addTags){
+        if(Array.isArray(item.tags)){
+          el.addTags.value = item.tags.join(', ');
+        } else if(typeof item.tags === 'string'){
+          el.addTags.value = item.tags;
+        }
+      }
+      if(item.icon_url && el.addIcon){
+        el.addIcon.value = item.icon_url;
+      } else if(item.icon && el.addIcon){
+        el.addIcon.value = item.icon;
+      }
+      
+      console.log('JSON paste: filled form with', item);
+    }catch(err){
+      console.warn('JSONペースト失敗:', err);
+      alert('クリップボードの読み取りに失敗しました。');
+    }
+  });
+}
