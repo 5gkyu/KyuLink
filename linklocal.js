@@ -78,6 +78,8 @@ const el = {
   addUrl: document.getElementById('addUrl'),
   addTitleInput: document.getElementById('addTitleInput'),
   addIcon: document.getElementById('addIcon'),
+  addGridImage: document.getElementById('addGridImage'),
+  addListImage: document.getElementById('addListImage'),
   addDesc: document.getElementById('addDesc'),
   addTags: document.getElementById('addTags'),
   pasteUrlBtn: document.getElementById('pasteUrlBtn'),
@@ -96,6 +98,7 @@ const el = {
   detailTags: document.getElementById('detailTags'),
   detailOpenLink: document.getElementById('detailOpenLink'),
   deleteInModal: document.getElementById('deleteInModal'),
+  refreshImagesBtn: document.getElementById('refreshImagesBtn'),
   viewSizeSelect: document.getElementById('viewSizeSelect'),
   sortSelect: document.getElementById('sortSelect'),
   quickTagsContainer: document.getElementById('quickTagsContainer'),
@@ -107,7 +110,17 @@ const el = {
   searchOverlay: document.getElementById('searchOverlay'),
   mobileSearchInput: document.getElementById('mobileSearchInput'),
   closeSearchOverlay: document.getElementById('closeSearchOverlay'),
-  pasteJsonBtn: document.getElementById('pasteJsonBtn')
+  pasteJsonBtn: document.getElementById('pasteJsonBtn'),
+  // Sidebar elements
+  sidebar: document.getElementById('sidebar'),
+  sidebarTagSearch: document.getElementById('sidebarTagSearch'),
+  sidebarTags: document.getElementById('sidebarTags'),
+  sidebarViewSize: document.getElementById('sidebarViewSize'),
+  sidebarSort: document.getElementById('sidebarSort'),
+  sidebarLayout: document.getElementById('sidebarLayout'),
+  sidebarTheme: document.getElementById('sidebarTheme'),
+  statTotal: document.getElementById('statTotal'),
+  statTags: document.getElementById('statTags')
 };
 
 const STORAGE_KEY = 'bookmark_data_v1';
@@ -124,6 +137,29 @@ function saveToStorage(){
     console.log('saveToStorage: skipped writing bookmark_data_v1 to localStorage (UI-only mode)');
   }catch(e){ console.warn('saveToStorage (UI-only) error', e); }
 }
+
+// --- Modal scroll lock helpers ------------------------------------------------
+let __savedModalScroll = null;
+function lockScrollForModal(){
+  try{
+    __savedModalScroll = { x: window.scrollX || 0, y: window.scrollY || 0, listTop: (el.list ? el.list.scrollTop : 0) };
+    const sb = window.innerWidth - document.documentElement.clientWidth;
+    if(sb > 0){ document.body.style.paddingRight = sb + 'px'; }
+    document.body.style.overflow = 'hidden';
+  }catch(e){ console.warn('lockScrollForModal failed', e); }
+}
+function unlockScrollForModal(){
+  try{
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    if(__savedModalScroll){
+      try{ window.scrollTo(__savedModalScroll.x, __savedModalScroll.y); }catch(e){}
+      try{ if(el.list) el.list.scrollTop = __savedModalScroll.listTop; }catch(e){}
+    }
+  }catch(e){ console.warn('unlockScrollForModal failed', e); }
+  __savedModalScroll = null;
+}
+
 // 正規化して比較用のキーを作る（簡易）
 function normalizeUrlForCompare(u){
   try{
@@ -184,7 +220,7 @@ function renderTags(){
       const noTagChip = document.createElement('button');
       noTagChip.className = 'chip' + (state.noTagFilter ? ' active' : '');
       noTagChip.textContent = `タグなし (${noTagCount})`;
-      noTagChip.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; renderTags(); renderList(); });
+      noTagChip.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; renderTags(); renderList(); renderSidebarTags(); });
       el.chipContainer.appendChild(noTagChip);
 
       all.slice(0,showN).forEach(t=>{
@@ -192,7 +228,7 @@ function renderTags(){
         const chip = document.createElement('button');
         chip.className = 'chip' + (state.tags.has(t) ? ' active' : '');
         chip.textContent = `${t} (${count})`;
-        chip.addEventListener('click', ()=>{ if(state.tags.has(t)) state.tags.delete(t); else state.tags.add(t); state.noTagFilter = false; renderTags(); renderList(); });
+        chip.addEventListener('click', ()=>{ if(state.tags.has(t)) state.tags.delete(t); else state.tags.add(t); state.noTagFilter = false; renderTags(); renderList(); renderSidebarTags(); });
         el.chipContainer.appendChild(chip);
       });
     }
@@ -210,7 +246,7 @@ function renderModalTags(all){
     const noTagBtn = document.createElement('button');
     noTagBtn.className = 'chip' + (state.noTagFilter ? ' active' : '');
     noTagBtn.textContent = `タグなし (${noTagCount})`;
-    noTagBtn.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; renderModalTags(all); renderTags(); renderList(); });
+    noTagBtn.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; renderModalTags(all); renderTags(); renderList(); renderSidebarTags(); });
     el.modalTags.appendChild(noTagBtn);
 
     all.forEach(t=>{
@@ -218,10 +254,169 @@ function renderModalTags(all){
       const cb = document.createElement('button');
       cb.className = 'chip' + (state.tags.has(t) ? ' active' : '');
       cb.textContent = `${t} (${count})`;
-      cb.addEventListener('click', ()=>{ if(state.tags.has(t)) state.tags.delete(t); else state.tags.add(t); state.noTagFilter = false; renderModalTags(all); renderTags(); renderList(); });
+      cb.addEventListener('click', ()=>{ if(state.tags.has(t)) state.tags.delete(t); else state.tags.add(t); state.noTagFilter = false; renderModalTags(all); renderTags(); renderList(); renderSidebarTags(); });
       el.modalTags.appendChild(cb);
     });
   }catch(e){ console.warn('renderModalTags error', e); }
+}
+
+/* ------------------ サイドバー ------------------ */
+// グリッドレイアウトとカラム数クラスを適用
+function applyGridLayout(){
+  try{
+    if(!el.list) return;
+    const layout = localStorage.getItem('desktop_layout') || 'list';
+    const isGrid = layout === 'grid';
+    el.list.classList.toggle('layout-grid', isGrid);
+    // カラム数クラスを更新（グリッド時のみ有効だが常に設定）
+    el.list.classList.remove('cols-3', 'cols-4', 'cols-5', 'cols-6', 'cols-7');
+    if(isGrid){
+      const cols = localStorage.getItem('grid_cols') || '5';
+      el.list.classList.add('cols-' + cols);
+    }
+  }catch(e){ console.warn('applyGridLayout error', e); }
+}
+
+// カラム数設定行の表示/非表示を更新
+function updateColsVisibility(){
+  try{
+    const layout = localStorage.getItem('desktop_layout') || 'list';
+    const isGrid = layout === 'grid';
+    const sidebarRow = document.getElementById('sidebarColsRow');
+    const settingsRow = document.getElementById('gridColsSettingRow');
+    if(sidebarRow) sidebarRow.style.display = isGrid ? '' : 'none';
+    if(settingsRow) settingsRow.style.display = isGrid ? '' : 'none';
+  }catch(e){}
+}
+
+function renderSidebarTags(filterQuery){
+  try{
+    if(!el.sidebarTags) return;
+    el.sidebarTags.innerHTML = '';
+    const all = buildAllTags(DATA);
+    const q = (filterQuery || '').toLowerCase();
+    const filtered = q ? all.filter(t => t.toLowerCase().includes(q)) : all;
+    
+    // タグなし ボタンを先頭に追加
+    const noTagCount = (DATA || []).filter(d=> !(d.tags && d.tags.length)).length;
+    const noTagBtn = document.createElement('div');
+    noTagBtn.className = 'sidebar-tag' + (state.noTagFilter ? ' active' : '');
+    noTagBtn.innerHTML = `<span>タグなし</span><span class="tag-count">${noTagCount}</span>`;
+    noTagBtn.addEventListener('click', ()=>{ 
+      state.noTagFilter = !state.noTagFilter; 
+      state.tags.clear();
+      renderTags(); 
+      renderList(); 
+      renderSidebarTags(filterQuery); 
+    });
+    el.sidebarTags.appendChild(noTagBtn);
+
+    filtered.forEach(t => {
+      const count = DATA.filter(d => (d.tags || []).includes(t)).length;
+      const tag = document.createElement('div');
+      tag.className = 'sidebar-tag' + (state.tags.has(t) ? ' active' : '');
+      tag.innerHTML = `<span>${t}</span><span class="tag-count">${count}</span>`;
+      tag.addEventListener('click', () => {
+        if(state.tags.has(t)) state.tags.delete(t);
+        else state.tags.add(t);
+        state.noTagFilter = false;
+        renderTags();
+        renderList();
+        renderSidebarTags(filterQuery);
+      });
+      el.sidebarTags.appendChild(tag);
+    });
+  }catch(e){ console.warn('renderSidebarTags error', e); }
+}
+
+function updateSidebarStats(){
+  try{
+    if(el.statTotal) el.statTotal.textContent = (DATA || []).length;
+    if(el.statTags) el.statTags.textContent = buildAllTags(DATA).length;
+  }catch(e){}
+}
+
+function initSidebar(){
+  try{
+    // サイドバータグ検索
+    if(el.sidebarTagSearch){
+      el.sidebarTagSearch.addEventListener('input', (e) => {
+        renderSidebarTags(e.target.value);
+      });
+    }
+    
+    // サイドバー表示サイズ
+    if(el.sidebarViewSize){
+      el.sidebarViewSize.value = state.viewMode || 'medium';
+      el.sidebarViewSize.addEventListener('change', (e) => {
+        state.viewMode = e.target.value;
+        saveViewMode();
+        renderList();
+        // 他のセレクトも同期
+        if(el.viewSizeSelect) el.viewSizeSelect.value = e.target.value;
+      });
+    }
+    
+    // サイドバーソート
+    if(el.sidebarSort){
+      el.sidebarSort.value = state.sort || 'alpha_en_asc';
+      el.sidebarSort.addEventListener('change', (e) => {
+        state.sort = e.target.value;
+        saveSort();
+        renderList();
+        // 他のセレクトも同期
+        if(el.sortSelect) el.sortSelect.value = e.target.value;
+      });
+    }
+    
+    // サイドバーレイアウト
+    if(el.sidebarLayout){
+      const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+      el.sidebarLayout.value = savedLayout;
+      el.sidebarLayout.addEventListener('change', (e) => {
+        const v = e.target.value === 'grid' ? 'grid' : 'list';
+        localStorage.setItem('desktop_layout', v);
+        applyGridLayout();
+        // レイアウト変更後に再レンダーしてアイコンを更新
+        renderList();
+        // ユーザー設定モーダル内のセレクトも同期
+        const desktopLayoutSelect = document.getElementById('desktopLayoutSelect');
+        if(desktopLayoutSelect) desktopLayoutSelect.value = v;
+        // カラム数設定の表示/非表示を更新
+        updateColsVisibility();
+      });
+    }
+    
+    // サイドバーカラム数
+    const sidebarCols = document.getElementById('sidebarCols');
+    if(sidebarCols){
+      const savedCols = localStorage.getItem('grid_cols') || '5';
+      sidebarCols.value = savedCols;
+      sidebarCols.addEventListener('change', (e) => {
+        localStorage.setItem('grid_cols', e.target.value);
+        applyGridLayout();
+        // ユーザー設定モーダル内のセレクトも同期
+        const gridColsSelect = document.getElementById('gridColsSelect');
+        if(gridColsSelect) gridColsSelect.value = e.target.value;
+      });
+    }
+    updateColsVisibility();
+    
+    // サイドバーテーマ
+    if(el.sidebarTheme){
+      const savedTheme = localStorage.getItem('app_theme') || 'light';
+      el.sidebarTheme.value = savedTheme;
+      el.sidebarTheme.addEventListener('change', (e) => {
+        if(typeof applyTheme === 'function') applyTheme(e.target.value);
+        // ユーザー設定モーダル内のセレクトも同期
+        const themeSelect = document.getElementById('themeSelect');
+        if(themeSelect) themeSelect.value = e.target.value;
+      });
+    }
+    
+    renderSidebarTags();
+    updateSidebarStats();
+  }catch(e){ console.warn('initSidebar error', e); }
 }
 
 /* ------------------ フィルタ・ソート・リスト表示 ------------------ */
@@ -270,10 +465,21 @@ function renderList(){
   el.list.innerHTML = '';
   if(el.countText) el.countText.textContent = `${arr.length} 件`;
 
-  // 表示モードに応じて list 要素にクラスを付与
+  // 保存されたレイアウト設定を取得
+  const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+  const isGridLayout = savedLayout === 'grid';
+
+  // 表示モードに応じて list 要素にクラスを付与（layout-gridを保持）
+  // リスト表示サイズクラスはグリッドレイアウトに影響しないように分離
   el.list.className = 'list';
-  if(state.viewMode === 'small') el.list.classList.add('list--small');
-  else el.list.classList.add('list--medium');
+  if(!isGridLayout){
+    // リストレイアウト時のみサイズクラスを適用
+    if(state.viewMode === 'small') el.list.classList.add('list--small');
+    else el.list.classList.add('list--medium');
+  }
+  
+  // グリッドレイアウトとカラム数を適用
+  applyGridLayout();
 
   arr.forEach(item=>{
     const row = document.createElement('div'); row.className = 'row';
@@ -292,21 +498,77 @@ function renderList(){
       iconWrap.appendChild(cb);
     }
     // 表示モード別のアイコン表示:
-    // - small / medium: 常にファビコンを表示
-    // - large: OGP のアイコン（item.icon_url）を優先、なければファビコン
-    // large view disabled: always show favicon for small/medium
-    if(false && state.viewMode === 'large' && item.icon_url){
-      const img = document.createElement('img');
-      img.src = getImageProxy(item.icon_url);
-      img.alt = item.title + ' アイコン';
-      img.onerror = ()=>{ img.src = faviconFromUrl(item.url,64); };
-      iconWrap.appendChild(img);
-    } else {
-      const img = document.createElement('img');
-      img.src = faviconFromUrl(item.url,64);
-      img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
-      img.onerror = ()=>{ iconWrap.textContent = item.title ? item.title[0] : '🔗'; };
-      iconWrap.appendChild(img);
+    // Grid layout: show OGP image (og_image) as hero, fallback to icon_url or favicon
+    // List layout: show favicon (favicon_url) as small icon
+    try{
+      const isGrid = (el.list && el.list.classList && el.list.classList.contains('layout-grid'));
+      if(isGrid){
+        // グリッド表示: OGP画像を優先、なければicon_url、最後にファビコン
+        const heroSrc = item.og_image || item.icon_url;
+        if(heroSrc){
+          const img = document.createElement('img');
+          img.src = getImageProxy ? getImageProxy(heroSrc) : heroSrc;
+          img.alt = item.title + ' アイコン';
+          img.className = 'hero';
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
+          // If the loaded image is essentially square, show the entire square
+          img.addEventListener('load', ()=>{
+            try{
+              if(img.naturalWidth && img.naturalHeight){
+                const ratio = img.naturalWidth / img.naturalHeight;
+                if(ratio > 0.95 && ratio < 1.05){
+                  img.classList.add('square');
+                  img.style.objectFit = 'contain';
+                } else {
+                  img.classList.remove('square');
+                  img.style.objectFit = 'cover';
+                }
+              }
+            }catch(_){ }
+          });
+          img.onerror = ()=>{
+            // hero image failed -> remove and show fallback favicon
+            img.remove();
+            const f = document.createElement('img');
+            f.className = 'fallback';
+            f.src = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
+            f.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
+            f.width = 64; f.height = 64;
+            f.loading = 'lazy'; f.decoding = 'async';
+            try{ f.referrerPolicy = 'no-referrer'; }catch(_){ }
+            f.onerror = ()=>{ f.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">😥</span>'; };
+            iconWrap.appendChild(f);
+          };
+          iconWrap.appendChild(img);
+        } else {
+          // OGP画像もicon_urlもない場合はファビコン表示
+          const img = document.createElement('img');
+          img.src = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
+          img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
+          img.className = 'fallback';
+          img.width = 64; img.height = 64;
+          img.loading = 'lazy'; img.decoding = 'async';
+          try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
+          img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">😥</span>'; };
+          iconWrap.appendChild(img);
+        }
+      } else {
+        // リスト表示: 必ずファビコンを表示（favicon_urlまたはGoogle s2）
+        const img = document.createElement('img');
+        img.src = item.favicon_url || faviconFromUrl(item.url, 64);
+        img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
+        img.className = 'fallback';
+        img.width = 40; img.height = 40;
+        img.loading = 'lazy'; img.decoding = 'async';
+        try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
+        img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">😥</span>'; };
+        iconWrap.appendChild(img);
+      }
+    }catch(e){
+      // フォールバック: 必ずファビコンのみ
+      try{ const img = document.createElement('img'); img.src = item.favicon_url || faviconFromUrl(item.url,64); img.alt=''; iconWrap.appendChild(img);}catch(_){}
     }
 
     const meta = document.createElement('div'); meta.className = 'meta';
@@ -409,10 +671,13 @@ function openEdit(item){
   el.addUrl.value = item.url;
   el.addTitleInput.value = item.title;
   el.addIcon.value = item.icon_url || '';
+  if(el.addGridImage) el.addGridImage.value = item.og_image || '';
+  if(el.addListImage) el.addListImage.value = item.favicon_url || item.icon_url || '';
   el.addDesc.value = item.desc || '';
   el.addTags.value = (item.tags || []).join(',');
   el.saveAdd.dataset.editId = item.id;
   try{ if(el.deleteInModal) el.deleteInModal.style.display = 'inline-block'; }catch(e){}
+  try{ if(el.refreshImagesBtn) el.refreshImagesBtn.style.display = 'inline-block'; }catch(e){}
 }
 
 /* ------------------ 表示モード初期化 ------------------ */
@@ -481,13 +746,13 @@ setTimeout(()=>{
     el.viewModeModal = document.getElementById('viewModeModal');
     el.viewModeCancel = document.getElementById('viewModeCancel');
     el.viewModeSave = document.getElementById('viewModeSave');
-    if(el.viewModeBtn) el.viewModeBtn.addEventListener('click', ()=>{ if(el.viewModeModal) el.viewModeModal.style.display='flex'; const radios = document.getElementsByName('vmode'); radios.forEach && radios.forEach(r=> r.checked = (r.value === state.viewMode)); });
-    if(el.viewModeCancel) el.viewModeCancel.addEventListener('click', ()=>{ if(el.viewModeModal) el.viewModeModal.style.display='none'; });
+    if(el.viewModeBtn) el.viewModeBtn.addEventListener('click', ()=>{ try{ lockScrollForModal(); }catch(e){}; if(el.viewModeModal) el.viewModeModal.style.display='flex'; const radios = document.getElementsByName('vmode'); radios.forEach && radios.forEach(r=> r.checked = (r.value === state.viewMode)); });
+    if(el.viewModeCancel) el.viewModeCancel.addEventListener('click', ()=>{ if(el.viewModeModal) el.viewModeModal.style.display='none'; try{ unlockScrollForModal(); }catch(e){} });
     if(el.viewModeSave) el.viewModeSave.addEventListener('click', ()=>{
       const radios = document.getElementsByName('vmode'); let sel = 'medium';
       for(let i=0;i<radios.length;i++){ if(radios[i].checked) { sel = radios[i].value; break; } }
       // 'large' option was removed; no special fallback required
-      state.viewMode = sel; saveViewMode(); updateViewModeUI(); renderList(); if(el.viewModeModal) el.viewModeModal.style.display='none';
+      state.viewMode = sel; saveViewMode(); updateViewModeUI(); renderList(); if(el.viewModeModal) el.viewModeModal.style.display='none'; try{ unlockScrollForModal(); }catch(e){}
     });
   }catch(e){ console.warn('viewMode modal init failed', e); }
 }, 50);
@@ -525,7 +790,7 @@ if(el.topEditModeBtn) el.topEditModeBtn.addEventListener('click', toggleEditMode
     const ids = Array.from(state.selectedIds);
     DATA = DATA.filter(d=>!ids.includes(d.id));
     state.selectedIds.clear();
-    saveToStorage(); renderTags(); renderList();
+    saveToStorage(); renderTags(); renderList(); renderSidebarTags(); updateSidebarStats();
     if (typeof saveBookmarksToRemote === 'function') saveBookmarksToRemote();
   });
 // View size select
@@ -535,6 +800,8 @@ if(el.viewSizeSelect){
     state.viewMode = e.target.value;
     saveViewMode();
     renderList();
+    // サイドバーも同期
+    if(el.sidebarViewSize) el.sidebarViewSize.value = e.target.value;
   });
 }
 
@@ -545,6 +812,8 @@ if(el.sortSelect){
     state.sort = e.target.value;
     saveSort();
     renderList();
+    // サイドバーも同期
+    if(el.sidebarSort) el.sidebarSort.value = e.target.value;
   });
 }
 
@@ -560,14 +829,89 @@ if(el.deleteInModal) el.deleteInModal.addEventListener('click', ()=>{
     DATA = DATA.filter(d=>d.id !== eid);
     delete el.saveAdd.dataset.editId;
     try{ el.deleteInModal.style.display = 'none'; }catch(e){}
-    saveToStorage(); renderTags(); renderList(); closeAddModal();
+    saveToStorage(); renderTags(); renderList(); renderSidebarTags(); updateSidebarStats(); closeAddModal();
     if (typeof saveBookmarksToRemote === 'function') saveBookmarksToRemote();
   }catch(e){ console.error('deleteInModal error', e); alert('削除に失敗しました'); }
 });
 
-if(el.moreTagsBtn) el.moreTagsBtn.addEventListener('click', ()=>{ if(el.tagModal) el.tagModal.style.display='flex'; document.body.classList.add('modal-tag-open'); try{ if(el.tagSearch){ el.tagSearch.value=''; el.tagSearch.focus(); } }catch(e){} });
-if(el.closeModal) el.closeModal.addEventListener('click', ()=>{ if(el.tagModal) el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); setTimeout(adjustWrapForHeader, 50); });
-if(el.tagModal) el.tagModal.addEventListener('click', (e)=>{ if(e.target === el.tagModal){ el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); setTimeout(adjustWrapForHeader, 50); } });
+// 画像更新ボタン: OGP画像とファビコンを再取得
+if(el.refreshImagesBtn) el.refreshImagesBtn.addEventListener('click', async ()=>{
+  try{
+    const url = el.addUrl.value.trim();
+    if(!url){ alert('URL を入力してください'); return; }
+    
+    el.refreshImagesBtn.disabled = true;
+    el.refreshImagesBtn.textContent = '取得中...';
+    
+    // fetchTitleFromUrl を使って画像を再取得
+    let targetUrl = url;
+    if(!/^https?:\/\//i.test(targetUrl)){
+      targetUrl = 'https://' + targetUrl;
+    }
+    
+    const controller = new AbortController();
+    const id = setTimeout(()=>controller.abort(), 8000);
+    const proxy = getOgpProxy();
+    
+    let fetched = null;
+    if(proxy && proxy.trim()){
+      const base = proxy.replace(/\/$/, '');
+      try{
+        const resp = await fetch(base + '?url=' + encodeURIComponent(targetUrl), { 
+          method: 'GET', mode: 'cors', redirect: 'follow', signal: controller.signal 
+        });
+        clearTimeout(id);
+        if(resp && resp.ok){
+          const json = await resp.json();
+          if(json && json.ok && json.meta){
+            fetched = json.meta;
+          }
+        }
+      }catch(e){ clearTimeout(id); console.warn('refreshImages fetch error', e); }
+    }
+    
+    if(fetched){
+      // 取得した画像をアイコンURL欄に表示（ユーザーが確認できるように）
+      if(fetched.image){
+        el.addIcon.value = fetched.image;
+      }
+      // 編集中のアイテムを更新
+      const eid = el.saveAdd && el.saveAdd.dataset && el.saveAdd.dataset.editId ? Number(el.saveAdd.dataset.editId) : null;
+      if(eid){
+        const idx = DATA.findIndex(d=>d.id === eid);
+        if(idx !== -1){
+          if(fetched.image) DATA[idx].og_image = fetched.image;
+          if(fetched.favicon) DATA[idx].favicon_url = fetched.favicon;
+          // タイトルや説明も更新オプション
+          if(fetched.title && !el.addTitleInput.value.trim()){
+            const cleaned = cleanTitle(fetched.title) || fetched.title;
+            el.addTitleInput.value = cleaned;
+            DATA[idx].title = cleaned;
+          }
+          if(fetched.description && !el.addDesc.value.trim()){
+            el.addDesc.value = fetched.description;
+            DATA[idx].desc = fetched.description;
+          }
+        }
+      }
+      alert('画像を更新しました！保存ボタンを押して確定してください。');
+    } else {
+      alert('画像の取得に失敗しました。');
+    }
+    
+    el.refreshImagesBtn.disabled = false;
+    el.refreshImagesBtn.textContent = '🔄 画像更新';
+  }catch(e){ 
+    console.error('refreshImages error', e); 
+    el.refreshImagesBtn.disabled = false;
+    el.refreshImagesBtn.textContent = '🔄 画像更新';
+    alert('画像更新中にエラーが発生しました'); 
+  }
+});
+
+if(el.moreTagsBtn) el.moreTagsBtn.addEventListener('click', ()=>{ try{ lockScrollForModal(); }catch(e){}; if(el.tagModal) el.tagModal.style.display='flex'; document.body.classList.add('modal-tag-open'); try{ if(el.tagSearch){ el.tagSearch.value=''; } }catch(e){} });
+if(el.closeModal) el.closeModal.addEventListener('click', ()=>{ if(el.tagModal) el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); try{ unlockScrollForModal(); }catch(e){}; setTimeout(adjustWrapForHeader, 50); });
+if(el.tagModal) el.tagModal.addEventListener('click', (e)=>{ if(e.target === el.tagModal){ el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); try{ unlockScrollForModal(); }catch(e){}; setTimeout(adjustWrapForHeader, 50); } });
 if(el.tagSearch) el.tagSearch.addEventListener('input', ()=>{ const q=el.tagSearch.value.trim().toLowerCase(); const all=buildAllTags(DATA); const filtered = all.filter(t=>t.toLowerCase().includes(q)); renderModalTags(filtered); });
 
 // 直近で使用されたタグを追跡 (最大5つ)
@@ -611,18 +955,25 @@ function renderQuickTags(){
 }
 
 function openAddModal(){
+  // preserve scroll & prevent layout shift when modal opens
+  lockScrollForModal();
   el.addModal.style.display='flex';
   try{ document.body.classList.add('modal-add-open'); }catch(e){}
-  el.addUrl.value=''; el.addTitleInput.value=''; el.addIcon.value=''; el.addDesc.value=''; el.addTags.value='';
+  el.addUrl.value=''; el.addTitleInput.value=''; el.addIcon.value='';
+  if(el.addGridImage) el.addGridImage.value = '';
+  if(el.addListImage) el.addListImage.value = '';
+  el.addDesc.value=''; el.addTags.value='';
   delete el.saveAdd.dataset.editId;
   try{ if(el.deleteInModal) el.deleteInModal.style.display = 'none'; }catch(e){}
+  try{ if(el.refreshImagesBtn) el.refreshImagesBtn.style.display = 'none'; }catch(e){}
   renderQuickTags();
-  
-  setTimeout(()=>el.addUrl.focus(),50);
+  // 自動フォーカスは無効化（モバイルでキーボードが勝手に出るのを防止）
 }
 function closeAddModal(){
   try{ document.body.classList.remove('modal-add-open'); }catch(e){}
   el.addModal.style.display='none';
+  // restore scroll position and remove temporary padding
+  unlockScrollForModal();
 }
 
 /* ------------------ 詳細モーダル（閲覧のみ） ------------------ */
@@ -636,10 +987,12 @@ function openDetailModal(item){
     el.detailTags.textContent = (item.tags && item.tags.length) ? item.tags.join(', ') : '（なし）';
     if(item.url){ el.detailOpenLink.href = item.url; el.detailOpenLink.style.display = ''; } else { el.detailOpenLink.style.display = 'none'; }
   }catch(e){ console.warn('openDetailModal error', e); }
+  // preserve scroll & prevent layout shift when modal opens
+  lockScrollForModal();
   el.detailModal.style.display = 'flex';
   try{ document.body.classList.add('modal-detail-open'); }catch(e){}
 }
-function closeDetailModal(){ if(!el.detailModal) return; el.detailModal.style.display = 'none'; try{ document.body.classList.remove('modal-detail-open'); }catch(e){} }
+function closeDetailModal(){ if(!el.detailModal) return; try{ document.body.classList.remove('modal-detail-open'); }catch(e){}; el.detailModal.style.display = 'none'; unlockScrollForModal(); }
 if(el.closeDetailModal) el.closeDetailModal.addEventListener('click', closeDetailModal);
 if(el.detailModal) el.detailModal.addEventListener('click', (e)=>{ if(e.target === el.detailModal) closeDetailModal(); });
 
@@ -720,7 +1073,7 @@ el.saveAdd.addEventListener('click', async ()=>{
           try{ console.debug('[fetchTitleFromUrl] parsed json:', json && json.ok ? json.meta : json); }catch(e){}
           if(json && json.ok && json.meta){
             const t = cleanTitle(json.meta.title) || json.meta.title || null;
-            return { title: t, description: json.meta.description || null, image: json.meta.image || null };
+            return { title: t, description: json.meta.description || null, image: json.meta.image || null, favicon: json.meta.favicon || null };
           }
         }
       }catch(e){ console.debug('[fetchTitleFromUrl] json parse failed', e); /* not json or parse failed, fallback to text parsing */ }
@@ -738,8 +1091,11 @@ el.saveAdd.addEventListener('click', async ()=>{
         const ogTitle = getMeta('meta[property="og:title"]') || getMeta('meta[name="twitter:title"]');
         const ogDesc = getMeta('meta[property="og:description"]') || getMeta('meta[name="description"]') || getMeta('meta[name="twitter:description"]');
         const ogImage = getMeta('meta[property="og:image"]') || getMeta('meta[name="twitter:image"]');
+        // Get favicon from link elements
+        const faviconEl = doc.querySelector('link[rel="icon"]') || doc.querySelector('link[rel="shortcut icon"]') || doc.querySelector('link[rel="apple-touch-icon"]');
+        const faviconHref = faviconEl ? faviconEl.getAttribute('href') : null;
         const title = (ogTitle && ogTitle.trim()) || (doc.querySelector('title') && doc.querySelector('title').textContent.trim()) || null;
-        return { title: title, description: ogDesc ? (''+ogDesc).trim() : null, image: ogImage ? (''+ogImage).trim() : null };
+        return { title: title, description: ogDesc ? (''+ogDesc).trim() : null, image: ogImage ? (''+ogImage).trim() : null, favicon: faviconHref ? (''+faviconHref).trim() : null };
       }catch(e){ /* parse error */ }
       return null;
     }catch(e){ return null; }
@@ -793,15 +1149,38 @@ el.saveAdd.addEventListener('click', async ()=>{
 
   // decide icon and desc: prefer user-specified, otherwise OGP (via proxy), otherwise favicon
   let icon = el.addIcon.value.trim();
-  // まずユーザー指定を優先
+  // OGP画像とファビコンを別々に保存
+  let ogImage = null;
+  let faviconUrl = null;
+  
+  if(fetched){
+    // OGP画像を保存
+    if(fetched.image){
+      ogImage = fetched.image;
+    }
+    // ファビコンを保存（プロキシから取得したもの or フォールバック）
+    if(fetched.favicon){
+      faviconUrl = fetched.favicon;
+    }
+  }
+  // ファビコンがない場合はGoogleサービスをフォールバック
+  if(!faviconUrl){
+    faviconUrl = faviconFromUrl(url, 64);
+  }
+  // User-provided overrides from modal inputs (allow explicit setting/inspection)
+  try{
+    const userGrid = el.addGridImage ? (el.addGridImage.value||'').trim() : '';
+    const userList = el.addListImage ? (el.addListImage.value||'').trim() : '';
+    if(userGrid) ogImage = userGrid;
+    if(userList) faviconUrl = userList;
+  }catch(e){}
+  
+  // icon_url（従来の互換性のため）: ユーザー指定 > OGP画像 > ファビコン
   if(!icon){
-    // OGP で取得できている場合は採用（プロキシ経由で保存するので CORS 問題は回避される）
-    if(fetched && fetched.image){
-      // Store the original OGP image URL (will be proxied when rendered)
-      icon = fetched.image;
+    if(ogImage){
+      icon = ogImage;
     } else {
-      // No OGP image: use favicon as fallback
-      icon = faviconFromUrl(url,64);
+      icon = faviconUrl;
     }
   }
   let desc = el.addDesc.value.trim();
@@ -827,6 +1206,7 @@ el.saveAdd.addEventListener('click', async ()=>{
       }catch(e){}
       const created = DATA[idx].created_at || Date.now();
       DATA[idx].url = url; DATA[idx].title = title; DATA[idx].icon_url = icon; DATA[idx].desc = desc; DATA[idx].tags = tags;
+      DATA[idx].og_image = ogImage; DATA[idx].favicon_url = faviconUrl;
       DATA[idx].created_at = created;
     }
   } else {
@@ -837,12 +1217,12 @@ el.saveAdd.addEventListener('click', async ()=>{
       if(exists){ alert('同じ URL のブックマークは既に存在します。'); return; }
     }catch(e){}
     const id = Date.now() + Math.floor(Math.random()*1000);
-    const newItem = { id, title, url, icon_url: icon, desc, tags, created_at: Date.now() };
+    const newItem = { id, title, url, icon_url: icon, og_image: ogImage, favicon_url: faviconUrl, desc, tags, created_at: Date.now() };
     DATA.unshift(newItem);
   }
 
   saveToStorage();
-  renderTags(); renderList();
+  renderTags(); renderList(); renderSidebarTags(); updateSidebarStats();
   closeAddModal();
   if (typeof saveBookmarksToRemote === 'function') saveBookmarksToRemote();
 });
@@ -859,6 +1239,7 @@ loadViewMode(); // 表示モードを localStorage から読み込み
 loadSort(); // ソート設定を localStorage から読み込み
 updateViewModeUI(); // ラジオボタンの状態を更新
 renderTags(); renderList();
+initSidebar(); // サイドバーを初期化
 
 function adjustWrapForHeader(){
   const hdr = document.querySelector('header.card');
@@ -870,14 +1251,17 @@ function adjustWrapForHeader(){
       const cs = window.getComputedStyle(hdr);
       const pb = parseFloat(cs.getPropertyValue('padding-bottom')) || 0;
       const rowGap = parseFloat(cs.getPropertyValue('row-gap')) || parseFloat(cs.getPropertyValue('gap')) || 0;
-      // subtract internal bottom padding and row gap so content sits flush beneath visible header
-      const topPad = Math.max(0, h - pb - rowGap);
-      wrap.style.paddingTop = topPad + 'px';
-      // expose adjusted header height as CSS variable so sticky elements can align exactly
-      document.documentElement.style.setProperty('--hdr-h', topPad + 'px');
+        // subtract internal bottom padding and row gap so content sits beneath visible header
+        const topPad = Math.max(0, h - pb - rowGap);
+        // add a small extra spacing to ensure cards don't visually collide with header
+        const extraSpacing = 12; // px
+        wrap.style.paddingTop = (topPad + extraSpacing) + 'px';
+        // expose adjusted header height (including extra spacing) as CSS variable so sticky elements align
+        document.documentElement.style.setProperty('--hdr-h', (topPad + extraSpacing) + 'px');
     }catch(e){
-      wrap.style.paddingTop = (h) + 'px';
-      try{ document.documentElement.style.setProperty('--hdr-h', h + 'px'); }catch(e){}
+      const extra = 12;
+      wrap.style.paddingTop = (h + extra) + 'px';
+      try{ document.documentElement.style.setProperty('--hdr-h', (h + extra) + 'px'); }catch(e){}
     }
   }
 }
@@ -1014,7 +1398,7 @@ function setLocalBookmarks(arr){
   try{ window.DATA = normalized; } catch(e){}
   // Do not persist bookmarks to localStorage in UI-only mode
   try{ console.log('setLocalBookmarks: updated in-memory DATA; not saved to localStorage (UI-only mode)'); }catch(e){}
-  try { renderTags(); renderList(); } catch(e){ /* ignore */ }
+  try { renderTags(); renderList(); renderSidebarTags(); updateSidebarStats(); } catch(e){ /* ignore */ }
 }
 
 function ensureIdAndTsForSync(item){
@@ -1150,6 +1534,7 @@ let userAvatarUrl = null;
 
 // モーダル開閉
 function openUserSettingsModal(){
+  try{ lockScrollForModal(); }catch(e){}
   if(userSettingsModal) userSettingsModal.style.display = 'flex';
   document.body.classList.add('modal-settings-open');
   updateModalLoginSection();
@@ -1157,39 +1542,145 @@ function openUserSettingsModal(){
     const v = localStorage.getItem('ogp_proxy') || '';
     const inp = document.getElementById('ogpProxyInput');
     if(inp) inp.value = v;
-    // sync dark mode toggle state when opening modal
+    // sync theme select state when opening modal
     try{
-      const dm = localStorage.getItem('dark_mode') === '1';
-      const chk = document.getElementById('darkModeToggle');
-      if(chk) chk.checked = dm;
+      const savedTheme = localStorage.getItem('app_theme') || 'light';
+      const sel = document.getElementById('themeSelect');
+      if(sel) sel.value = savedTheme;
+      // sync desktop layout when opening modal
+      const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+      const layoutSel = document.getElementById('desktopLayoutSelect');
+      if(layoutSel) layoutSel.value = savedLayout;
+      // sync grid cols when opening modal
+      const savedCols = localStorage.getItem('grid_cols') || '5';
+      const colsSel = document.getElementById('gridColsSelect');
+      if(colsSel) colsSel.value = savedCols;
+      updateColsVisibility();
+        // sync bottom nav toggle when opening modal
+        try{
+          const bottomToggle = document.getElementById('bottomNavToggle');
+          const savedBottom = localStorage.getItem('show_bottom_nav');
+          const showBottom = (savedBottom === null) ? true : (savedBottom === '1' || savedBottom === 'true');
+          if(bottomToggle) bottomToggle.checked = !!showBottom;
+        }catch(e){}
     }catch(e){}
   }catch(e){}
 }
 function closeUserSettingsModalFn(){
   if(userSettingsModal) userSettingsModal.style.display = 'none';
   document.body.classList.remove('modal-settings-open');
+  try{ unlockScrollForModal(); }catch(e){}
 }
 if(userInfoBtn) userInfoBtn.addEventListener('click', openUserSettingsModal);
 if(closeUserSettingsModal) closeUserSettingsModal.addEventListener('click', closeUserSettingsModalFn);
 if(userSettingsModal) userSettingsModal.addEventListener('click', (e)=>{ if(e.target === userSettingsModal) closeUserSettingsModalFn(); });
 
-// Dark mode handling
-function applyDarkMode(enabled){
+// Theme handling (multi-theme support)
+function applyTheme(themeName){
   try{
-    if(enabled) document.documentElement.classList.add('dark-mode'); else document.documentElement.classList.remove('dark-mode');
-    localStorage.setItem('dark_mode', enabled ? '1' : '0');
-  }catch(e){ console.warn('applyDarkMode error', e); }
+    // Remove all theme classes first
+    document.documentElement.classList.remove('dark-mode', 'theme-kohane', 'theme-lavender', 'theme-mint');
+    
+    if(themeName === 'dark'){
+      document.documentElement.classList.add('dark-mode');
+    } else if(themeName === 'awake'){
+      // 'Awake' maps to the previous kohane theme
+      document.documentElement.classList.add('theme-kohane');
+    } else if(themeName === 'kohane'){
+      document.documentElement.classList.add('theme-kohane');
+    } else if(themeName === 'lavender'){
+      document.documentElement.classList.add('theme-lavender');
+    } else if(themeName === 'mint'){
+      document.documentElement.classList.add('theme-mint');
+    }
+    // 'light' is default, no class needed
+    localStorage.setItem('app_theme', themeName);
+  }catch(e){ console.warn('applyTheme error', e); }
 }
 
-// Bind toggle if present
+// Bind theme select if present
 try{
-  const dmToggle = document.getElementById('darkModeToggle');
-  if(dmToggle){
-    dmToggle.addEventListener('change', (e)=>{ applyDarkMode(!!e.target.checked); });
+  const themeSelect = document.getElementById('themeSelect');
+  const desktopLayoutSelect = document.getElementById('desktopLayoutSelect');
+  if(themeSelect){
+    themeSelect.addEventListener('change', (e)=>{ 
+      applyTheme(e.target.value);
+      // サイドバーのテーマセレクトも同期
+      if(el.sidebarTheme) el.sidebarTheme.value = e.target.value;
+    });
+  }
+  // Bottom navigation toggle handling
+  try{
+    const bottomNav = document.getElementById('bottomNav');
+    const bottomNavToggle = document.getElementById('bottomNavToggle');
+    function applyBottomNavVisible(v){
+      try{
+        if(!bottomNav) return;
+        if(v) bottomNav.classList.remove('hidden-by-user');
+        else bottomNav.classList.add('hidden-by-user');
+      }catch(e){}
+    }
+    // load persisted preference (default: visible)
+    const savedBottom = localStorage.getItem('show_bottom_nav');
+    const showBottom = (savedBottom === null) ? true : (savedBottom === '1' || savedBottom === 'true');
+    applyBottomNavVisible(showBottom);
+    if(bottomNavToggle){
+      bottomNavToggle.checked = !!showBottom;
+      bottomNavToggle.addEventListener('change', (e)=>{
+        const v = !!e.target.checked;
+        try{ localStorage.setItem('show_bottom_nav', v ? '1' : '0'); }catch(e){}
+        applyBottomNavVisible(v);
+      });
+    }
+  }catch(e){}
+  if(desktopLayoutSelect){
+    desktopLayoutSelect.addEventListener('change', (e)=>{
+      const v = e.target.value === 'grid' ? 'grid' : 'list';
+      try{ localStorage.setItem('desktop_layout', v); }catch(e){}
+      applyGridLayout();
+      // レイアウト変更後に再レンダーしてアイコンを更新
+      renderList();
+      // サイドバーのレイアウトセレクトも同期
+      if(el.sidebarLayout) el.sidebarLayout.value = v;
+      updateColsVisibility();
+    });
+  }
+  // Grid columns select in settings modal
+  const gridColsSelect = document.getElementById('gridColsSelect');
+  if(gridColsSelect){
+    const savedCols = localStorage.getItem('grid_cols') || '5';
+    gridColsSelect.value = savedCols;
+    gridColsSelect.addEventListener('change', (e)=>{
+      try{ localStorage.setItem('grid_cols', e.target.value); }catch(ex){}
+      applyGridLayout();
+      // サイドバーも同期
+      const sidebarCols = document.getElementById('sidebarCols');
+      if(sidebarCols) sidebarCols.value = e.target.value;
+    });
   }
   // Apply persisted preference on script load
-  const saved = localStorage.getItem('dark_mode') === '1';
-  applyDarkMode(saved);
+  const savedTheme = localStorage.getItem('app_theme') || 'light';
+  // Migrate old dark_mode setting
+  if(!localStorage.getItem('app_theme') && localStorage.getItem('dark_mode') === '1'){
+    applyTheme('dark');
+  } else {
+    applyTheme(savedTheme);
+  }
+  // Sync select state
+  if(themeSelect) themeSelect.value = localStorage.getItem('app_theme') || 'light';
+  // Apply persisted desktop layout and sync select
+  try{
+    const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+    applyGridLayout();
+    if(desktopLayoutSelect) desktopLayoutSelect.value = savedLayout;
+    // カラム数セレクトも同期
+    const savedCols = localStorage.getItem('grid_cols') || '5';
+    const gridColsSelect = document.getElementById('gridColsSelect');
+    if(gridColsSelect) gridColsSelect.value = savedCols;
+    const sidebarCols = document.getElementById('sidebarCols');
+    if(sidebarCols) sidebarCols.value = savedCols;
+    updateColsVisibility();
+  }catch(e){}
 }catch(e){ /* ignore */ }
 
 // ログインセクション表示切替
@@ -1613,8 +2104,12 @@ function closeAllModals(){
   if(el.addModal) { el.addModal.style.display='none'; document.body.classList.remove('modal-add-open'); }
   if(el.tagModal) { el.tagModal.style.display='none'; document.body.classList.remove('modal-tag-open'); }
   if(el.searchOverlay) el.searchOverlay.classList.remove('open');
-  if(el.detailModal) el.detailModal.style.display='none';
+  if(el.detailModal) { if(typeof closeDetailModal === 'function') closeDetailModal(); else { el.detailModal.style.display='none'; try{ document.body.classList.remove('modal-detail-open'); }catch(e){} } }
   if(el.viewModeModal) el.viewModeModal.style.display='none';
+  // Also close user settings modal if open
+  try{ if(typeof closeUserSettingsModalFn === 'function') closeUserSettingsModalFn(); }catch(e){}
+  // Restore scroll/padding if any modal had locked it
+  try{ unlockScrollForModal(); }catch(e){}
 }
 
 // Search button - open search overlay with keyboard
@@ -1672,7 +2167,6 @@ if(el.bottomTagsBtn){
       document.body.classList.add('modal-tag-open');
       if(el.tagSearch){
         el.tagSearch.value = '';
-        el.tagSearch.focus();
       }
     }
   });
@@ -1749,3 +2243,113 @@ if(el.pasteJsonBtn){
     }
   });
 }
+
+/* ========== Keyboard Shortcuts (PC only, Owner only) ========== */
+document.addEventListener('keydown', async (e)=>{
+  // 管理者モードでない場合は無視
+  if(isReadOnlyMode) return;
+  
+  // 入力フィールドにフォーカス中は無視（テキスト入力を邪魔しない）
+  const activeEl = document.activeElement;
+  const isTyping = activeEl && (
+    activeEl.tagName === 'INPUT' || 
+    activeEl.tagName === 'TEXTAREA' || 
+    activeEl.isContentEditable
+  );
+  
+  // 'A' キー: 追加モーダルを開く（入力中でない場合のみ）
+  if((e.key === 'a' || e.key === 'A') && !isTyping && !e.ctrlKey && !e.metaKey && !e.altKey){
+    // モーダルが既に開いている場合は無視
+    if(el.addModal && el.addModal.style.display === 'flex') return;
+    e.preventDefault();
+    closeAllModals();
+    openAddModal();
+    return;
+  }
+  
+  // 'V' キー: 追加モーダル内でペースト（URLまたはJSON自動識別）
+  if((e.key === 'v' || e.key === 'V') && !e.ctrlKey && !e.metaKey && !e.altKey){
+    // 追加モーダルが開いている場合のみ
+    if(!el.addModal || el.addModal.style.display !== 'flex') return;
+    // 入力フィールドにフォーカス中は通常のペーストを許可
+    if(isTyping) return;
+    
+    e.preventDefault();
+    try{
+      const text = await navigator.clipboard.readText();
+      if(!text || !text.trim()){
+        alert('クリップボードにテキストがありません。');
+        return;
+      }
+      
+      const trimmed = text.trim();
+      
+      // URLかどうかを判定
+      const isUrl = /^https?:\/\//i.test(trimmed);
+      
+      if(isUrl){
+        // URLとしてペースト
+        if(el.addUrl) el.addUrl.value = trimmed;
+        console.log('Shortcut V: pasted as URL');
+      } else {
+        // JSONとして解析を試みる
+        try{
+          const jsonData = JSON.parse(trimmed);
+          const item = Array.isArray(jsonData) ? jsonData[0] : jsonData;
+          
+          if(item && typeof item === 'object'){
+            if(item.url && el.addUrl) el.addUrl.value = item.url;
+            if(item.title && el.addTitleInput) el.addTitleInput.value = item.title;
+            if(item.desc && el.addDesc) el.addDesc.value = item.desc;
+            else if(item.description && el.addDesc) el.addDesc.value = item.description;
+            if(item.tags && el.addTags){
+              el.addTags.value = Array.isArray(item.tags) ? item.tags.join(', ') : item.tags;
+            }
+            if(item.icon_url && el.addIcon) el.addIcon.value = item.icon_url;
+            else if(item.icon && el.addIcon) el.addIcon.value = item.icon;
+            console.log('Shortcut V: pasted as JSON', item);
+          } else {
+            // JSONだが有効なオブジェクトでない場合はURLフィールドに入れる
+            if(el.addUrl) el.addUrl.value = trimmed;
+          }
+        }catch(jsonErr){
+          // JSON解析失敗 → URLフィールドにそのまま入れる
+          if(el.addUrl) el.addUrl.value = trimmed;
+          console.log('Shortcut V: pasted as plain text to URL field');
+        }
+      }
+    }catch(err){
+      console.warn('Shortcut V paste failed:', err);
+      alert('クリップボードの読み取りに失敗しました。');
+    }
+  }
+});
+
+// Close any open modal when pressing 'z' (works for all users, not only owner)
+document.addEventListener('keydown', (e)=>{
+  if(!(e.key === 'z' || e.key === 'Z')) return;
+  if(e.ctrlKey || e.altKey || e.metaKey) return;
+  const activeEl = document.activeElement;
+  const isTyping = activeEl && (
+    activeEl.tagName === 'INPUT' || 
+    activeEl.tagName === 'TEXTAREA' || 
+    activeEl.isContentEditable
+  );
+  if(isTyping) return;
+
+  const anyOpen = (
+    (el.addModal && el.addModal.style.display === 'flex') ||
+    (el.tagModal && el.tagModal.style.display === 'flex') ||
+    (el.detailModal && el.detailModal.style.display === 'flex') ||
+    (el.viewModeModal && el.viewModeModal.style.display === 'flex') ||
+    (el.searchOverlay && el.searchOverlay.classList && el.searchOverlay.classList.contains('open')) ||
+    (typeof userSettingsModal !== 'undefined' && userSettingsModal && userSettingsModal.style && userSettingsModal.style.display === 'flex')
+  );
+
+  if(anyOpen){
+    e.preventDefault();
+    try{ closeAllModals(); }catch(err){}
+    try{ if(typeof closeDetailModal === 'function') closeDetailModal(); }catch(err){}
+    try{ if(typeof closeUserSettingsModalFn === 'function') closeUserSettingsModalFn(); }catch(err){}
+  }
+});

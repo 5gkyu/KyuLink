@@ -43,9 +43,15 @@
       opacity: 0.4;
       filter: blur(1px);
     }
-    body.modal-add-open .fab,
-    body.modal-add-open .sidebar {
+    /* Hide floating action button when modal open, but keep sidebar visible */
+    body.modal-add-open .fab {
       display: none !important;
+    }
+    /* Disable sidebar interaction when modal is open (visible but not clickable) */
+    body.modal-add-open .sidebar {
+      pointer-events: none;
+      opacity: 0.5;
+      filter: blur(1px);
     }
     /* Prevent body from scrolling when modal open */
     body.modal-add-open { overflow: hidden; }
@@ -113,9 +119,51 @@
       <!-- count row (kept outside header for transparent background) -->
     </header>
 
-    <main>
-      <div class="list" id="list"></div>
-    </main>
+    <div class="content-row">
+      <!-- Left Sidebar (Desktop only) -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+          <h4 class="sidebar-title">🏷️ タグで絞り込み</h4>
+          <div class="sidebar-search">
+            <input type="text" id="sidebarTagSearch" placeholder="タグを検索..." />
+          </div>
+          <div class="sidebar-tags" id="sidebarTags"></div>
+        </div>
+        <div class="sidebar-section">
+          <h4 class="sidebar-title">📊 統計</h4>
+          <div class="sidebar-stats" id="sidebarStats">
+            <div class="stat-item"><span class="stat-label">全件数:</span><span class="stat-value" id="statTotal">0</span></div>
+            <div class="stat-item"><span class="stat-label">タグ数:</span><span class="stat-value" id="statTags">0</span></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <h4 class="sidebar-title">🖼️ 表示設定</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="min-width:70px;">レイアウト:</label>
+              <select id="sidebarLayout" style="flex:1;padding:6px;border-radius:6px;">
+                <option value="list">リスト</option>
+                <option value="grid">グリッド</option>
+              </select>
+            </div>
+            <div id="sidebarColsRow" style="display:flex;align-items:center;gap:8px;">
+              <label style="min-width:70px;">カラム数:</label>
+              <select id="sidebarCols" style="flex:1;padding:6px;border-radius:6px;">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="list" id="list"></div>
+      </main>
+    </div>
   </div>
 
   <!-- FABボタンは削除済み - ボトムナビを使用 -->
@@ -139,9 +187,19 @@
         <input id="addTitleInput" type="text" placeholder="自動取得されます" />
       </div>
 
-      <div class="form-row">
+      <div class="form-row" id="addIconRow" style="display:none;" aria-hidden="true">
         <label>アイコン URL（任意）</label>
         <input id="addIcon" type="url" placeholder="外部アイコン URL を指定（省略可）" />
+      </div>
+      <div class="form-row">
+        <label>Grid 用画像 URL（任意）</label>
+        <input id="addGridImage" type="url" placeholder="og:image やカード画像の URL を指定（省略可）" />
+        <small style="color:var(--muted);">カード上部の大きな画像（グリッド表示時）</small>
+      </div>
+      <div class="form-row">
+        <label>List 用画像 URL（任意）</label>
+        <input id="addListImage" type="url" placeholder="favicon の URL を指定（省略可）" />
+        <small style="color:var(--muted);">一覧表示の小アイコン（リスト表示時）</small>
       </div>
       <div class="form-row">
         <label>説明（任意）</label>
@@ -159,6 +217,7 @@
       <div style="display:flex;gap:8px;justify-content:space-between;margin-top:8px;align-items:center">
         <div style="display:flex;gap:8px;align-items:center">
           <button id="deleteInModal" class="small-btn" type="button" style="background:#e74c3c;color:#fff;border-color:#e74c3c;">削除</button>
+          <button id="refreshImagesBtn" class="small-btn" type="button" style="background:#3498db;color:#fff;border-color:#3498db;">🔄 画像更新</button>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
           <button id="cancelAdd" class="small-btn" type="button">キャンセル</button>
@@ -272,13 +331,57 @@
           </div>
         </div>
       </div>
-      <!-- Appearance: Dark mode toggle -->
+      <!-- Appearance: Theme selector -->
       <div style="margin-top:12px;">
         <div class="form-row" style="margin-bottom:6px">
-          <label style="font-weight:700">外観</label>
-          <div style="display:flex;align-items:center;gap:8px">
-            <input type="checkbox" id="darkModeToggle" />
-            <label for="darkModeToggle" style="margin:0;">ダークモードを有効にする</label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="min-width:80px;font-weight:700">Theme:</label>
+            <select id="themeSelect" style="padding:8px;border-radius:8px;min-width:160px;">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="awake">Awake</option>
+              <option value="lavender">Lavender</option>
+              <option value="mint">Mint</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance: Desktop layout selector -->
+      <div style="margin-top:8px;">
+        <div class="form-row" style="margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="min-width:80px;font-weight:700">Layout:</label>
+            <select id="desktopLayoutSelect" style="padding:8px;border-radius:8px;min-width:160px;">
+              <option value="list">List</option>
+              <option value="grid">Grid</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- Grid column count selector -->
+      <div id="gridColsSettingRow" style="margin-top:8px;">
+        <div class="form-row" style="margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="min-width:80px;font-weight:700">カラム数:</label>
+            <select id="gridColsSelect" style="padding:8px;border-radius:8px;min-width:160px;">
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom nav visibility toggle -->
+      <div style="margin-top:8px;">
+        <div class="form-row" style="margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="min-width:80px;font-weight:700">表示</label>
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" id="bottomNavToggle" /> ボトムナビを表示
+            </label>
           </div>
         </div>
       </div>
