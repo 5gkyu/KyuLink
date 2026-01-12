@@ -268,12 +268,20 @@ function renderTags(){
   try{
     if(el.chipContainer){
       el.chipContainer.innerHTML = '';
+      // 全て ボタン（タグなしの前）
+      const allBtn = document.createElement('button');
+      const isAllActive = !state.noTagFilter && state.tags.size === 0;
+      allBtn.className = 'chip' + (isAllActive ? ' active' : '');
+      allBtn.textContent = `全て (${(DATA || []).length})`;
+      allBtn.addEventListener('click', ()=>{ state.tags.clear(); state.noTagFilter = false; renderTags(); renderList(); renderSidebarTags(); });
+      el.chipContainer.appendChild(allBtn);
+      
       // タグなし チップ
       const noTagCount = (DATA || []).filter(d=> !(d.tags && d.tags.length)).length;
       const noTagChip = document.createElement('button');
       noTagChip.className = 'chip' + (state.noTagFilter ? ' active' : '');
       noTagChip.textContent = `タグなし (${noTagCount})`;
-      noTagChip.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; renderTags(); renderList(); renderSidebarTags(); });
+      noTagChip.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; state.tags.clear(); renderTags(); renderList(); renderSidebarTags(); });
       el.chipContainer.appendChild(noTagChip);
 
       all.slice(0,showN).forEach(t=>{
@@ -294,12 +302,20 @@ function renderModalTags(all){
   try{
     if(!el.modalTags) return;
     el.modalTags.innerHTML = '';
+    // 全て ボタン（タグなしの前）
+    const allBtn = document.createElement('button');
+    const isAllActive = !state.noTagFilter && state.tags.size === 0;
+    allBtn.className = 'chip' + (isAllActive ? ' active' : '');
+    allBtn.textContent = `全て (${(DATA || []).length})`;
+    allBtn.addEventListener('click', ()=>{ state.tags.clear(); state.noTagFilter = false; renderModalTags(all); renderTags(); renderList(); renderSidebarTags(); });
+    el.modalTags.appendChild(allBtn);
+    
     // タグなし ボタンを先頭に追加
     const noTagCount = (DATA || []).filter(d=> !(d.tags && d.tags.length)).length;
     const noTagBtn = document.createElement('button');
     noTagBtn.className = 'chip' + (state.noTagFilter ? ' active' : '');
     noTagBtn.textContent = `タグなし (${noTagCount})`;
-    noTagBtn.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; renderModalTags(all); renderTags(); renderList(); renderSidebarTags(); });
+    noTagBtn.addEventListener('click', ()=>{ state.noTagFilter = !state.noTagFilter; state.tags.clear(); renderModalTags(all); renderTags(); renderList(); renderSidebarTags(); });
     el.modalTags.appendChild(noTagBtn);
 
     all.forEach(t=>{
@@ -352,6 +368,20 @@ function renderSidebarTags(filterQuery){
     const all = buildAllTags(DATA);
     const q = (filterQuery || '').toLowerCase();
     const filtered = q ? all.filter(t => t.toLowerCase().includes(q)) : all;
+    
+    // 全て ボタン（タグなしの前）
+    const allBtn = document.createElement('div');
+    const isAllActive = !state.noTagFilter && state.tags.size === 0;
+    allBtn.className = 'sidebar-tag' + (isAllActive ? ' active' : '');
+    allBtn.innerHTML = `<span>全て</span><span class="tag-count">${(DATA || []).length}</span>`;
+    allBtn.addEventListener('click', ()=>{ 
+      state.tags.clear();
+      state.noTagFilter = false;
+      renderTags(); 
+      renderList(); 
+      renderSidebarTags(filterQuery); 
+    });
+    el.sidebarTags.appendChild(allBtn);
     
     // タグなし ボタンを先頭に追加
     const noTagCount = (DATA || []).filter(d=> !(d.tags && d.tags.length)).length;
@@ -1725,6 +1755,9 @@ function applyTheme(themeName){
     } else if(themeName === 'awake'){
       // 'Awake' maps to the previous kohane theme
       document.documentElement.classList.add('theme-kohane');
+    } else if(themeName === 'awake-dark'){
+      document.documentElement.classList.add('theme-kohane');
+      document.documentElement.classList.add('dark-mode');
     } else if(themeName === 'kohane'){
       document.documentElement.classList.add('theme-kohane');
     } else if(themeName === 'lavender'){
@@ -1734,6 +1767,25 @@ function applyTheme(themeName){
     }
     // 'light' is default, no class needed
     localStorage.setItem('app_theme', themeName);
+
+    // Update meta theme-color so mobile chrome / overscroll areas match theme
+    try{
+      var themeColor = '#f6fbfb';
+      if(themeName === 'dark') themeColor = '#07181a';
+      else if(themeName === 'awake' || themeName === 'kohane') themeColor = '#ffdada';
+      else if(themeName === 'awake-dark') themeColor = '#07181a';
+      else if(themeName === 'lavender') themeColor = '#e8d5f0';
+      else if(themeName === 'mint') themeColor = '#d0f0ec';
+      else if(themeName === 'light') themeColor = getComputedStyle(document.documentElement).getPropertyValue('--bg') || themeColor;
+
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if(!meta){
+        meta = document.createElement('meta');
+        meta.setAttribute('name','theme-color');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', themeColor.trim());
+    }catch(e){ /* non-fatal */ }
   }catch(e){ console.warn('applyTheme error', e); }
 }
 

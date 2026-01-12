@@ -485,6 +485,7 @@ html.dark-mode .sidebar-section{border-bottom-color:rgba(255,255,255,0.06)}
 html.dark-mode .sidebar-search input{background:#0b2a2a;border-color:rgba(255,255,255,0.08)}
 html.dark-mode .sidebar-tag{background:rgba(255,255,255,0.03)}
 html.dark-mode .sidebar-tag:hover{background:rgba(23,195,198,0.12);border-color:rgba(23,195,198,0.25)}
+html.dark-mode .sidebar-tag.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(0,0,0,0.25)}
 html.dark-mode .sidebar-control-row select{background:#0b2a2a;border-color:rgba(255,255,255,0.08)}
 
 /* Theme-specific sidebar styles */
@@ -893,7 +894,7 @@ body.edit-mode .row .open-btn{display:none}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:220}
 /* ensure modal small buttons are visible regardless of edit-mode */
 .modal .small-btn{display:inline-block}
-.modal .panel{background:linear-gradient(180deg,var(--card),rgba(var(--card-rgb),0.96));padding:18px;border-radius:12px;max-width:720px;width:92%;box-shadow:0 10px 40px rgba(2,12,20,0.4);border:1px solid rgba(6,50,58,0.04)}
+.modal .panel{background:linear-gradient(180deg,var(--card),rgba(var(--card-rgb),0.96));padding:18px;border-radius:12px;max-width:720px;width:92%;box-shadow:0 10px 40px rgba(2,12,20,0.4);border:1px solid rgba(6,50,58,0.04);max-height:calc(90vh - 12px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .modal .panel h3{margin:0 0 8px 0;color:var(--text)}
 .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .form-row input, .form-row textarea{padding:10px;border-radius:8px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text);box-shadow: inset 0 1px 0 rgba(2,12,14,0.02)}
@@ -911,6 +912,8 @@ body.edit-mode .row .open-btn{display:none}
 .tagbar{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;overflow:hidden;margin-top:10px}
 .chip{padding:8px 10px;border-radius:999px;background:#eafffb;border:1px solid rgba(6,50,58,0.06);cursor:pointer;white-space:nowrap;color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .chip.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#ffffff;border-color:transparent;font-weight:700}
+.modal .chip{background:rgba(6,50,58,0.06);border-color:rgba(6,50,58,0.08)}
+.modal .chip.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2)) !important;color:#ffffff !important;border-color:transparent !important;box-shadow:0 6px 16px rgba(0,0,0,0.2) !important;font-weight:700 !important}
 .chip-container{display:flex;gap:8px;overflow:hidden;min-width:0}
 .more-btn{padding:8px 10px;border-radius:999px;background:#eafffb;border:1px solid rgba(6,50,58,0.06);cursor:pointer;color:var(--text);font-weight:700}
 
@@ -1166,6 +1169,9 @@ body.modal-add-open { overflow: hidden; }
   justify-content: space-around;
   align-items: center;
 }
+
+/* Hide bottom nav while add/edit modal is open (mobile focus) */
+body.modal-add-open .bottom-nav { display:none !important; }
 
 html.dark-mode .bottom-nav {
   background: linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));
