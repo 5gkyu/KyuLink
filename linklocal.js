@@ -1130,6 +1130,31 @@ function closeAddModal(){
   unlockScrollForModal();
 }
 
+// Prevent horizontal swipe gestures while add/edit modal is open (mobile)
+;(function(){
+  let startX = 0, startY = 0, active = false;
+  function onTouchStart(e){
+    if(!document.body.classList.contains('modal-add-open')) return;
+    const t = e.touches && e.touches[0]; if(!t) return;
+    startX = t.clientX; startY = t.clientY; active = true;
+  }
+  function onTouchMove(e){
+    if(!active) return;
+    const t = e.touches && e.touches[0]; if(!t) return;
+    const dx = t.clientX - startX; const dy = t.clientY - startY;
+    // If horizontal movement is dominant, prevent default to stop history-swipe/navigation
+    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8){
+      // preventDefault requires non-passive listener
+      try{ e.preventDefault(); e.stopPropagation(); }catch(err){}
+    }
+  }
+  function onTouchEnd(e){ active = false; }
+  // attach listeners at capture on document to reliably intercept gestures
+  document.addEventListener('touchstart', onTouchStart, {passive:true});
+  document.addEventListener('touchmove', onTouchMove, {passive:false});
+  document.addEventListener('touchend', onTouchEnd, {passive:true});
+})();
+
 /* ------------------ 詳細モーダル（閲覧のみ） ------------------ */
 function openDetailModal(item){
   if(!el.detailModal) return;
