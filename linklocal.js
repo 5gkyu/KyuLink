@@ -2359,6 +2359,8 @@ if(el.bottomSearchBtn){
         // 一部ブラウザでは遅延が必要な場合があるため、フォールバックで短遅延でも再フォーカス
         setTimeout(()=>{ try{ el.mobileSearchInput.focus(); }catch(e){} }, 50);
       }
+      // Also focus main search input if present (useful on larger viewports)
+      try{ if(el.q) { el.q.value = state.q || ''; el.q.focus(); } }catch(e){}
     }
   });
 }

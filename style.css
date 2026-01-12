@@ -523,6 +523,13 @@ select, button, input[type="url"]{padding:10px 12px;border-radius:10px;border:1p
 header.card .selector{display:flex;align-items:center}
   
 .list{display:flex;flex-direction:column;gap:8px;padding-top:16px}
+/* Prevent parent/page overscroll when interacting with the list on mobile.
+   This reduces pull-to-refresh / page-bounce caused by fast vertical swipes.
+   Browsers that support it will contain the scroll in `.list`. */
+.list{
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* Desktop grid layout when user selects Grid layout */
 @media(min-width:881px){
@@ -894,7 +901,30 @@ body.edit-mode .row .open-btn{display:none}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:220}
 /* ensure modal small buttons are visible regardless of edit-mode */
 .modal .small-btn{display:inline-block}
-.modal .panel{background:linear-gradient(180deg,var(--card),rgba(var(--card-rgb),0.96));padding:18px;border-radius:12px;max-width:720px;width:92%;box-shadow:0 10px 40px rgba(2,12,20,0.4);border:1px solid rgba(6,50,58,0.04);max-height:calc(90vh - 12px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.modal .panel{
+  background: linear-gradient(180deg,var(--card),rgba(var(--card-rgb),0.96));
+  padding: 18px;
+  border-radius: 12px;
+  max-width: 720px;
+  width: 92%;
+  box-shadow: 0 10px 40px rgba(2,12,20,0.4);
+  border: 1px solid rgba(6,50,58,0.04);
+  max-height: calc(90vh - 12px);
+  display: flex;
+  flex-direction: column;
+  overflow: auto; /* panel itself scrolls */
+  -webkit-overflow-scrolling: touch;
+}
+.modal .panel > :last-child{
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  background: linear-gradient(180deg, rgba(var(--card-rgb),0.02), var(--card));
+  padding-top: 10px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  margin: 0 -18px -18px;
+  border-top: 1px solid rgba(6,50,58,0.04);
+}
 .modal .panel h3{margin:0 0 8px 0;color:var(--text)}
 .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .form-row input, .form-row textarea{padding:10px;border-radius:8px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text);box-shadow: inset 0 1px 0 rgba(2,12,14,0.02)}
@@ -1169,6 +1199,14 @@ body.modal-add-open { overflow: hidden; }
   justify-content: space-around;
   align-items: center;
 }
+
+/* Hide header and bottom navigation while user settings modal is open */
+body.modal-settings-open header.card { display: none !important; }
+body.modal-settings-open .bottom-nav { display: none !important; }
+
+/* Normalize spacing in header top-row so tag button aligns evenly */
+.top-row{gap:8px}
+.top-row .more-btn{margin-left:0;margin-right:0}
 
 /* Hide bottom nav while add/edit modal is open (mobile focus) */
 body.modal-add-open .bottom-nav { display:none !important; }
