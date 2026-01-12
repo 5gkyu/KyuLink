@@ -76,6 +76,7 @@ const el = {
   topEditModeBtn: document.getElementById('topEditModeBtn'),
   addModal: document.getElementById('addModal'),
   addUrl: document.getElementById('addUrl'),
+  copyAddUrlBtn: document.getElementById('copyAddUrlBtn'),
   addTitleInput: document.getElementById('addTitleInput'),
   addIcon: document.getElementById('addIcon'),
   addGridImage: document.getElementById('addGridImage'),
@@ -93,6 +94,7 @@ const el = {
   detailModal: document.getElementById('detailModal'),
   closeDetailModal: document.getElementById('closeDetailModal'),
   detailUrl: document.getElementById('detailUrl'),
+  copyDetailUrlBtn: document.getElementById('copyDetailUrlBtn'),
   detailTitleText: document.getElementById('detailTitleText'),
   detailDesc: document.getElementById('detailDesc'),
   detailTags: document.getElementById('detailTags'),
@@ -203,6 +205,57 @@ function loadAndDedupeFromStorage(){
   return false;
 }
 
+// ------------------ Clipboard helpers & copy-button wiring ------------------
+function copyTextToClipboard(text){
+  if(!text) return Promise.reject(new Error('empty'));
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject)=>{
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly','');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if(ok) resolve(); else reject(new Error('execCommand failed'));
+    }catch(e){ reject(e); }
+  });
+}
+
+function flashCopied(button){
+  if(!button) return;
+  const orig = button.textContent;
+  try{ button.textContent = 'コピーしました'; button.disabled = true; }
+  catch(e){}
+  setTimeout(()=>{ try{ button.textContent = orig; button.disabled = false; }catch(e){} }, 1600);
+}
+
+// attach listeners if elements exist
+(function(){
+  try{
+    if(el.copyAddUrlBtn && el.addUrl){
+      el.copyAddUrlBtn.addEventListener('click', ()=>{
+        const url = (el.addUrl && el.addUrl.value) ? el.addUrl.value.trim() : '';
+        if(!url) return flashCopied(el.copyAddUrlBtn);
+        copyTextToClipboard(url).then(()=> flashCopied(el.copyAddUrlBtn)).catch(()=> flashCopied(el.copyAddUrlBtn));
+      });
+    }
+
+    if(el.copyDetailUrlBtn && el.detailUrl){
+      el.copyDetailUrlBtn.addEventListener('click', ()=>{
+        const url = (el.detailUrl && el.detailUrl.textContent) ? el.detailUrl.textContent.trim() : '';
+        if(!url) return flashCopied(el.copyDetailUrlBtn);
+        copyTextToClipboard(url).then(()=> flashCopied(el.copyDetailUrlBtn)).catch(()=> flashCopied(el.copyDetailUrlBtn));
+      });
+    }
+  }catch(e){ console.warn('copy button init error', e); }
+})();
+
 /* ------------------ タグ関連レンダリング ------------------ */
 function buildAllTags(data){
   return Array.from(new Set((data || []).flatMap(d=>(d.tags || [])))).sort((a,b)=>a.localeCompare(b,'ja'));
@@ -261,14 +314,14 @@ function renderModalTags(all){
 }
 
 /* ------------------ サイドバー ------------------ */
-// グリッドレイアウトとカラム数クラスを適用
+// タブレット/PCレイアウトとカラム数クラスを適用
 function applyGridLayout(){
   try{
     if(!el.list) return;
     const layout = localStorage.getItem('desktop_layout') || 'list';
     const isGrid = layout === 'grid';
     el.list.classList.toggle('layout-grid', isGrid);
-    // カラム数クラスを更新（グリッド時のみ有効だが常に設定）
+    // カラム数クラスを更新（タブレット/PC表示時のみ有効だが常に設定）
     el.list.classList.remove('cols-3', 'cols-4', 'cols-5', 'cols-6', 'cols-7');
     if(isGrid){
       const cols = localStorage.getItem('grid_cols') || '5';
@@ -286,6 +339,9 @@ function updateColsVisibility(){
     const settingsRow = document.getElementById('gridColsSettingRow');
     if(sidebarRow) sidebarRow.style.display = isGrid ? '' : 'none';
     if(settingsRow) settingsRow.style.display = isGrid ? '' : 'none';
+    // サイドバーの表示サイズ行はスマートフォン表示時のみ表示
+    const viewSizeRow = document.getElementById('sidebarViewSizeRow');
+    if(viewSizeRow) viewSizeRow.style.display = isGrid ? 'none' : '';
   }catch(e){}
 }
 
@@ -376,8 +432,18 @@ function initSidebar(){
       el.sidebarLayout.addEventListener('change', (e) => {
         const v = e.target.value === 'grid' ? 'grid' : 'list';
         localStorage.setItem('desktop_layout', v);
+        // If switching to tablet/PC (grid), force view size to 'medium' first and re-render
+        if(v === 'grid'){
+          try{
+            state.viewMode = 'medium'; saveViewMode(); updateViewModeUI();
+            if(el.viewSizeSelect) el.viewSizeSelect.value = 'medium';
+            const sidebarView = document.getElementById('sidebarViewSize'); if(sidebarView) sidebarView.value = 'medium';
+            // ensure the list is re-rendered in medium size before applying grid layout
+            renderList();
+          }catch(_){ }
+        }
+        // Now apply the grid layout and re-render to reflect layout change
         applyGridLayout();
-        // レイアウト変更後に再レンダーしてアイコンを更新
         renderList();
         // ユーザー設定モーダル内のセレクトも同期
         const desktopLayoutSelect = document.getElementById('desktopLayoutSelect');
@@ -385,6 +451,26 @@ function initSidebar(){
         // カラム数設定の表示/非表示を更新
         updateColsVisibility();
       });
+      // Wire up the new 1-click layout toggle buttons if present
+      try{
+        const btnPhone = document.getElementById('layoutBtnPhone');
+        const btnDesktop = document.getElementById('layoutBtnDesktop');
+        function setLayoutButtonsActive(v){
+          if(btnPhone) btnPhone.classList.toggle('active', v === 'list');
+          if(btnDesktop) btnDesktop.classList.toggle('active', v === 'grid');
+        }
+        setLayoutButtonsActive(el.sidebarLayout.value || savedLayout);
+        if(btnPhone) btnPhone.addEventListener('click', ()=>{
+          el.sidebarLayout.value = 'list';
+          setLayoutButtonsActive('list');
+          el.sidebarLayout.dispatchEvent(new Event('change'));
+        });
+        if(btnDesktop) btnDesktop.addEventListener('click', ()=>{
+          el.sidebarLayout.value = 'grid';
+          setLayoutButtonsActive('grid');
+          el.sidebarLayout.dispatchEvent(new Event('change'));
+        });
+      }catch(e){ /* ignore */ }
     }
     
     // サイドバーカラム数
@@ -419,7 +505,7 @@ function initSidebar(){
   }catch(e){ console.warn('initSidebar error', e); }
 }
 
-/* ------------------ フィルタ・ソート・リスト表示 ------------------ */
+/* ------------------ フィルタ・ソート・スマートフォン表示 ------------------ */
 function filterAndSort(){
   const qn = normalizeForSearch(state.q);
   let arr = (DATA || []).filter(item=>{
@@ -470,15 +556,15 @@ function renderList(){
   const isGridLayout = savedLayout === 'grid';
 
   // 表示モードに応じて list 要素にクラスを付与（layout-gridを保持）
-  // リスト表示サイズクラスはグリッドレイアウトに影響しないように分離
+  // スマートフォン表示サイズクラスはタブレット/PCレイアウトに影響しないように分離
   el.list.className = 'list';
   if(!isGridLayout){
-    // リストレイアウト時のみサイズクラスを適用
+    // スマートフォン表示時のみサイズクラスを適用
     if(state.viewMode === 'small') el.list.classList.add('list--small');
     else el.list.classList.add('list--medium');
   }
   
-  // グリッドレイアウトとカラム数を適用
+  // タブレット/PCレイアウトとカラム数を適用
   applyGridLayout();
 
   arr.forEach(item=>{
@@ -503,7 +589,7 @@ function renderList(){
     try{
       const isGrid = (el.list && el.list.classList && el.list.classList.contains('layout-grid'));
       if(isGrid){
-        // グリッド表示: OGP画像を優先、なければicon_url、最後にファビコン
+        // タブレット/PC表示: OGP画像を優先、なければicon_url、最後にファビコン
         const heroSrc = item.og_image || item.icon_url;
         if(heroSrc){
           const img = document.createElement('img');
@@ -538,7 +624,7 @@ function renderList(){
             f.width = 64; f.height = 64;
             f.loading = 'lazy'; f.decoding = 'async';
             try{ f.referrerPolicy = 'no-referrer'; }catch(_){ }
-            f.onerror = ()=>{ f.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">😥</span>'; };
+            f.onerror = ()=>{ f.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">🐹</span>'; };
             iconWrap.appendChild(f);
           };
           iconWrap.appendChild(img);
@@ -551,11 +637,11 @@ function renderList(){
           img.width = 64; img.height = 64;
           img.loading = 'lazy'; img.decoding = 'async';
           try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
-          img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">😥</span>'; };
+          img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">🐹</span>'; };
           iconWrap.appendChild(img);
         }
       } else {
-        // リスト表示: 必ずファビコンを表示（favicon_urlまたはGoogle s2）
+        // スマートフォン表示: 必ずファビコンを表示（favicon_urlまたはGoogle s2）
         const img = document.createElement('img');
         img.src = item.favicon_url || faviconFromUrl(item.url, 64);
         img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
@@ -563,7 +649,7 @@ function renderList(){
         img.width = 40; img.height = 40;
         img.loading = 'lazy'; img.decoding = 'async';
         try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
-        img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">😥</span>'; };
+        img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">🐹</span>'; };
         iconWrap.appendChild(img);
       }
     }catch(e){
@@ -599,7 +685,7 @@ function renderList(){
       if(state.viewMode !== 'small'){
         const desc = document.createElement('div'); desc.className = 'desc'; desc.textContent = item.desc || '';
         const tagsWrap = document.createElement('div'); tagsWrap.className = 'tags';
-        (item.tags || []).forEach(t=>{ const s=document.createElement('span'); s.className='tag'; s.textContent=t; tagsWrap.appendChild(s); });
+        (item.tags || []).slice().sort((a,b)=>a.localeCompare(b,'ja')).forEach(t=>{ const s=document.createElement('span'); s.className='tag'; s.textContent=t; tagsWrap.appendChild(s); });
         meta.appendChild(titleRow); meta.appendChild(desc); meta.appendChild(tagsWrap);
       } else {
         meta.appendChild(titleRow);
@@ -609,7 +695,7 @@ function renderList(){
       if(state.viewMode !== 'small'){
         const desc = document.createElement('div'); desc.className = 'desc'; desc.textContent = item.desc || '';
         const tagsWrap = document.createElement('div'); tagsWrap.className = 'tags';
-        (item.tags || []).forEach(t=>{ const s=document.createElement('span'); s.className='tag'; s.textContent=t; tagsWrap.appendChild(s); });
+        (item.tags || []).slice().sort((a,b)=>a.localeCompare(b,'ja')).forEach(t=>{ const s=document.createElement('span'); s.className='tag'; s.textContent=t; tagsWrap.appendChild(s); });
         meta.appendChild(title); meta.appendChild(desc); meta.appendChild(tagsWrap);
       } else {
         meta.appendChild(title);
@@ -633,7 +719,7 @@ function renderList(){
 const btn = document.createElement('button');
 btn.className = 'open-btn';
 btn.setAttribute('aria-label', item.title + ' を編集する');
-btn.textContent = '編集';
+btn.textContent = '✏️';
 btn.addEventListener('click', (e)=>{ e.stopPropagation(); openEdit(item); });
 
 actions.appendChild(btn);
@@ -678,6 +764,8 @@ function openEdit(item){
   el.saveAdd.dataset.editId = item.id;
   try{ if(el.deleteInModal) el.deleteInModal.style.display = 'inline-block'; }catch(e){}
   try{ if(el.refreshImagesBtn) el.refreshImagesBtn.style.display = 'inline-block'; }catch(e){}
+  // 既存タグに応じてクイックタグボタン状態を更新
+  updateQuickTagButtons();
 }
 
 /* ------------------ 表示モード初期化 ------------------ */
@@ -871,9 +959,15 @@ if(el.refreshImagesBtn) el.refreshImagesBtn.addEventListener('click', async ()=>
     }
     
     if(fetched){
-      // 取得した画像をアイコンURL欄に表示（ユーザーが確認できるように）
+      // 取得した画像をモーダル内の該当欄に表示（ユーザーが確認できるように）
       if(fetched.image){
-        el.addIcon.value = fetched.image;
+        // legacy icon field (hidden) kept for compatibility
+        try{ if(el.addIcon) el.addIcon.value = fetched.image; }catch(_){}
+        // update grid/list specific modal inputs so user sees the new links immediately
+        try{ if(el.addGridImage) el.addGridImage.value = fetched.image; }catch(_){}
+      }
+      if(fetched.favicon){
+        try{ if(el.addListImage) el.addListImage.value = fetched.favicon; }catch(_){}
       }
       // 編集中のアイテムを更新
       const eid = el.saveAdd && el.saveAdd.dataset && el.saveAdd.dataset.editId ? Number(el.saveAdd.dataset.editId) : null;
@@ -894,13 +988,14 @@ if(el.refreshImagesBtn) el.refreshImagesBtn.addEventListener('click', async ()=>
           }
         }
       }
-      alert('画像を更新しました！保存ボタンを押して確定してください。');
+      el.refreshImagesBtn.textContent = '✅ 更新完了';
+      setTimeout(()=>{ if(el.refreshImagesBtn) el.refreshImagesBtn.textContent = '🔄 画像更新'; }, 2000);
     } else {
-      alert('画像の取得に失敗しました。');
+      el.refreshImagesBtn.textContent = '✖ 取得失敗';
+      setTimeout(()=>{ if(el.refreshImagesBtn) el.refreshImagesBtn.textContent = '🔄 画像更新'; }, 2000);
     }
     
     el.refreshImagesBtn.disabled = false;
-    el.refreshImagesBtn.textContent = '🔄 画像更新';
   }catch(e){ 
     console.error('refreshImages error', e); 
     el.refreshImagesBtn.disabled = false;
@@ -928,29 +1023,58 @@ function renderQuickTags(){
   if(!el.quickTagsContainer) return;
   el.quickTagsContainer.innerHTML = '';
   const existingTags = buildAllTags(DATA);
-  // 直近5つのタグを優先表示（存在するタグのみ）
-  const tagsToShow = recentlyUsedTags.filter(t => existingTags.includes(t)).slice(0, 5);
-  // 履歴がない場合は既存タグから最大5つ表示
-  if(tagsToShow.length === 0){
-    existingTags.slice(0, 5).forEach(tag => tagsToShow.push(tag));
+  
+  // datalistに全タグを追加（入力補完用）
+  const datalist = document.getElementById('tagSuggestions');
+  if(datalist){
+    datalist.innerHTML = '';
+    existingTags.forEach(tag => {
+      const opt = document.createElement('option');
+      opt.value = tag;
+      datalist.appendChild(opt);
+    });
   }
-  tagsToShow.forEach(tag => {
+  
+  // 既存タグがない場合は表示しない
+  if(existingTags.length === 0) return;
+  
+  // すべての既存タグをクリック可能なボタンとして表示
+  existingTags.forEach(tag => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'small-btn';
+    btn.className = 'small-btn quick-tag-btn';
     btn.textContent = tag;
-    btn.style.fontSize = '11px';
-    btn.style.padding = '4px 8px';
     btn.addEventListener('click', ()=>{
       if(!el.addTags) return;
       const currentTags = el.addTags.value.split(',').map(t => t.trim()).filter(t => t);
       if(!currentTags.includes(tag)){
         currentTags.push(tag);
         el.addTags.value = currentTags.join(', ');
+        btn.classList.add('active');
+      } else {
+        // すでにある場合は削除
+        const idx = currentTags.indexOf(tag);
+        if(idx > -1) currentTags.splice(idx, 1);
+        el.addTags.value = currentTags.join(', ');
+        btn.classList.remove('active');
       }
-      trackRecentTag(tag); // クリックしたタグを履歴に追加
     });
     el.quickTagsContainer.appendChild(btn);
+  });
+  
+  // 現在の入力値に応じてボタンの状態を更新
+  updateQuickTagButtons();
+}
+
+function updateQuickTagButtons(){
+  if(!el.quickTagsContainer || !el.addTags) return;
+  const currentTags = el.addTags.value.split(',').map(t => t.trim()).filter(t => t);
+  el.quickTagsContainer.querySelectorAll('.quick-tag-btn').forEach(btn => {
+    if(currentTags.includes(btn.textContent)){
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
   });
 }
 
@@ -1567,6 +1691,21 @@ function openUserSettingsModal(){
   }catch(e){}
 }
 function closeUserSettingsModalFn(){
+  try{
+    // If desktop layout is tablet/PC (grid), ensure display size is set to 'medium' inside modal before closing
+    const layoutSel = document.getElementById('desktopLayoutSelect');
+    const layout = layoutSel ? layoutSel.value : (localStorage.getItem('desktop_layout') || 'list');
+    if(layout === 'grid'){
+      try{
+        const viewSel = document.getElementById('viewSizeSelect');
+        if(viewSel) viewSel.value = 'medium';
+        state.viewMode = 'medium'; saveViewMode(); updateViewModeUI(); renderList();
+        // sync sidebar view size select if present
+        const sidebarView = document.getElementById('sidebarViewSize');
+        if(sidebarView) sidebarView.value = 'medium';
+      }catch(e){}
+    }
+  }catch(e){}
   if(userSettingsModal) userSettingsModal.style.display = 'none';
   document.body.classList.remove('modal-settings-open');
   try{ unlockScrollForModal(); }catch(e){}
@@ -1598,6 +1737,30 @@ function applyTheme(themeName){
   }catch(e){ console.warn('applyTheme error', e); }
 }
 
+// Font handling (font presets)
+function applyFont(fontName){
+  try{
+    document.documentElement.classList.remove('font-dotgothic16','font-mplus','font-kosugi','font-yomogi','font-notojp');
+    if(fontName === 'dotgothic16'){
+      document.documentElement.classList.add('font-dotgothic16');
+    } else if(fontName === 'mplus'){
+      document.documentElement.classList.add('font-mplus');
+    } else if(fontName === 'kosugi'){
+      document.documentElement.classList.add('font-kosugi');
+    } else if(fontName === 'yomogi'){
+      document.documentElement.classList.add('font-yomogi');
+    } else if(fontName === 'notojp'){
+      document.documentElement.classList.add('font-notojp');
+    } else if(fontName === 'dela'){
+      // legacy mapping: map removed Dela to DotGothic16
+      document.documentElement.classList.add('font-dotgothic16');
+      fontName = 'dotgothic16';
+    }
+    // 'default' uses the base stack defined in CSS
+    try{ localStorage.setItem('app_font', fontName); }catch(e){}
+  }catch(e){ console.warn('applyFont error', e); }
+}
+
 // Bind theme select if present
 try{
   const themeSelect = document.getElementById('themeSelect');
@@ -1607,6 +1770,13 @@ try{
       applyTheme(e.target.value);
       // サイドバーのテーマセレクトも同期
       if(el.sidebarTheme) el.sidebarTheme.value = e.target.value;
+    });
+  }
+  // Bind font select if present
+  const fontSelect = document.getElementById('fontSelect');
+  if(fontSelect){
+    fontSelect.addEventListener('change', (e)=>{
+      applyFont(e.target.value);
     });
   }
   // Bottom navigation toggle handling
@@ -1637,6 +1807,15 @@ try{
     desktopLayoutSelect.addEventListener('change', (e)=>{
       const v = e.target.value === 'grid' ? 'grid' : 'list';
       try{ localStorage.setItem('desktop_layout', v); }catch(e){}
+      // If switching to tablet/PC (grid), force view size to 'medium' first and re-render
+      if(v === 'grid'){
+        try{
+          state.viewMode = 'medium'; saveViewMode(); updateViewModeUI();
+          const viewSel = document.getElementById('viewSizeSelect'); if(viewSel) viewSel.value = 'medium';
+          const sidebarView = document.getElementById('sidebarViewSize'); if(sidebarView) sidebarView.value = 'medium';
+          renderList();
+        }catch(_){ }
+      }
       applyGridLayout();
       // レイアウト変更後に再レンダーしてアイコンを更新
       renderList();
@@ -1668,6 +1847,10 @@ try{
   }
   // Sync select state
   if(themeSelect) themeSelect.value = localStorage.getItem('app_theme') || 'light';
+  // Apply persisted font preference
+  const savedFont = localStorage.getItem('app_font') || 'default';
+  applyFont(savedFont);
+  if(fontSelect) fontSelect.value = savedFont;
   // Apply persisted desktop layout and sync select
   try{
     const savedLayout = localStorage.getItem('desktop_layout') || 'list';

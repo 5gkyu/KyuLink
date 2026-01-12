@@ -36,6 +36,8 @@
   <meta name="twitter:image:alt" content="KyuLink — きゅーがよく使うリンクまとめ" />
   
   <link rel="stylesheet" href="style.css">
+  <!-- Load Google Fonts for additional font options -->
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c&family=Kosugi+Maru&family=Yomogi&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <style>
     /* When add/edit modal is open, make header visible but disabled (cannot interact) */
     body.modal-add-open header.card {
@@ -123,13 +125,6 @@
       <!-- Left Sidebar (Desktop only) -->
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-section">
-          <h4 class="sidebar-title">🏷️ タグで絞り込み</h4>
-          <div class="sidebar-search">
-            <input type="text" id="sidebarTagSearch" placeholder="タグを検索..." />
-          </div>
-          <div class="sidebar-tags" id="sidebarTags"></div>
-        </div>
-        <div class="sidebar-section">
           <h4 class="sidebar-title">📊 統計</h4>
           <div class="sidebar-stats" id="sidebarStats">
             <div class="stat-item"><span class="stat-label">全件数:</span><span class="stat-value" id="statTotal">0</span></div>
@@ -137,13 +132,32 @@
           </div>
         </div>
         <div class="sidebar-section">
+          <h4 class="sidebar-title">🏷️ タグで絞り込み</h4>
+          <div class="sidebar-search">
+            <input type="text" id="sidebarTagSearch" placeholder="タグを検索..." />
+          </div>
+          <div class="sidebar-tags" id="sidebarTags"></div>
+        </div>
+        <div class="sidebar-section">
           <h4 class="sidebar-title">🖼️ 表示設定</h4>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;align-items:center;gap:8px;">
-              <label style="min-width:70px;">レイアウト:</label>
-              <select id="sidebarLayout" style="flex:1;padding:6px;border-radius:6px;">
-                <option value="list">リスト</option>
-                <option value="grid">グリッド</option>
+                <label style="min-width:70px;">レイアウト:</label>
+                <div id="layoutToggle" style="display:flex;gap:6px;">
+                  <button id="layoutBtnPhone" class="small-btn layout-toggle-btn" data-value="list" type="button">スマートフォン</button>
+                  <button id="layoutBtnDesktop" class="small-btn layout-toggle-btn" data-value="grid" type="button">タブレット/PC</button>
+                </div>
+                <!-- hidden select kept for compatibility with existing JS -->
+                <select id="sidebarLayout" style="display:none;">
+                  <option value="list">スマートフォン</option>
+                  <option value="grid">タブレット/PC</option>
+                </select>
+              </div>
+            <div id="sidebarViewSizeRow" style="display:flex;align-items:center;gap:8px;">
+              <label style="min-width:70px;">表示サイズ:</label>
+              <select id="sidebarViewSize" style="flex:1;padding:6px;border-radius:6px;">
+                <option value="small">小</option>
+                <option value="medium">中</option>
               </select>
             </div>
             <div id="sidebarColsRow" style="display:flex;align-items:center;gap:8px;">
@@ -174,9 +188,14 @@
       <h3 id="addTitle">ブックマークを追加</h3>
 
       <div class="form-row">
-        <label>URL（必須）</label>
-        <div class="form-inline">
-          <input id="addUrl" type="url" placeholder="https://example.com" style="flex:1" />
+        <div class="label-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <label style="margin:0">URL（必須）</label>
+          <button id="copyAddUrlBtn" class="small-btn" type="button" title="URL をコピー">コピー</button>
+        </div>
+        <div class="form-inline" style="margin-top:6px">
+          <div style="flex:1;min-width:0;">
+            <input id="addUrl" type="url" placeholder="https://example.com" style="width:100%;box-sizing:border-box" />
+          </div>
           <button id="pasteUrlBtn" class="small-btn" type="button">URL</button>
           <button id="pasteJsonBtn" class="small-btn" type="button">JSON</button>
         </div>
@@ -194,12 +213,10 @@
       <div class="form-row">
         <label>Grid 用画像 URL（任意）</label>
         <input id="addGridImage" type="url" placeholder="og:image やカード画像の URL を指定（省略可）" />
-        <small style="color:var(--muted);">カード上部の大きな画像（グリッド表示時）</small>
       </div>
       <div class="form-row">
         <label>List 用画像 URL（任意）</label>
         <input id="addListImage" type="url" placeholder="favicon の URL を指定（省略可）" />
-        <small style="color:var(--muted);">一覧表示の小アイコン（リスト表示時）</small>
       </div>
       <div class="form-row">
         <label>説明（任意）</label>
@@ -210,8 +227,9 @@
 
       <div class="form-row">
         <label>タグ（カンマ区切り、任意）</label>
-        <input id="addTags" type="text" placeholder="例: 開発,ツール" />
-        <div id="quickTagsContainer" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
+        <input id="addTags" type="text" placeholder="例: 開発,ツール" list="tagSuggestions" autocomplete="off" />
+        <datalist id="tagSuggestions"></datalist>
+        <div id="quickTagsContainer" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
       </div>
 
       <div style="display:flex;gap:8px;justify-content:space-between;margin-top:8px;align-items:center">
@@ -266,7 +284,10 @@
 
           <div class="form-row">
             <label>URL</label>
-            <div class="detail-value" id="detailUrl" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;word-break:break-all;user-select:text;"></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="detail-value" id="detailUrl" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;word-break:break-all;user-select:text;min-width:0;flex:1;"></div>
+              <button id="copyDetailUrlBtn" class="small-btn" type="button" title="URL をコピー">コピー</button>
+            </div>
           </div>
 
           <div class="form-row">
@@ -340,25 +361,25 @@
               <option value="light">Light</option>
               <option value="dark">Dark</option>
               <option value="awake">Awake</option>
-              <option value="lavender">Lavender</option>
-              <option value="mint">Mint</option>
+              <option value="lavender">Twilight</option>
+              <option value="mint">Ocean</option>
             </select>
           </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+              <label style="min-width:80px;font-weight:700">フォント:</label>
+              <select id="fontSelect" style="padding:8px;border-radius:8px;min-width:160px;">
+                <option value="default">Inter</option>
+                <option value="notojp">Noto Sans JP</option>
+                <option value="dotgothic16">DotGothic16</option>
+                <option value="mplus">M PLUS Rounded 1c</option>
+                <option value="kosugi">Kosugi Maru</option>
+                <option value="yomogi">Yomogi</option>
+              </select>
+            </div>
         </div>
       </div>
 
-      <!-- Appearance: Desktop layout selector -->
-      <div style="margin-top:8px;">
-        <div class="form-row" style="margin-bottom:6px">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <label style="min-width:80px;font-weight:700">Layout:</label>
-            <select id="desktopLayoutSelect" style="padding:8px;border-radius:8px;min-width:160px;">
-              <option value="list">List</option>
-              <option value="grid">Grid</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      <!-- Appearance: Desktop layout selector removed (controlled via sidebar only) -->
       <!-- Grid column count selector -->
       <div id="gridColsSettingRow" style="margin-top:8px;">
         <div class="form-row" style="margin-bottom:6px">

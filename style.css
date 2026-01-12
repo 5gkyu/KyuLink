@@ -3,6 +3,7 @@
 :root{
   --bg: #f6fbfb;
   --card: #ffffff;
+  --card-rgb: 255,255,255;
   --accent-1: #0fb8bf;
   --accent-2: #8fe3dd;
   --text: #073a46;
@@ -16,20 +17,21 @@
 html.dark-mode{
   --bg: #07181a;
   --card: #071e1f;
+  --card-rgb: 7,30,31;
   --accent-1: #17c3c6;
   --accent-2: #5fbfc0;
   --text: #e6fbfb;
   --muted: #9fb5b7;
 }
 
-/* ピンク + ベージュ + 白のカラーパレット */
+/* ピンク + コーラル (Awake) */
 html.theme-kohane{
-  --bg: #ffe8e8;
+  --bg: #ffdada;
   --card: #ffffff;
-  --accent-1: #ff8fa3;
-  --accent-2: #ffb5c2;
-  --text: #5c4a4a;
-  --muted: #9a8585;
+  --accent-1: #ff6b8a;
+  --accent-2: #ff9eb0;
+  --text: #5c3a3a;
+  --muted: #8a6565;
 }
 
 html.theme-kohane body{
@@ -107,14 +109,14 @@ html.theme-kohane .search-overlay-content{
   border: 1px solid rgba(255,143,163,0.2);
 }
 
-/* ========== ラベンダーテーマ (Lavender Dream) ========== */
+/* ========== トワイライトテーマ (Twilight) ========== */
 html.theme-lavender{
-  --bg: #f3e5f5;
+  --bg: #e8d5f0;
   --card: #ffffff;
-  --accent-1: #b39ddb;
-  --accent-2: #ce93d8;
-  --text: #4a3a5a;
-  --muted: #8a7a9a;
+  --accent-1: #9575cd;
+  --accent-2: #ba68c8;
+  --text: #3a2a4a;
+  --muted: #7a6a8a;
 }
 
 html.theme-lavender body{
@@ -192,14 +194,14 @@ html.theme-lavender .search-overlay-content{
   border: 1px solid rgba(179,157,219,0.25);
 }
 
-/* ========== ミントテーマ (Mint Breeze) ========== */
+/* ========== オーシャンテーマ (Ocean) ========== */
 html.theme-mint{
-  --bg: #e0f7f4;
+  --bg: #d0f0ec;
   --card: #ffffff;
-  --accent-1: #4dd0c0;
-  --accent-2: #80e6d7;
-  --text: #2d5a54;
-  --muted: #6a8a85;
+  --accent-1: #26a69a;
+  --accent-2: #4dd0c0;
+  --text: #1a4a44;
+  --muted: #4a7a75;
 }
 
 html.theme-mint body{
@@ -399,10 +401,47 @@ html.dark-mode .modal .panel{ background: #0c2c2c; color: var(--text); border:1p
 html.dark-mode .tags{ color: var(--text); }
 
 
+/* Dark-mode: make Google sign-in and user avatar contrast-friendly */
+html.dark-mode #googleSignInBtn2{
+  background: linear-gradient(90deg, rgba(23,195,198,0.08), rgba(95,191,192,0.06));
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  box-shadow: none !important;
+}
+html.dark-mode #googleSignInBtn2 img{ filter: none; mix-blend-mode: normal; }
+
+html.dark-mode .user-mini-avatar{
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02));
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+html.dark-mode .user-mini-avatar img{ border: 1px solid rgba(255,255,255,0.06); }
+
 html,body{height:100%;width:100%;margin:0;font-family:Inter, "Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 /* Background image served from GitHub Pages */
 body{background-image: url('backimage.png');background-attachment:fixed;background-size:cover;background-position:center;min-height:100vh}
 .wrap{max-width:980px;margin:0 auto;padding:8px}
+/* Optional font variants controlled via html class */
+html.font-dotgothic16, html.font-dotgothic16 body{
+  font-family: 'DotGothic16', "Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
+html.font-mplus, html.font-mplus body{
+  font-family: 'M PLUS Rounded 1c', "Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
+html.font-kosugi, html.font-kosugi body{
+  font-family: 'Kosugi Maru', "Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
+html.font-yomogi, html.font-yomogi body{
+  font-family: 'Yomogi', "Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
+html.font-notojp, html.font-notojp body{
+  font-family: 'Noto Sans JP', "Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
+/* 'default' uses the existing Inter / system stack */
+/* Ensure all UI elements inherit the selected font */
+button, input, select, textarea, .bottom-nav, .bottom-nav-btn, .modal .panel, .small-btn, .open-btn, .top-btn, .chip, .tag-btn{
+  font-family: inherit;
+}
 /* Desktop layout: content row */
 .content-row{display:flex;gap:12px;align-items:flex-start}
 .sidebar{display:block;width:260px;flex:0 0 260px;position:sticky;top:var(--hdr-h,0px);align-self:flex-start;max-height:calc(100vh - var(--hdr-h,0px));overflow:auto;padding:12px;background:var(--card);border-radius:12px;border:1px solid rgba(6,50,58,0.06);box-shadow:0 4px 16px rgba(2,18,22,0.06)}
@@ -425,8 +464,8 @@ body{background-image: url('backimage.png');background-attachment:fixed;backgrou
 .sidebar-title{font-size:13px;font-weight:700;color:var(--text);margin:0 0 10px 0;display:flex;align-items:center;gap:6px}
 .sidebar-search input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(6,50,58,0.1);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box}
 .sidebar-search input::placeholder{color:var(--muted)}
-.sidebar-tags{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;margin-top:8px}
-.sidebar-tag{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:rgba(6,50,58,0.03);border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all 0.15s ease}
+.sidebar-tags{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;margin-top:8px;padding-right:12px;box-sizing:border-box;scrollbar-gutter:stable}
+.sidebar-tag{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:rgba(6,50,58,0.03);border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all 0.15s ease;box-sizing:border-box;min-width:0}
 .sidebar-tag:hover{background:rgba(15,184,191,0.08);border-color:rgba(15,184,191,0.2)}
 .sidebar-tag.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#fff;border-color:transparent}
 .sidebar-tag .tag-count{font-size:11px;opacity:0.7;font-weight:500}
@@ -467,7 +506,7 @@ html.theme-mint .sidebar-tag.active{background:linear-gradient(90deg,var(--accen
   /* Footer styling removed - footer will not be rendered in this build */
 
 /* Sticky header so search is always visible */
-header.card{position:fixed;left:0;right:0;top:0;z-index:1000;background:linear-gradient(180deg, var(--card), #fbffff);backdrop-filter: blur(6px);padding:12px;border-radius:0;box-shadow:0 10px 30px rgba(2,18,22,0.06);border:1px solid rgba(6,50,58,0.04);display:flex;flex-direction:column;align-items:stretch;gap:8px}
+header.card{position:fixed;left:0;right:0;top:0;z-index:1000;background:linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));backdrop-filter: blur(6px);padding:12px;border-radius:0;box-shadow:0 10px 30px rgba(2,18,22,0.06);border:1px solid rgba(6,50,58,0.04);display:flex;flex-direction:column;align-items:stretch;gap:8px}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .search{flex:1;min-width:200px;position:relative}
 .search input{width:100%;padding:12px 44px 12px 12px;border-radius:10px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text);font-size:16px;box-shadow: inset 0 1px 0 rgba(2,12,14,0.02)}
@@ -509,7 +548,7 @@ header.card .selector{display:flex;align-items:center}
     height: 260px; /* Fixed height for uniform cards */
     padding: 0;
     border-radius: 14px;
-    background: linear-gradient(180deg, var(--card), #fbffff);
+    background: linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));
     border: 1px solid rgba(6,50,58,0.04);
     box-shadow: 0 2px 8px rgba(2,18,22,0.04);
     overflow: hidden;
@@ -628,9 +667,24 @@ header.card .selector{display:flex;align-items:center}
     align-items: center;
     justify-content: center;
   }
+  /* Dark-mode: make the small action buttons (including the 'e' edit button)
+     use a subdued translucent background instead of a bright gradient so
+     they remain readable and don't clash with card hero images. */
+  html.dark-mode .list.layout-grid .actions .open-btn,
+  html.dark-mode .list.layout-grid .actions .small-btn{
+    background: rgba(255,255,255,0.04) !important;
+    color: var(--text) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    box-shadow: none !important;
+  }
+  /* Dark-mode adjustments for grid cards (ensure borders/shadows remain dark-mode appropriate) */
+  html.dark-mode .list.layout-grid .row{
+    border-color: rgba(255,255,255,0.06);
+    box-shadow: 0 6px 18px rgba(2,8,10,0.55);
+  }
 }
 
-.row{display:flex;align-items:center;height:var(--row-h);gap:0;padding:8px 6px;border-radius:12px;background:linear-gradient(180deg, var(--card), #fbffff);border:1px solid rgba(6,50,58,0.04);box-shadow:0 2px 8px rgba(2,18,22,0.04)}
+.row{display:flex;align-items:center;height:var(--row-h);gap:0;padding:8px 6px;border-radius:12px;background:linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));border:1px solid rgba(6,50,58,0.04);box-shadow:0 2px 8px rgba(2,18,22,0.04)}
 .row:hover{box-shadow:0 8px 24px rgba(6,50,58,0.08)}
 /* prevent selection from changing layout: ensure selected rows don't alter size */
 .row.selected{transform:none !important; box-sizing:border-box;}
@@ -676,19 +730,28 @@ body.edit-mode .actions .small-btn{white-space:nowrap;overflow:hidden;text-overf
 
 /* Primary action button (編集ボタン・モーダル内保存ボタン) */
 .open-btn{
-  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-  color: #ffffff;
-  border: none;
-  font-weight: 800;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid rgba(6,50,58,0.08);
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(2,18,22,0.08);
+  box-shadow: 0 2px 6px rgba(2,18,22,0.06);
   transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
 .open-btn:hover{ transform: translateY(-1px); opacity: 0.97; }
 /* Ensure modal primary button looks the same and is clearly visible */
-.modal .open-btn{ background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); color: #ffffff; }
-/* Keep dark-mode appearance consistent and ensure focus visibility */
-html.dark-mode .open-btn{ background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); color: #ffffff; box-shadow: none; }
+.modal .open-btn{ background: var(--card); color: var(--text); border: 1px solid rgba(6,50,58,0.08); }
+/* Keep dark-mode appearance consistent and ensure focus visibility
+   For list-row action buttons (the small 'e' edit button) use a faint
+   translucent surface so the button stands out against the card. */
+html.dark-mode .open-btn,
+html.dark-mode .actions .open-btn,
+html.dark-mode .row .actions .open-btn{
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
 .open-btn:focus{ outline: 3px solid rgba(255,255,255,0.12); outline-offset: 2px; }
 .modal .open-btn:focus{ outline: 3px solid rgba(255,255,255,0.12); outline-offset: 2px; }
 
@@ -740,6 +803,25 @@ body.edit-mode .actions{min-width:auto !important;flex:0 0 auto !important}
 body.edit-mode .small-btn{display:inline-block}
 /* Modal buttons should always be visible regardless of edit-mode */
 .modal .small-btn{display:inline-block}
+/* Quick tag buttons in add/edit modal */
+.quick-tag-btn{
+  font-size:12px !important;
+  padding:5px 10px !important;
+  border-radius:16px !important;
+  background:var(--card) !important;
+  border:1px solid var(--accent-2) !important;
+  color:var(--text) !important;
+  transition:all 0.15s ease;
+}
+.quick-tag-btn:hover{
+  background:var(--accent-2) !important;
+  color:#fff !important;
+}
+.quick-tag-btn.active{
+  background:var(--accent-1) !important;
+  color:#fff !important;
+  border-color:var(--accent-1) !important;
+}
 /* hide only the per-row open button in edit mode (keep modal open/save buttons visible) */
 body.edit-mode .row .open-btn{display:none}
 /* top header buttons active state */
@@ -811,13 +893,18 @@ body.edit-mode .row .open-btn{display:none}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:220}
 /* ensure modal small buttons are visible regardless of edit-mode */
 .modal .small-btn{display:inline-block}
-.modal .panel{background:linear-gradient(180deg,var(--card),#fbffff);padding:18px;border-radius:12px;max-width:720px;width:92%;max-height:80vh;overflow:auto;box-shadow:0 10px 40px rgba(2,12,20,0.4);border:1px solid rgba(6,50,58,0.04)}
+.modal .panel{background:linear-gradient(180deg,var(--card),rgba(var(--card-rgb),0.96));padding:18px;border-radius:12px;max-width:720px;width:92%;box-shadow:0 10px 40px rgba(2,12,20,0.4);border:1px solid rgba(6,50,58,0.04)}
 .modal .panel h3{margin:0 0 8px 0;color:var(--text)}
 .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .form-row input, .form-row textarea{padding:10px;border-radius:8px;border:1px solid rgba(6,50,58,0.08);background:var(--card);color:var(--text);box-shadow: inset 0 1px 0 rgba(2,12,14,0.02)}
 .form-row input::placeholder, .form-row textarea::placeholder{color:#9fb5b7}
 .form-row label{color:var(--text);font-weight:700}
 .form-inline{display:flex;gap:8px;align-items:center}
+/* layout for label + action on same row */
+.label-row label{font-weight:700}
+.label-row .small-btn{flex-shrink:0}
+/* input-with-copy: place a copy button inside the input's right edge to avoid wrapping on narrow screens */
+.input-with-copy{position:relative}
 .muted-note{font-size:12px;color:var(--muted)}
 
 /* tag overflow control */
@@ -876,7 +963,7 @@ body.edit-mode .row .open-btn{display:none}
     padding:6px 28px 6px 10px;
     border-radius:8px;
     border:1px solid rgba(6,50,58,0.1);
-    background:linear-gradient(180deg, var(--card), #fbffff);
+    background:linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));
     color:var(--text);
     font-size:13px;
     font-weight:600;
@@ -1072,7 +1159,7 @@ body.modal-add-open { overflow: hidden; }
   bottom: 0;
   height: calc(56px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: linear-gradient(180deg, var(--card), #fbffff);
+  background: linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));
   border-top: 1px solid rgba(6,50,58,0.08);
   box-shadow: 0 -4px 16px rgba(2,18,22,0.06);
   z-index: 9999;
@@ -1081,7 +1168,7 @@ body.modal-add-open { overflow: hidden; }
 }
 
 html.dark-mode .bottom-nav {
-  background: linear-gradient(180deg, var(--card), #0a2424);
+  background: linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));
   border-top-color: rgba(255,255,255,0.06);
 }
 
@@ -1107,6 +1194,12 @@ html.dark-mode .bottom-nav {
   color: var(--accent-1);
 }
 
+/* Layout toggle active styling */
+.layout-toggle-btn{ background: transparent; border:1px solid rgba(0,0,0,0.06); display:inline-block; }
+.layout-toggle-btn.active{ background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#fff; border-color:transparent; }
+/* Ensure layout toggle is visible even though .small-btn defaults to hidden outside edit mode */
+.sidebar .layout-toggle-btn{ display:inline-block !important; }
+
 .bottom-nav-icon {
   font-size: 20px;
   line-height: 1;
@@ -1126,6 +1219,11 @@ html.dark-mode .bottom-nav {
   .list {
     padding-bottom: calc(var(--row-h, 72px) + 80px + env(safe-area-inset-bottom, 0px)) !important;
   }
+}
+
+/* Hide bottom navigation when add/edit modal is open to avoid overlap on mobile */
+body.modal-add-open .bottom-nav {
+  display: none !important;
 }
 
 /* User-controlled hide class: ensures JS can force-hide bottom nav even on mobile */
