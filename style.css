@@ -915,6 +915,24 @@ body.edit-mode .row .open-btn{display:none}
   overflow: auto; /* panel itself scrolls */
   -webkit-overflow-scrolling: touch;
 }
+.modal, .modal .panel {
+  /* Allow vertical pan, prevent horizontal gestures while modal is active */
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
+}
+
+/* Prevent horizontal drift when vertically scrolling inside modals.
+   Allow horizontal scrolling only for known horizontal containers (chips/tags). */
+.modal .panel{
+  overflow-x: hidden; /* avoid accidental horizontal content shift */
+}
+.modal .panel .chip-container,
+.modal .panel .tags,
+.modal .panel .tagbar{
+  /* these are intentionally horizontal scroll lists; allow pan-x */
+  touch-action: pan-x;
+  -ms-touch-action: pan-x;
+}
 .modal .panel > :last-child{
   position: sticky;
   bottom: 0;
