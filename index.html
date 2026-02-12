@@ -1,601 +1,1187 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" class="theme-kohane">
 <head>
   <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" />  <title>KyuLink</title>
-  <meta name="description" content="きゅーがよく使うリンクまとめ" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>X検索補助ツール</title>
   
-  <!-- Favicon: use local image files (favicon.ico, apple-touch-icon, android-chrome) -->
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png" />
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="manifest" href="manifest.json" />
-
-  <!-- Theme color (初音ミク色) -->
-  <meta name="theme-color" content="#39C5D6" />
-  <meta name="msapplication-TileColor" content="#39C5D6" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
   
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://5gkyu.github.io/KyuLink/" />
-  <meta property="og:title" content="KyuLink" />
-  <meta property="og:description" content="きゅーがよく使うリンクまとめ" />
-  <meta property="og:image" content="/ogp.png" />
+  <!-- OGP / Open Graph Protocol -->
+  <meta property="og:title" content="X検索補助ツール" />
+  <meta property="og:description" content="スマホ用のXの検索を効率化するための補助ツール。期間指定、エンゲージメント、アカウント指定など高度な検索を簡単に実行できます。" />
+  <meta property="og:image" content="ogp.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="KyuLink — きゅーがよく使うリンクまとめ" />
-  <link rel="image_src" href="/ogp.png" />
+  <meta property="og:image:alt" content="X検索補助ツール のカード画像" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://5gkyu.github.io/Xplore/" />
+  <meta property="og:site_name" content="X検索コマンドツール" />
+  <meta property="og:locale" content="ja_JP" />
   
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://5gkyu.github.io/KyuLink/" />
-  <meta property="twitter:title" content="KyuLink" />
-  <meta property="twitter:description" content="きゅーがよく使うリンクまとめ" />
-  <meta property="twitter:image" content="/ogp.png" />
-  <meta name="twitter:image:alt" content="KyuLink — きゅーがよく使うリンクまとめ" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="X検索補助ツール" />
+  <meta name="twitter:description" content="スマホ用のXの検索を効率化するための補助ツール。期間指定、エンゲージメント、アカウント指定など高度な検索を簡単に実行できます。" />
+  <meta name="twitter:image" content="ogp.png" />
+  <meta name="twitter:image:alt" content="X検索補助ツール のカード画像" />
+  <meta name="twitter:site" content="@5gkyu" />
+  <meta name="twitter:creator" content="@5gkyu" />
   
-  <link rel="stylesheet" href="style.css">
-  <!-- Load Google Fonts for additional font options -->
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c&family=Kosugi+Maru&family=Yomogi&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <!-- General Meta Tags -->
+  <meta name="description" content="スマホ用のXの検索を効率化するための補助ツール。期間指定、エンゲージメント、アカウント指定など高度な検索を簡単に実行できます。" />
+  <meta name="keywords" content="X,Twitter,検索,ツール,検索補助,高度な検索,期間指定,エンゲージメント" />
+  <meta name="author" content="5gkyu" />
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="ogp.png" />
+  
   <style>
-    /* When add/edit modal is open, make header visible but disabled (cannot interact) */
-    body.modal-add-open header.card {
-      pointer-events: none;
-      opacity: 0.4;
-      filter: blur(1px);
-    }
-    /* Hide floating action button when modal open, but keep sidebar visible */
-    body.modal-add-open .fab {
-      display: none !important;
-    }
-    /* Disable sidebar interaction when modal is open (visible but not clickable) */
-    body.modal-add-open .sidebar {
-      pointer-events: none;
-      opacity: 0.5;
-      filter: blur(1px);
-    }
-    /* Prevent body from scrolling when modal open */
-    body.modal-add-open { overflow: hidden; }
+:root{ --bg:#f6fbfb; --card:#ffffff; --card-rgb:255,255,255; --accent-1:#0fb8bf; --accent-2:#8fe3dd; --text:#073a46; --muted:#57727a; --input-bg:#ffffff; --input-border:rgba(6,50,58,0.08); --shadow:0 10px 30px rgba(2,18,22,0.06); --radius:12px; --collapse-header-bg:#f3f3f3; --collapse-content-bg:#fafafa; --collapse-border:rgba(6,50,58,0.06); --miku-headset-red-1:#ff2d55; --miku-headset-red-2:#ff6b7a; --bottom-bar-height:64px; --footer-height:56px; --app-vh:1vh; }
+html.theme-kohane{ --bg:#ffdada; --card:#ffffff; --accent-1:#ff6b8a; --accent-2:#ff9eb0; --text:#5c3a3a; --muted:#8a6565; --input-bg:#fff8f5; --collapse-header-bg:#fff0ed; --collapse-content-bg:#fff8f5; }
+html,body{
+  min-height:calc(var(--app-vh) * 100);
+  height:calc(var(--app-vh) * 100);
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;
+  color:var(--text);
+  background:var(--bg) url('bg.png') no-repeat center center fixed;
+  background-size:cover;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding-bottom:env(safe-area-inset-bottom);
+  overflow:hidden; /* デフォルトではページスクロールを無効にして、大画面での 固定レイアウト を維持 */
+  scrollbar-gutter: stable;
+}
+/* モバイル向けに強制的にスクロールを禁止するクラス
+   タッチ移動を無効化し、オーバースクロールを抑制します */
+html.no-scroll-mobile, body.no-scroll-mobile, .no-scroll-mobile{
+  overflow: hidden !important;
+  height: 100% !important;
+  touch-action: auto !important;
+  -webkit-overflow-scrolling: auto !important;
+  overscroll-behavior: none !important;
+}
+/* 入力フォーカス時のみスクロールを許可（モバイル） */
+html.allow-scroll-mobile, body.allow-scroll-mobile{
+  overflow: auto !important;
+  height: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+/* 大きなボタングリッド（2×3） */
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:12px;
+  width:100%;
+  margin-top:8px;
+}
+/* Ensure the bottom action buttons match the menu grid layout */
+.menu-actions{
+  display:grid !important;
+  grid-template-columns:repeat(2, 1fr) !important;
+  gap:12px !important;
+  width:100%;
+  margin-top:8px;
+}
+.menu-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:20px 10px;
+  border-radius:14px;
+  border:1px solid var(--input-border);
+  background:var(--card);
+  box-shadow:0 4px 12px rgba(2,12,20,0.06);
+  cursor:pointer;
+  transition:transform 0.15s, box-shadow 0.15s;
+  min-height:90px;
+}
+.menu-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(2,12,20,0.1);
+}
+.menu-btn:active{
+  transform:scale(0.97);
+}
+.menu-btn .icon{
+  font-size:28px;
+  margin-bottom:6px;
+}
+.menu-btn .icon img{ width:28px; height:28px; display:block; }
+.icon-inline{ width:18px; height:18px; display:inline-block; vertical-align:-3px; }
+.top-reset-btn img,
+.top-search-btn img,
+.modal-close-btn img,
+.section-modal-close img{
+  width:16px;
+  height:16px;
+  display:block;
+  filter:brightness(0) invert(1);
+}
+.menu-btn .label{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+  text-align:center;
+}
+.menu-btn .sublabel{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+  text-align:center;
+}
+/* Ensure sublabel weight is normal (avoid inheriting .secondary's bold) */
+.menu-btn .sublabel, .menu-actions .secondary .sublabel { font-weight:400; }
+@media(max-width:400px){
+  .menu-btn{
+    padding:16px 8px;
+    min-height:80px;
+  }
+  .menu-btn .icon{
+    font-size:24px;
+  }
+  .menu-btn .label{
+    font-size:13px;
+  }
+  .menu-btn .sublabel{
+    font-size:10px;
+  }
+}
+/* セクション用モーダル */
+.section-modal-overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.5);
+  z-index:2000;
+  padding:16px;
+  box-sizing:border-box;
+}
+.section-modal-overlay.active{
+  display:flex;
+}
+.section-modal{
+  position:relative;
+  background:var(--card);
+  padding:16px;
+  border-radius:14px;
+  max-width:500px;
+  width:100%;
+  max-height:calc(var(--app-vh) * 85);
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  box-shadow:0 10px 40px rgba(2,12,20,0.4);
+  border:1px solid rgba(6,50,58,0.04);
+}
+.section-modal h3{
+  margin:0 0 12px 0;
+  color:var(--text);
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.section-modal-close{
+  position:absolute;
+  right:12px;
+  top:12px;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:#475569; /* muted slate */
+  color:white;
+  border:1px solid rgba(0,0,0,0.06);
+  cursor:pointer;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:none;
+  transition:transform .14s ease, background .14s ease;
+}
+.section-modal-close:hover{ background:#394852; transform:translateY(-1px); }
+.section-modal-close:active{ transform:translateY(0) scale(0.98); }
+.card{ width:100%; max-width:500px; margin:0 auto; background:var(--card); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); border:1px solid rgba(6,50,58,0.04); box-sizing:border-box; min-width:0; overflow-x:hidden; max-height:calc((var(--app-vh) * 100) - 48px); overflow:hidden; }
+header{display:flex;gap:12px;align-items:center}
+.logo{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--accent-1);color:white;font-weight:800;font-size:20px}
+h1{margin:0;font-size:18px}
+p.lead{margin:6px 0 14px;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:768px){
+  .grid{grid-template-columns:1fr 1fr}
+}
+/* その他入力欄を下部に配置 */
+.misc-section{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--input-border);
+}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 
-    /* Ensure main content sits below the fixed header (uses --hdr-h set by script) */
-    .wrap {
-      box-sizing: border-box;
-      padding-top: calc(var(--hdr-h, 72px) + 16px);
-    }
+/* 基本検索内部はラベルと入力の隙間を詰める */
+.basic-section label{ margin-bottom:0; }
+.preset-row input{ flex:1; padding:8px; border-radius:6px; border:1px solid var(--input-border); background:var(--input-bg); font-size:13px; color:var(--text); }
+input[type=text], select, textarea{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text); font-size:14px; box-sizing:border-box; box-shadow: inset 0 1px 0 rgba(2,12,14,0.02); }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+
+/* 検索ワード用ヒーロー背景（ピンク） と入力欄の対比 */
+.search-hero{
+  background: #fff5f8;
+  border:1px solid rgba(240,180,200,0.25);
+  padding:12px;
+  border-radius:12px;
+}
+.search-hero label{ font-weight:800; color:var(--text); margin-bottom:6px; display:block }
+.search-hero .phrase-input{
+  background: #ffffff;
+  color: var(--text);
+  padding:14px 12px;
+  border-radius:10px;
+  border:1px solid rgba(6,50,58,0.06);
+  box-shadow: 0 8px 24px rgba(6,50,58,0.04);
+  font-size:16px;
+}
+.search-hero .phrase-input::placeholder{ color:#b8d3d6 }
+
+/* フォーカス時にブラウザのデフォルトで青くなるのを防ぐ */
+input:focus, textarea:focus, select:focus{
+  background: var(--input-bg) !important;
+  color: var(--text) !important;
+  outline: none !important;
+  box-shadow: inset 0 1px 0 rgba(2,12,14,0.02) !important;
+}
+/* Chrome 等のオートフィルで背景が変わる問題を上書き */
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+}
+textarea{min-height:88px;resize:vertical}
+
+/* モバイルで入力フォーカス時に自動拡大されるのを防ぐ */
+@media (max-width: 600px){
+  input[type=text], select, textarea, .preset-row input{ font-size:16px; }
+}
+.secondary{background:#ffffff;border:1px solid rgba(6,50,58,0.08);padding:10px 12px;border-radius:10px;color:var(--text);font-weight:700;cursor:pointer}
+/* Make glossary/history action buttons match the large menu buttons */
+.menu-actions .secondary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px 10px;
+  border-radius:14px;
+  border:1px solid var(--input-border);
+  background:var(--card);
+  box-shadow:0 4px 12px rgba(2,12,20,0.06);
+  min-height:90px;
+  width:100%;
+}
+@media(max-width:400px){
+  .menu-actions .secondary{ padding:16px 8px; min-height:80px }
+}
+/* Match internal layout (icon / label / sublabel) to .menu-btn */
+.menu-actions .secondary{ flex-direction:column; }
+.menu-actions .secondary .icon{ font-size:28px; margin-bottom:6px; display:block; }
+.menu-actions .secondary .label{ font-size:14px; font-weight:700; color:var(--text); text-align:center; }
+.menu-actions .secondary .sublabel{ font-size:11px; color:var(--muted); margin-top:2px; text-align:center; }
+.hint{font-size:12px;color:#6a8690;margin-top:6px}
+.open-mode-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.open-mode-option{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-size:13px;cursor:pointer;user-select:none}
+.open-mode-option input{accent-color:var(--accent-1)}
+.small{font-size:13px;padding:8px 10px;border-radius:8px}
+/* アカウントタイプのチェックボックス余白をスマホで詰める */
+.account-type-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+/* スマホでエンゲージ指定を1行横並びに */
+.engagement-row {
+  display: flex;
+  gap: 0;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  width: 100%;
+  justify-content: space-between;
+}
+.engagement-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.engagement-buttons button {
+  flex: 1 1 0;
+  padding: 10px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 10px;
+  color: var(--text);
+  border: 1px solid var(--input-border);
+  cursor: pointer;
+  min-width: 0;
+  background: var(--card);
+  transition: all 0.15s;
+  box-shadow: 0 6px 18px rgba(2,12,20,0.04);
+  text-align: center;
+}
+.engagement-buttons button:hover {
+  background: var(--collapse-header-bg);
+}
+/* エンゲージ3列（モバイルでも列表示） */
+.engagement-columns{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+}
+.engagement-columns .engagement-block{
+  margin:0;
+  padding:8px;
+}
+.engagement-columns .engagement-buttons{
+  margin-top:10px;
+  gap:10px;
+}
+.engagement-columns .engagement-buttons button{
+  padding:8px 0;
+  font-size:11px;
+  border-radius:10px;
+  box-shadow:none;
+}
+@media(max-width:520px){
+  .engagement-columns .engagement-buttons{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .engagement-columns .engagement-buttons button{
+    width:100%;
+  }
+}
+@media(max-width:520px){
+  .engagement-row {
+    gap: 0;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .engagement-col {
+    width: 50%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-sizing: border-box;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+  .engagement-row label.muted-small {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  .engagement-row .num-small {
+    width: 100%;
+    min-width: 0;
+    font-size: 13px;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  .engagement-buttons { gap: 6px; margin-top: 6px; }
+  .engagement-buttons button { flex: 1 1 32px; padding: 6px 0; font-size: 12px; border-radius: 6px; box-shadow: none; font-weight: 700; }
+}
+/* リセットボタン色を統一（スマホと同じパステルピンク） */
+.engagement-reset-btn {
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 10px;
+  background: #f0f5ff;
+  color: #2a3f66;
+  border: 1px solid #c9d7ff;
+  cursor: pointer;
+  vertical-align: middle;
+  line-height: 1.1;
+  font-weight: 800;
+  transition: background 0.2s, transform .14s ease;
+  white-space: nowrap;
+  width: auto;
+}
+.engagement-reset-btn:hover {
+  background: #e5eeff;
+  transform: translateY(-1px);
+}
+.engagement-reset-btn:active { transform: translateY(0) scale(0.98); }
+/* いいね用ボタン色（パステルピンク） */
+.engagement-buttons .like-btn {
+  background: #ffe3ea;
+  color: var(--text);
+}
+.engagement-buttons .like-btn:hover {
+  background: #ffd6e0;
+  color: var(--text);
+}
+/* リツイート用ボタン色（パステルグリーン） */
+.engagement-buttons .retweet-btn {
+  background: #e3ffe3;
+}
+.engagement-buttons .retweet-btn:hover {
+  background: #d6ffe0;
+}
+/* ensure retweet button text is readable in light mode */
+.engagement-buttons .retweet-btn { color: var(--text); border:1px solid var(--input-border); }
+/* リプライ用ボタン色（淡め） */
+.engagement-buttons .reply-btn {
+  background: #eef3ff;
+  color: var(--text);
+  border: 1px solid var(--input-border);
+}
+.engagement-buttons .reply-btn:hover { background: #e6ecff; color: var(--text); }
+@media(min-width:768px){
+  .engagement-buttons .retweet-btn { color: var(--text); }
+}
+@media(max-width:520px){
+  .account-type-row {
+    gap: 4px;
+    row-gap: 2px;
+    margin-bottom: 0;
+  }
+  .account-type-row label.small {
+    padding: 6px 6px;
+    font-size: 12px;
+  }
+}
+.muted-small{font-size:12px;color:var(--muted)}
+.date-block{background:transparent;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.date-title{font-weight:800;color:var(--muted);font-size:13px;margin-bottom:4px}
+.period-row{display:flex;gap:6px;align-items:center}
+/* period row wrapper: ラベルを左上に表示するためのラッパー */
+.period-row-wrap{ position:relative; padding-top:18px; margin-bottom:8px }
+.period-row-label{ position:absolute; left:0; top:0; font-size:12px; color:var(--muted); font-weight:700 }
+.sel-with-label{display:inline-flex;align-items:center;gap:6px}
+.sel-label{font-size:13px;color:var(--muted);min-width:28px;text-align:left}
+.num-small{width:88px;min-width:64px;padding:8px;border-radius:8px;text-align:center;font-size:13px;border:1px solid var(--input-border);background:var(--input-bg); color:var(--text)}
+.collapse-group{display:block;min-width:0}
+.collapsible-header{ display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; background:var(--collapse-header-bg); cursor:pointer; border:1px solid var(--collapse-border); min-width:0; }
+.collapsible-header img.icon{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+  object-fit:contain;
+  object-position:center;
+  background:transparent;
+  border:none;
+  box-shadow:0 2px 6px rgba(2,12,14,0.04);
+  flex-shrink:0;
+  display:block;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  transform: rotate(0deg);
+}
+.collapse-group.collapsed .collapsible-header img.icon {
+  transform: rotate(180deg);
+}
+.collapsible-header .title{font-weight:800;color:var(--text);font-size:14px;display:flex;align-items:center;gap:8px}
+.collapsible-content{margin-top:8px;display:block;padding:8px;border-radius:8px;background:var(--collapse-content-bg);border:1px solid rgba(6,50,58,0.03);overflow-x:auto;min-width:0}
+.collapse-group.collapsed .collapsible-content{display:none}
+.phrase-row{display:flex;flex-direction:column;gap:8px}
+.phrase-actions{display:flex;gap:8px;flex-wrap:wrap}
+.phrase-actions .btn, .phrase-actions .secondary{flex:1;min-width:120px}
+.chip-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 8px;border-radius:999px;background:var(--collapse-content-bg);border:1px solid rgba(6,50,58,0.06);font-weight:700}
+.chip button{background:transparent;border:0;font-weight:900;cursor:pointer;color:var(--text)}
+.or-panel{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:8px;background:#fffaf0;border:1px solid rgba(179,58,80,0.06)}
+.or-panel-title{font-weight:800;color:#b33a50;display:flex;align-items:center;justify-content:space-between}
+.or-items{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tabs{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding:4px 4px}
+.tab{padding:6px 10px;border-radius:999px;border:1px solid rgba(6,50,58,0.12);background:transparent;color:var(--text);cursor:pointer;white-space:nowrap;font-weight:700;display:inline-flex;align-items:center;justify-content:center;min-height:32px;min-width:64px;flex:0 0 auto}
+.tab[aria-selected="true"]{background:var(--accent-1);color:white;border-color:transparent;box-shadow:none}
+.overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:1400; padding:16px; }
+.modal{ width:100%; max-width:560px; background:white; border-radius:12px; padding:14px; box-shadow:0 10px 40px rgba(2,12,20,0.4); max-height:80vh; overflow:auto; }
+@media(min-width:640px){
+  .phrase-row{flex-direction:row;align-items:center}
+  .phrase-actions .btn, .phrase-actions .secondary{flex:0 0 auto}
+}
+@media(max-width:520px){
+  .num-small{width:64px}
+  .wrap{padding-bottom:220px}
+  .collapsible-header img.icon{ width:36px; height:36px; border-radius:8px; }
+  .collapsible-header{padding:6px; gap:8px;}
+  .collapsible-header .title{font-size:13px}
+}
+.fixed-top-bar{ position:relative; display:flex; gap:6px; align-items:stretch; background:var(--card); box-shadow:0 6px 24px rgba(2,12,20,0.06); padding:6px 16px; box-sizing:border-box; width:100%; max-width:532px; margin-bottom:0; border-radius:var(--radius); }
+.query-display{ flex:1 1 70%; padding:12px 12px; border-radius:8px; border:1px solid var(--input-border); background:var(--input-bg); font-size:13px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--text); min-width:0; display:flex; align-items:center; cursor:pointer; z-index:2; min-height:44px; align-self:stretch; position:relative; pointer-events:auto; text-align:left; appearance:none; -webkit-appearance:none; outline:none; }
+.top-reset-btn{ flex:0 0 34px; padding:6px; border-radius:8px; background:#ff6699; color:white; border:0; cursor:pointer; font-size:14px; text-align:center; display:inline-flex; align-items:center; justify-content:center; }
+.top-search-btn{ flex:0 0 42px; padding:6px; border-radius:8px; background:#ff6699; color:white; border:0; cursor:pointer; font-size:14px; text-align:center; font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
+/* copy button moved inside query modal */
+
+/* 下部メニュー */
+.fixed-bottom-bar{ position:fixed; bottom:0; left:0; right:0; z-index:1600; display:flex; gap:8px; align-items:center; justify-content:space-between; background:var(--card); box-shadow:0 -6px 24px rgba(2,12,20,0.06); padding:8px 16px; box-sizing:border-box; height:var(--bottom-bar-height); padding-bottom:calc(8px + env(safe-area-inset-bottom)); }
+.bottom-btn{ flex:1; padding:12px 16px; border-radius:8px; background:var(--accent-1); color:white; border:0; cursor:pointer; font-size:14px; text-align:center; font-weight:700; height:100%; }
+
+/* inner container centers buttons and limits width on larger screens */
+.fixed-bottom-inner{ width:100%; display:flex; gap:8px; align-items:center; justify-content:space-between; padding:0 6px; box-sizing:border-box }
+@media(min-width:768px){
+  .fixed-bottom-inner{ max-width:980px; margin:0 auto; padding:0 12px }
+}
+
+/* モーダル */
+.modal-overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:2000; }
+.modal-overlay.active{ display:flex; }
+.modal-overlay.focused{ align-items:flex-start; padding-top:12px; }
+.modal-panel{ position:relative; background:var(--card); padding:12px; border-radius:10px; max-width:500px; width:92%; max-height:80vh; overflow:auto; box-shadow:0 10px 40px rgba(2,12,20,0.4); border:1px solid rgba(6,50,58,0.04); }
+.modal-panel{ max-height:calc(var(--app-vh) * 80); -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+.modal-overlay.focused .modal-panel{ margin-top:0; max-height:90vh; }
+.modal-panel h3{ margin:0 0 10px 0; color:var(--text); font-size:15px; }
+.modal-close-btn{
+  position:absolute;
+  right:12px;
+  top:10px;
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  background:#475569; /* muted slate */
+  color:white;
+  border:1px solid rgba(0,0,0,0.06);
+  cursor:pointer;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:none;
+  transition:transform .14s ease, background .14s ease;
+}
+.modal-close-btn:hover{ background:#394852; transform:translateY(-1px); }
+.modal-close-btn:active{ transform:translateY(0) scale(0.98); }
+.modal-copy-btn{ position:absolute; right:56px; top:8px; padding:6px 10px; border-radius:8px; background:var(--accent-1); color:white; border:1px solid var(--accent-2); cursor:pointer; font-size:13px; }
+/* action-styled buttons inside modal (not absolutely positioned) */
+.modal-action-btn{ padding:9px 14px; border-radius:10px; background:var(--accent-1); color:#fff; border:1px solid rgba(0,0,0,0.06); cursor:pointer; font-size:13px; font-weight:700; letter-spacing:.01em; transition:transform .14s ease, filter .14s ease; }
+.modal-action-btn:hover{ filter:brightness(0.95); transform:translateY(-1px); }
+.modal-action-btn:active{ transform:translateY(0) scale(0.98); }
+.open-intermediate-url{ margin-top:8px; padding:8px 10px; background:var(--collapse-content-bg); border:1px dashed var(--input-border); border-radius:8px; font-size:12px; color:var(--muted); word-break:break-all; }
+.open-intermediate-actions{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.open-intermediate-actions .secondary{ font-weight:700; }
+.query-analysis{ background:var(--collapse-content-bg); border:1px dashed var(--input-border); border-radius:8px; padding:10px; font-size:12px; color:var(--text); line-height:1.6; }
+.query-analysis ul{ margin:6px 0 0 18px; padding:0; }
+.query-analysis li{ margin:2px 0; }
+.preset-row{ display:flex; gap:8px; align-items:center; margin-bottom:10px; padding:10px; background:#fbfdff; border-radius:8px; border:1px solid rgba(6,50,58,0.04); flex-wrap:wrap; }
+.preset-row input{ flex:1; padding:8px; border-radius:6px; border:1px solid var(--input-border); background:var(--input-bg); font-size:13px; }
+.preset-row button{ padding:9px 13px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1px solid transparent; transition:transform .14s ease, background .14s ease; }
+.preset-row button:hover{ transform:translateY(-1px); }
+.preset-row button:active{ transform:translateY(0) scale(0.98); }
+.preset-edit-btn{ background:#eef2f6; color:#0f1724; border-color:#d6e1ea; }
+.preset-edit-btn:hover{ background:#e6edf2; }
+.preset-edit-area{ display:none; width:100%; margin-top:8px; }
+.preset-edit-area textarea{ width:100%; height:110px; padding:10px; border-radius:8px; border:1px solid rgba(6,50,58,0.06); background:var(--input-bg); color:var(--text); box-sizing:border-box; }
+.preset-edit-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
+.preset-edit-actions button{ padding:8px 12px; border-radius:10px; border:1px solid transparent; font-size:12px; font-weight:800; cursor:pointer; transition:transform .14s ease, background .14s ease; }
+.preset-edit-actions button:hover{ transform:translateY(-1px); }
+.preset-edit-actions button:active{ transform:translateY(0) scale(0.98); }
+.preset-edit-actions .secondary{ background:#fafafa; color:var(--text); border-color:#eef0f3; }
+.preset-edit-actions .secondary:hover{ background:#f2f3f5; }
+.preset-edit-actions .preset-save-current-btn{ background:var(--accent-1); color:white; border-color:transparent; }
+.preset-edit-actions .preset-save-current-btn:hover{ filter:brightness(0.95); }
+.preset-edit-actions .preset-save-btn-inline{ background:var(--accent-1); color:white; border-color:transparent; }
+.preset-edit-actions .preset-save-btn-inline:hover{ filter:brightness(0.95); }
+.preset-save-btn{ background:var(--accent-1); color:white; border:1px solid rgba(0,0,0,0.06); }
+.reset-preset-save-btn:hover{ opacity:0.95 }
+.preset-load-btn{ background:var(--accent-2); color:white; border:1px solid rgba(0,0,0,0.04); }
+.preset-actions{ display:flex; gap:8px; }
+.history-row{ display:flex; gap:8px; align-items:center; padding:10px 8px; background:var(--collapse-content-bg); border-radius:8px; border:1px solid rgba(6,50,58,0.06); margin-bottom:6px; cursor:pointer; }
+.history-row:hover{ background:var(--collapse-header-bg); }
+.history-date{ flex:0 0 90px; font-size:12px; color:var(--muted); }
+.history-query{ flex:1; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.clear-history-btn{ width:100%; margin-top:12px; padding:10px; border-radius:8px; background:var(--miku-headset-red-2); color:white; border:1px solid var(--miku-headset-red-1); cursor:pointer; font-weight:700; }
+.period-buttons{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.period-buttons button{ flex:1 1 0; padding:6px 4px; font-size:11px; border-radius:6px; background:#e3f5ff; color:var(--text); border:1px solid var(--input-border); cursor:pointer; min-width:0; box-sizing:border-box; text-align:center; }
+.period-buttons.period-from-row button{ background:#fff1d6; color:var(--text); }
+/* 直近ボタンを青系ではない色にする（パステルピンク） */
+.period-row-wrap:first-of-type .period-buttons button{ background:#ffe3ea; color:var(--text); }
+.period-row-wrap:first-of-type .period-buttons button:hover{ background:#ffd6e0; }
+@media(min-width:768px){
+  .period-buttons{ flex-wrap:nowrap }
+  .period-buttons button{ flex:1 1 0 }
+}
+.date-input{ width:120px; padding:6px 8px; border-radius:8px; text-align:center; font-size:13px; border:1px solid var(--input-border); background:var(--input-bg); }
+.wrap{ padding-top:0; padding-bottom:16px; display:flex;flex-direction:column;align-items:center; min-height:calc(var(--app-vh) * 100); }
+
+/* iOS Safari キーボード対策 */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+  .wrap {
+    min-height: 100%;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* 小さな画面ではカードの max-height 制限を解除して縦スクロールを許可 */
+@media(max-width:420px){
+  html,body{ overflow-y:hidden !important; }
+  .card{ max-height:none !important; overflow:visible !important; }
+  .wrap{ padding-top:0; padding-bottom:220px; }
+}
+
+@media(max-width:520px){
+  .preset-row input.preset-title{ font-size:16px; }
+}
+
+/* Footer (参考: linklocal.html) */
+footer.site-footer{
+  position:relative;
+  left:0;
+  right:0;
+  margin:0;
+  width:100%;
+  z-index:1601;
+  background-color:#74728F;
+  color:#FFFFFFde;
+  padding:12px 0;
+  text-align:center;
+  font-size:14px;
+  border-radius:0;
+  box-sizing:border-box;
+  display:block;
+}
+footer.site-footer a{color:inherit;text-decoration:underline}
+
+/* Footer content placed outside .wrap to allow full-bleed background */
+.site-footer-inner{ width:100%; max-width:980px; margin:0 auto; padding:0 16px; box-sizing:border-box; text-align:center }
+
+/* make filter-row single-line (限定 / 除外 を横並びに) */
+.filter-row{ display:flex; gap:12px; align-items:center; flex-wrap:nowrap; }
+.filter-card label.small{ display:inline-flex; align-items:center; gap:4px; }
+
+/* ワードカード（クエリ補助用） */
+.word-cards{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; min-height:40px; padding:10px; background:var(--collapse-content-bg); border-radius:10px; border:1px dashed var(--input-border); position:relative; }
+.word-card{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:20px; background:var(--collapse-header-bg); border:2px solid transparent; cursor:pointer; font-weight:600; font-size:13px; transition:all 0.15s; user-select:none; }
+.word-card:hover{ background:var(--collapse-content-bg); }
+.word-card.selected{ border-color:var(--accent-1); background:var(--accent-2); }
+.word-card-or{ background:#fff3e6; color:#b35a00; font-weight:800; }
+.word-card-paren{ background:#e6e6ff; color:#5a5ab3; font-weight:800; }
+
+/* 期間プリセットボタン改善 (視認性向上) */
+.period-preset-btn{ flex:1; min-width:60px; padding:10px 6px; border-radius:10px; border:1px solid rgba(6,50,58,0.08); background:var(--card); color:var(--text); cursor:pointer; font-size:12px; font-weight:600; text-align:center; transition:all 0.15s; box-shadow:0 6px 18px rgba(2,12,20,0.04); }
+.period-preset-btn:hover{ background:var(--collapse-header-bg); }
+.period-preset-btn.active{ background:var(--accent-1); color:white; border-color:transparent; box-shadow:0 8px 20px rgba(6,50,58,0.08); }
+
+/* テーマ時の背景オーバーレイ */
+html.theme-kohane body{ background-image: url('bg.png'); background-color: var(--bg); }
+.tri-toggle{ display:flex; border-radius:10px; overflow:hidden; border:1px solid var(--input-border); background:var(--collapse-content-bg); flex:1 1 auto; max-width:520px; }
+.tri-toggle button{ flex:1 1 0; padding:10px 8px; border:0; background:transparent; cursor:pointer; font-size:13px; font-weight:700; color:var(--muted); transition:all 0.15s; text-align:center; }
+.tri-toggle button:not(:last-child){ border-right:1px solid var(--input-border); }
+.tri-toggle button.active-none{ background:#f0f0f0; color:var(--text); }
+.tri-toggle button.active-only{ background:#e6ffe6; color:#2a7a2a; }
+.tri-toggle button.active-exclude{ background:#ffe6e6; color:#a03030; }
+
+/* タイプ指定グリッド */
+.type-grid{ display:flex; flex-direction:column; gap:10px; }
+.type-row{ display:flex; align-items:center; gap:10px; }
+.type-label{ min-width:70px; font-weight:700; font-size:13px; color:var(--text); }
+
+/* 期間プリセットボタン改善 */
+.period-preset-row{ display:grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(36px, auto); gap:8px; margin-bottom:12px; }
+.period-preset-btn{ padding:10px 6px; border-radius:10px; border:1px solid var(--input-border); background:var(--card); cursor:pointer; font-size:12px; font-weight:600; text-align:center; transition:all 0.15s; width:100%; box-sizing:border-box; }
+.period-preset-btn:hover{ background:var(--collapse-header-bg); }
+.period-preset-btn.active{ background:var(--accent-1); color:white; border-color:transparent; }
   </style>
-    <script>
-    (function(){
-      let lastH = 0;
-      let scheduled = false;
-      function updateHeaderHeight(){
-        try{
-          const header = document.querySelector('header.card');
-          if(!header) return;
-          const h = header.offsetHeight || 0;
-          if(h === lastH) return;
-          lastH = h;
-          document.documentElement.style.setProperty('--hdr-h', h + 'px');
-        }catch(e){console.warn('updateHeaderHeight failed', e)}
-      }
-      function scheduleUpdate(){ if(scheduled) return; scheduled = true; requestAnimationFrame(()=>{ scheduled = false; updateHeaderHeight(); }); }
-      updateHeaderHeight();
-      window.addEventListener('resize', scheduleUpdate);
-      window.addEventListener('orientationchange', scheduleUpdate);
-      if(window.visualViewport){
-        try{
-          visualViewport.addEventListener('resize', scheduleUpdate);
-          // avoid reacting to visualViewport.scroll to prevent layout thrash on mobile
-        }catch(e){}
-      }
-      window.addEventListener('load', ()=> setTimeout(scheduleUpdate,120));
-    })();
-    </script>
+  <style>
+  /* Type modal: increase size to avoid internal scrolling */
+  #modal_type .section-modal {
+    max-width: 720px;
+    width: min(96%, 720px);
+    max-height: calc(var(--app-vh) * 92);
+    overflow: visible; /* allow content to expand without inner scroll */
+    padding: 18px;
+  }
+  @media(max-width:520px){
+    #modal_type .section-modal { width: 96%; max-width: 520px; max-height: calc(var(--app-vh) * 92); overflow:auto; }
+  }
+  </style>
 </head>
 <body>
-  <div id="loadingOverlay" aria-hidden="true">
-    <div class="loader">
-      <div class="spinner" aria-hidden="true"></div>
-      <div class="loader-text">読み込み中…</div>
-    </div>
-  </div>
   <div class="wrap">
-    <header class="card" role="banner">
-      <div class="top-row">
-        <div class="search" aria-hidden="false" style="flex:1;min-width:0;margin:0;">
-          <input id="q" placeholder="検索" autocomplete="off" />
-          <div class="icon" id="countText" style="font-size:12px;opacity:0.8;">0 件</div>
-        </div>
+    <!-- top bar (常設) -->
+    <div class="fixed-top-bar" role="toolbar" aria-label="検索操作">
+      <button type="button" class="query-display" id="top_query_display" role="button" tabindex="0">（検索クエリがここに表示されます）</button>
+      <button type="button" class="top-reset-btn" id="top_btn_reset" title="リセット"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+      <button class="top-search-btn" id="top_btn_search" title="検索"><img src="./image/magnifying-glass.svg" alt="" aria-hidden="true" /></button>
+    </div>
 
-        <button class="more-btn tag-btn" id="moreTagsBtn" aria-haspopup="dialog" style="flex-shrink:0;margin-left:8px;">🏷️ タグ</button>
+    <div class="card" role="region" aria-label="X検索補助ツール">
 
-        <div id="authRight" style="flex-shrink:0;z-index:1010;">
-          <div class="user-info-row" id="userInfoBtn" title="ユーザー設定">
-            <div class="user-mini-avatar" id="userMiniAvatar">👤</div>
-            <span class="user-info-text" id="userInfoText">ユーザー: ゲスト</span>
-          </div>
-        </div>
-      </div>
+      <!-- fixed bottom bar removed; preset/history buttons moved into main card -->
 
-      <!-- mid-row removed: display-size and sort moved to hamburger menu -->
-      <!-- count row (kept outside header for transparent background) -->
-    </header>
-
-    <div class="content-row">
-      <!-- Left Sidebar (Desktop only) -->
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-section">
-          <h4 class="sidebar-title">📊 統計</h4>
-          <div class="sidebar-stats" id="sidebarStats">
-            <div class="stat-item"><span class="stat-label">全件数:</span><span class="stat-value" id="statTotal">0</span></div>
-            <div class="stat-item"><span class="stat-label">タグ数:</span><span class="stat-value" id="statTags">0</span></div>
-          </div>
-        </div>
-        <div class="sidebar-section">
-          <h4 class="sidebar-title">🏷️ タグで絞り込み</h4>
-          <div class="sidebar-search">
-            <input type="text" id="sidebarTagSearch" placeholder="タグを検索..." />
-          </div>
-          <div class="sidebar-tags" id="sidebarTags"></div>
-        </div>
-        <div class="sidebar-section">
-          <h4 class="sidebar-title">🖼️ 表示設定</h4>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-                <label style="min-width:70px;">レイアウト:</label>
-                <div id="layoutToggle" style="display:flex;gap:6px;">
-                  <button id="layoutBtnPhone" class="small-btn layout-toggle-btn" data-value="list" type="button">スマートフォン</button>
-                  <button id="layoutBtnDesktop" class="small-btn layout-toggle-btn" data-value="grid" type="button">タブレット/PC</button>
-                </div>
-                <!-- hidden select kept for compatibility with existing JS -->
-                <select id="sidebarLayout" style="display:none;">
-                  <option value="list">スマートフォン</option>
-                  <option value="grid">タブレット/PC</option>
-                </select>
+      <!-- プリセットモーダル -->
+      <div class="modal-overlay" id="modal_preset">
+        <div class="modal-panel">
+          <h3><img class="icon-inline" src="./image/folder.svg" alt="" aria-hidden="true" /> プリセット</h3>
+            <button class="modal-close-btn" id="close_preset"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+            <div id="preset_list">
+            <div class="preset-row" data-preset="1">
+              <input type="text" class="preset-title" value="タイムライン" readonly />
+              <div class="preset-actions">
+                <button class="preset-edit-btn">編集</button>
+                <button class="preset-load-btn">呼出</button>
               </div>
-            <div id="sidebarViewSizeRow" style="display:flex;align-items:center;gap:8px;">
-              <label style="min-width:70px;">表示サイズ:</label>
-              <select id="sidebarViewSize" style="flex:1;padding:6px;border-radius:6px;">
-                <option value="small">小</option>
-                <option value="medium">中</option>
-              </select>
+              <div class="preset-edit-area"></div>
+              </div>
+              
+            <div class="preset-row" data-preset="2">
+              <input type="text" class="preset-title" value="プリセット2" readonly />
+              <div class="preset-actions">
+                <button class="preset-edit-btn">編集</button>
+                <button class="preset-load-btn">呼出</button>
+              </div>
+              <div class="preset-edit-area"></div>
             </div>
-            <div id="sidebarColsRow" style="display:flex;align-items:center;gap:8px;">
-              <label style="min-width:70px;">カラム数:</label>
-              <select id="sidebarCols" style="flex:1;padding:6px;border-radius:6px;">
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-              </select>
+            <div class="preset-row" data-preset="3">
+              <input type="text" class="preset-title" value="プリセット3" readonly />
+              <div class="preset-actions">
+                <button class="preset-edit-btn">編集</button>
+                <button class="preset-load-btn">呼出</button>
+              </div>
+              <div class="preset-edit-area"></div>
             </div>
-          </div>
-        </div>
-      </aside>
-
-      <main>
-        <div class="list" id="list"></div>
-      </main>
-    </div>
-  </div>
-
-  <!-- FABボタンは削除済み - ボトムナビを使用 -->
-
-  <!-- modal for adding a bookmark -->
-  <div class="modal" id="addModal" role="dialog" aria-modal="true">
-    <div class="panel" role="document" aria-labelledby="addTitle">
-      <h3 id="addTitle">ブックマークを追加</h3>
-
-      <div class="form-row">
-        <div class="label-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <label style="margin:0">URL（必須）</label>
-          <button id="copyAddUrlBtn" class="small-btn" type="button" title="URL をコピー">コピー</button>
-        </div>
-        <div class="form-inline" style="margin-top:6px">
-          <div style="flex:1;min-width:0;">
-            <input id="addUrl" type="url" placeholder="https://example.com" style="width:100%;box-sizing:border-box" />
-          </div>
-          <button id="pasteUrlBtn" class="small-btn" type="button">URL</button>
-          <button id="pasteJsonBtn" class="small-btn" type="button">JSON</button>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>タイトル</label>
-        <input id="addTitleInput" type="text" placeholder="自動取得されます" />
-      </div>
-
-      <div class="form-row" id="addIconRow" style="display:none;" aria-hidden="true">
-        <label>アイコン URL（任意）</label>
-        <input id="addIcon" type="url" placeholder="外部アイコン URL を指定（省略可）" />
-      </div>
-      <div class="form-row">
-        <label>Grid 用画像 URL（任意）</label>
-        <input id="addGridImage" type="url" placeholder="og:image やカード画像の URL を指定（省略可）" />
-      </div>
-      <div class="form-row">
-        <label>List 用画像 URL（任意）</label>
-        <input id="addListImage" type="url" placeholder="favicon の URL を指定（省略可）" />
-      </div>
-      <div class="form-row">
-        <label>説明（任意）</label>
-        <textarea id="addDesc" rows="2" placeholder="サイトの説明"></textarea>
-      </div>
-
-      <!-- フォルダ機能を廃止しました -->
-
-      <div class="form-row">
-        <label>タグ（カンマ区切り、任意）</label>
-        <input id="addTags" type="text" placeholder="例: 開発,ツール" list="tagSuggestions" autocomplete="off" />
-        <datalist id="tagSuggestions"></datalist>
-        <div id="quickTagsContainer" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-      </div>
-
-      <div style="display:flex;gap:8px;justify-content:space-between;margin-top:8px;align-items:center">
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="deleteInModal" class="small-btn" type="button" style="background:#e74c3c;color:#fff;border-color:#e74c3c;">削除</button>
-          <button id="refreshImagesBtn" class="small-btn" type="button" style="background:#3498db;color:#fff;border-color:#3498db;">🔄 画像更新</button>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
-          <button id="cancelAdd" class="small-btn" type="button">キャンセル</button>
-          <button id="saveAdd" class="open-btn" type="button">保存</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- modal for full tag selection -->
-  <div class="modal" id="tagModal" role="dialog" aria-modal="true">
-    <div class="panel">
-      <h3>タグで絞り込む</h3>
-      <div style="margin-bottom:8px"><input id="tagSearch" placeholder="タグで検索" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" /></div>
-      <div class="tags-grid" id="modalTags"></div>
-      <div style="margin-top:12px;text-align:right"><button id="closeModal">閉じる</button></div>
-    </div>
-  </div>
-
-  <!-- フォルダ機能は完全に削除しました -->
-
-  <!-- modal for view mode selection -->
-  <div class="modal" id="viewModeModal" role="dialog" aria-modal="true">
-    <div class="panel" role="document" style="max-width:360px;">
-      <h3 style="margin-top:0;">表示サイズ</h3>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-        <label style="display:flex;align-items:center;gap:8px"><input type="radio" name="vmode" value="small"> 小</label>
-        <label style="display:flex;align-items:center;gap:8px"><input type="radio" name="vmode" value="medium"> 中</label>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-        <button id="viewModeCancel" class="small-btn" type="button">キャンセル</button>
-        <button id="viewModeSave" class="open-btn" type="button">適用</button>
-      </div>
-    </div>
-  </div>
-
-      <!-- 一般ユーザー用詳細モーダル（閲覧のみ） -->
-      <div class="modal" id="detailModal" role="dialog" aria-modal="true">
-        <div class="panel" role="document" aria-labelledby="detailTitle">
-          <h3 id="detailTitle">ブックマーク詳細</h3>
-
-          <div class="form-row">
-            <label>タイトル</label>
-            <div class="detail-value" id="detailTitleText" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;user-select:text;"></div>
-          </div>
-
-          <div class="form-row">
-            <label>URL</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div class="detail-value" id="detailUrl" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;word-break:break-all;user-select:text;min-width:0;flex:1;"></div>
-              <button id="copyDetailUrlBtn" class="small-btn" type="button" title="URL をコピー">コピー</button>
+            <div class="preset-row" data-preset="4">
+              <input type="text" class="preset-title" value="プリセット4" readonly />
+              <div class="preset-actions">
+                <button class="preset-edit-btn">編集</button>
+                <button class="preset-load-btn">呼出</button>
+              </div>
+              <div class="preset-edit-area"></div>
+            </div>
+            <div class="preset-row" data-preset="5">
+              <input type="text" class="preset-title" value="プリセット5" readonly />
+              <div class="preset-actions">
+                <button class="preset-edit-btn">編集</button>
+                <button class="preset-load-btn">呼出</button>
+              </div>
+              <div class="preset-edit-area"></div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="form-row">
-            <label>説明</label>
-            <div class="detail-value" id="detailDesc" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;min-height:40px;user-select:text;white-space:pre-wrap;"></div>
-          </div>
+      <!-- プリセット編集モーダル -->
+      <!-- プリセット編集モーダルはインライン編集UIに置き換え -->
 
-          <div class="form-row">
-            <label>タグ</label>
-            <div class="detail-value" id="detailTags" style="padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;user-select:text;"></div>
-          </div>
-
-          <div style="display:flex;justify-content:center;margin-top:16px;">
-            <button id="closeDetailModal" class="small-btn" type="button">閉じる</button>
+      <!-- 検索履歴モーダル -->
+      <div class="modal-overlay" id="modal_history">
+        <div class="modal-panel">
+          <button class="modal-close-btn" id="close_history"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/clock-counter-clockwise.svg" alt="" aria-hidden="true" /> 検索履歴</h3>
+          <div id="history_list"></div>
+          <button class="clear-history-btn" id="btn_clear_history">履歴全消去</button>
+          <div style="margin-top:12px;padding:10px;background:var(--collapse-content-bg);border-left:3px solid var(--accent-1);border-radius:6px;color:var(--muted);font-size:12px;line-height:1.5">
+            <b>使い方:</b> 履歴をタップすると現在の検索条件を上書きします（確認あり）。<br>
+            履歴は最大30件まで保存され、古いものから自動削除されます。
           </div>
         </div>
       </div>
 
-      <!-- JSON import/export UI removed -->
-
-  <!-- ユーザー設定モーダル -->
-  <div class="modal" id="userSettingsModal" role="dialog" aria-modal="true">
-    <div class="panel" role="document" style="max-width:400px;">
-      <h3 style="text-align:center;">👤 ユーザー設定</h3>
-      <div style="text-align:center;margin:16px 0;">
-        <div class="user-avatar-large" id="userAvatarLarge">👤</div>
-        <input type="file" id="avatarUploadInput" accept="image/*" style="display:none" />
-        <button id="uploadAvatarBtn" class="small-btn" style="margin-top:12px;">📷 アイコンを変更</button>
+      <!-- 検索クエリ全文表示モーダル -->
+      <div class="modal-overlay" id="modal_query">
+        <div class="modal-panel">
+          <button class="modal-close-btn" id="close_query"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/magnifying-glass.svg" alt="" aria-hidden="true" /> 検索クエリ（全文）</h3>
+          <div style="margin-top:8px">
+            <textarea id="modal_query_text" style="width:100%;height:160px;padding:12px;border-radius:8px;border:1px solid var(--input-border);box-sizing:border-box;background:var(--input-bg);color:var(--text);"></textarea>
+          </div>
+          <div class="query-analysis" id="modal_query_analysis" aria-live="polite" style="margin-top:8px"></div>
+          <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="modal-action-btn" id="modal_query_select_all" title="全選択">全選択</button>
+            <button class="modal-action-btn" id="modal_query_copy" title="コピー">コピー</button>
+            <!-- 保存ボタンは要望により削除 -->
+          </div>
+        </div>
       </div>
-      <div id="loginSection" style="margin-top:16px;">
-        <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;">Googleでログインするとデータが同期されます</p>
-        <button id="googleSignInBtn2" class="open-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:18px;height:18px;">
-          Googleでログイン
+
+
+
+
+      <!-- 2×3 メニューボタングリッド -->
+      <!-- 基本検索をメイン画面に常設 -->
+      <div class="basic-section search-hero" style="margin-top:0;">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label for="q_phrase_input">検索ワード（半角スペース区切り）</label>
+          <input id="q_phrase_input" class="phrase-input" type="text" placeholder='検索ワードをここに入力' />
+        </div>
+      </div>
+
+      <div class="menu-grid">
+        <button class="menu-btn" data-modal="modal_period">
+          <span class="icon"><img src="./image/calendar.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">期間</span>
+          <span class="sublabel">開始日 / 終了日</span>
+        </button>
+        <button class="menu-btn" data-modal="modal_engagement">
+          <span class="icon"><img src="./image/heart.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">反応数</span>
+          <span class="sublabel">いいね / RT / 返信</span>
+        </button>
+        <button class="menu-btn" data-modal="modal_type">
+          <span class="icon"><img src="./image/toggle-left.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">投稿タイプ</span>
+          <span class="sublabel">限定 / 除外</span>
+        </button>
+        <button class="menu-btn" data-modal="modal_account">
+          <span class="icon"><img src="./image/user-circle.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">アカウント</span>
+          <span class="sublabel">from / to / @</span>
+        </button>
+        <button class="menu-btn" id="btn_preset" data-modal="modal_preset">
+          <span class="icon"><img src="./image/folder.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">プリセット</span>
+          <span class="sublabel">保存 / 呼出</span>
+        </button>
+        <button class="menu-btn" id="btn_history">
+          <span class="icon"><img src="./image/clock-counter-clockwise.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">検索履歴</span>
+          <span class="sublabel">過去の検索</span>
+        </button>
+        <button class="menu-btn" data-modal="modal_other">
+          <span class="icon"><img src="./image/gear.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">その他</span>
+          <span class="sublabel">言語 / タブ</span>
+        </button>
+        <button id="btn_quick_search" class="menu-btn" type="button">
+          <span class="icon"><img src="./image/magnifying-glass.svg" alt="" aria-hidden="true" /></span>
+          <span class="label">検索</span>
+          <span class="sublabel">現在の条件で検索</span>
         </button>
       </div>
-      <div id="logoutSection" style="display:none;margin-top:16px;">
-        <p id="loggedInEmail" style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px;"></p>
-        <button id="signOutBtn2" class="small-btn" style="width:100%;background:#e74c3c;color:#fff;border-color:#e74c3c;">ログアウト</button>
+          
       </div>
-      <!-- 表示設定: view size と sort をここに移動 -->
-      <div style="margin-top:12px;">
-        <div class="form-row" style="margin-bottom:6px">
-          <label style="font-weight:700">表示設定</label>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label style="min-width:80px;">表示サイズ:</label>
-              <select id="viewSizeSelect">
-                <option value="small">🔍 小</option>
-                <option value="medium">📋 中</option>
-              </select>
+
+
+      <!-- ===== セクション別モーダル ===== -->
+
+      <!-- 期間モーダル -->
+      <div class="section-modal-overlay" id="modal_period">
+        <div class="section-modal">
+          <button class="section-modal-close" data-close="modal_period"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/calendar.svg" alt="" aria-hidden="true" /> 期間</h3>
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <label class="muted-small" style="margin:0;color:var(--text)"><b>カスタム期間（yymmdd形式）</b></label>
+            <button id="btn_period_reset" type="button" class="engagement-reset-btn" title="開始/終了をリセット" style="margin-left:6px">リセット</button>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:6px">
+            <div style="flex:1;display:flex;gap:8px;align-items:center">
+              <div style="flex:1">
+                <input id="q_since_date" class="date-input" style="width:100%;color:var(--text);background:var(--input-bg)" type="text" placeholder="開始日" inputmode="numeric" maxlength="6" />
+              </div>
+              <span style="color:var(--text);font-weight:700">〜</span>
+              <div style="flex:1;display:flex;align-items:center">
+                <input id="q_until_date" class="date-input" style="width:100%;color:var(--text);background:var(--input-bg)" type="text" placeholder="終了日" inputmode="numeric" maxlength="6" />
+              </div>
+              
             </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label style="min-width:80px;">並び順:</label>
-              <select id="sortSelect">
-                <option value="alpha_en_asc">名前順（昇順）</option>
-                <option value="alpha_en_desc">名前順（降順）</option>
-                <option value="date-new">📅 新しい順</option>
-                <option value="date-old">📅 古い順</option>
-              </select>
-            </div>
+          </div>
+          <div id="period_desc" class="hint" style="margin-top:8px;color:var(--muted)">期間が未指定です。</div>
+
+          <div style="height:8px"></div>
+          <label class="muted-small" style="margin-bottom:6px;display:block;color:var(--text)"><b>カレンダー範囲</b></label>
+          <div class="period-preset-row">
+            <button type="button" class="period-preset-btn" data-range="today">今日</button>
+            <button type="button" class="period-preset-btn" data-range="this_week">今週</button>
+            <button type="button" class="period-preset-btn" data-range="this_month">今月</button>
+            <button type="button" class="period-preset-btn" data-range="this_year">今年</button>
+          </div>
+
+          <div style="height:12px"></div>
+          <label class="muted-small" style="margin-bottom:6px;display:block;color:var(--text)"><b>直近から遡る（クイック選択）</b></label>
+          <div class="period-preset-row">
+            <button type="button" class="period-preset-btn" data-quick="1d">1日</button>
+            <button type="button" class="period-preset-btn" data-quick="7d">7日</button>
+            <button type="button" class="period-preset-btn" data-quick="31d">31日</button>
+            <button type="button" class="period-preset-btn" data-quick="365d">365日</button>
+          </div>
+
+          <div style="height:12px"></div>
+          <label class="muted-small" style="margin-bottom:6px;display:block;color:var(--text)"><b>開始日からn日（開始日を先に入力）</b></label>
+          <div class="period-preset-row period-from-row">
+            <button type="button" class="period-preset-btn" data-period-from="1d">+1日</button>
+            <button type="button" class="period-preset-btn" data-period-from="7d">+7日</button>
+            <button type="button" class="period-preset-btn" data-period-from="31d">+31日</button>
+            <button type="button" class="period-preset-btn" data-period-from="365d">+365日</button>
+          </div>
+          <div class="hint" style="margin-top:8px;padding:10px;background:var(--collapse-content-bg);border-radius:8px;border-left:3px solid var(--accent-1);line-height:1.6;color:var(--muted)">
+            <div style="margin-bottom:6px">開始日を入力してから「+n日」を押すと終了日が自動計算されます</div>
+            <div>注: X の検索パラメータ <code style="background:var(--input-bg);padding:2px 4px;border-radius:3px">until:YYYY-MM-DD</code> は指定日を含みません（exclusive）。この UI では直感的に終了日を含めるため、内部的に終了日を1日進めて設定しています。</div>
           </div>
         </div>
       </div>
-      <!-- Appearance: Theme selector -->
-      <div style="margin-top:12px;">
-        <div class="form-row" style="margin-bottom:6px">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <label style="min-width:80px;font-weight:700">Theme:</label>
-            <select id="themeSelect" style="padding:8px;border-radius:8px;min-width:160px;">
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="awake">Awake</option>
-              <option value="lavender">Twilight</option>
-              <option value="mint">Ocean</option>
+
+      <!-- 反応数モーダル -->
+      <div class="section-modal-overlay" id="modal_engagement">
+        <div class="section-modal">
+          <button class="section-modal-close" data-close="modal_engagement"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/heart.svg" alt="" aria-hidden="true" /> 反応数（最小）</h3>
+          <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:6px;margin-bottom:8px">
+            <button id="btn_reset_all_engagement" type="button" class="engagement-reset-btn" title="全てのエンゲージ条件を未指定に戻す">全てリセット</button>
+          </div>
+
+          <div class="engagement-columns">
+            <!-- リプライ数（左列） -->
+            <div class="engagement-block" style="background:var(--collapse-content-bg);border-radius:10px;border:1px solid var(--input-border);padding:10px;">
+              <div style="margin-bottom:6px;">
+                <label class="muted-small" for="q_min_replies" style="font-weight:700;color:var(--text)"><img class="icon-inline" src="./image/chat-circle.svg" alt="" aria-hidden="true" /> リプライ</label>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+                <button type="button" class="engagement-reset-btn" data-reset="q_min_replies">リセット</button>
+              </div>
+              <input id="q_min_replies" class="num-small" style="width:100%;box-sizing:border-box;color:var(--text);background:var(--input-bg);margin-bottom:8px" type="text" placeholder="例: 3" inputmode="numeric" maxlength="6" />
+              <div class="engagement-buttons">
+                <button type="button" class="reply-btn" data-target="q_min_replies" data-value="1">1</button>
+                <button type="button" class="reply-btn" data-target="q_min_replies" data-value="5">5</button>
+                <button type="button" class="reply-btn" data-target="q_min_replies" data-value="10">10</button>
+                <button type="button" class="reply-btn" data-target="q_min_replies" data-value="20">20</button>
+                <button type="button" class="reply-btn" data-target="q_min_replies" data-value="50">50</button>
+              </div>
+            </div>
+
+            <!-- リツイート数（中央列） -->
+            <div class="engagement-block" style="background:var(--collapse-content-bg);border-radius:10px;border:1px solid var(--input-border);padding:10px;">
+              <div style="margin-bottom:6px;">
+                <label class="muted-small" for="q_min_retweets" style="font-weight:700;color:var(--text)"><img class="icon-inline" src="./image/repeat.svg" alt="" aria-hidden="true" /> リツイート</label>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+                <button type="button" class="engagement-reset-btn" data-reset="q_min_retweets">リセット</button>
+              </div>
+              <input id="q_min_retweets" class="num-small" style="width:100%;box-sizing:border-box;color:var(--text);background:var(--input-bg);margin-bottom:8px" type="text" placeholder="例: 50" inputmode="numeric" maxlength="6" />
+              <div class="engagement-buttons">
+                <button type="button" class="retweet-btn" data-target="q_min_retweets" data-value="10">10</button>
+                <button type="button" class="retweet-btn" data-target="q_min_retweets" data-value="50">50</button>
+                <button type="button" class="retweet-btn" data-target="q_min_retweets" data-value="100">100</button>
+                <button type="button" class="retweet-btn" data-target="q_min_retweets" data-value="500">500</button>
+                <button type="button" class="retweet-btn" data-target="q_min_retweets" data-value="1000">1000</button>
+              </div>
+            </div>
+
+            <!-- いいね数（右列） -->
+            <div class="engagement-block" style="background:var(--collapse-content-bg);border-radius:10px;border:1px solid var(--input-border);padding:10px;">
+              <div style="margin-bottom:6px;">
+                <label class="muted-small" for="q_min_likes" style="font-weight:700;color:var(--text)"><img class="icon-inline" src="./image/heart.svg" alt="" aria-hidden="true" /> いいね</label>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+                <button type="button" class="engagement-reset-btn" data-reset="q_min_likes">リセット</button>
+              </div>
+              <input id="q_min_likes" class="num-small" style="width:100%;box-sizing:border-box;color:var(--text);background:var(--input-bg);margin-bottom:8px" type="text" placeholder="例: 100" inputmode="numeric" maxlength="6" />
+              <div class="engagement-buttons">
+                <button type="button" class="like-btn" data-target="q_min_likes" data-value="10">10</button>
+                <button type="button" class="like-btn" data-target="q_min_likes" data-value="100">100</button>
+                <button type="button" class="like-btn" data-target="q_min_likes" data-value="500">500</button>
+                <button type="button" class="like-btn" data-target="q_min_likes" data-value="1000">1000</button>
+                <button type="button" class="like-btn" data-target="q_min_likes" data-value="10000">10000</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ポストIDでリプライと引用を開く -->
+          <div style="margin-top:12px;padding:10px;background:var(--collapse-content-bg);border-radius:10px;border:1px solid var(--input-border);">
+            <label class="muted-small" for="q_post_id" style="font-weight:700;color:var(--text);display:block;margin-bottom:6px">ポストIDを貼り付け</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="q_post_id" type="text" placeholder="例: 1255050733675704320 または https://x.com/.../status/ID" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text)" />
+              <button id="btn_paste_id" type="button" class="secondary" style="white-space:nowrap;flex:0 0 78px">📋 ペースト</button>
+              <button id="btn_open_by_id" type="button" class="engagement-reset-btn" style="white-space:nowrap">検索実行</button>
+            </div>
+            <div class="hint" style="margin-top:8px;color:var(--muted)">貼り付けたIDで「conversation_id:ID OR ID」を自動生成して検索を開きます（リプライ＋引用の取得）。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- アカウント指定モーダル -->
+      <div class="section-modal-overlay" id="modal_account">
+        <div class="section-modal">
+          <button class="section-modal-close" data-close="modal_account"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/user-circle.svg" alt="" aria-hidden="true" /> アカウント指定</h3>
+          <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:6px;margin-bottom:8px">
+            <button id="btn_account_reset_all" type="button" class="engagement-reset-btn" title="全てのアカウント指定を未指定に戻す">全てリセット</button>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+            <div style="font-weight:800;color:var(--muted);width:44px">from</div>
+            <div style="flex:1"><input id="q_from" type="text" placeholder="例: 5gkyu" /></div>
+            <button type="button" class="engagement-reset-btn" data-reset="q_from">リセット</button>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+            <div style="font-weight:800;color:var(--muted);width:44px">to</div>
+            <div style="flex:1"><input id="q_to" type="text" placeholder="例: 5gkyu" /></div>
+            <button type="button" class="engagement-reset-btn" data-reset="q_to">リセット</button>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+            <div style="font-weight:800;color:var(--muted);width:44px">@</div>
+            <div style="flex:1"><input id="q_at_search" type="text" placeholder="例: 5gkyu" /></div>
+            <button type="button" class="engagement-reset-btn" data-reset="q_at_search">リセット</button>
+          </div>
+          <div style="margin-top:10px">
+            <label class="muted-small" for="q_lang_select" style="color:var(--text)">🌐 言語</label>
+            <select id="q_lang_select" aria-label="言語指定" style="width:200px;color:var(--text);background:var(--input-bg);">
+              <option value="">自動</option>
+              <option value="ja">日本語 (ja)</option>
+              <option value="en">英語 (en)</option>
+              <option value="zh-CN">中国語（簡体） (zh-CN)</option>
+              <option value="zh-TW">中国語（繁体） (zh-TW)</option>
+              <option value="ko">韓国語 (ko)</option>
+              <option value="es">スペイン語 (es)</option>
+              <option value="fr">フランス語 (fr)</option>
+              <option value="de">ドイツ語 (de)</option>
             </select>
           </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-              <label style="min-width:80px;font-weight:700">フォント:</label>
-              <select id="fontSelect" style="padding:8px;border-radius:8px;min-width:160px;">
-                <option value="default">Inter</option>
-                <option value="notojp">Noto Sans JP</option>
-                <option value="dotgothic16">DotGothic16</option>
-                <option value="mplus">M PLUS Rounded 1c</option>
-                <option value="kosugi">Kosugi Maru</option>
-                <option value="yomogi">Yomogi</option>
-              </select>
+          <div class="hint" style="margin-top:8px;padding:10px;background:var(--collapse-content-bg);border-radius:8px;border-left:3px solid var(--accent-1);line-height:1.6;color:var(--text)">
+            <div style="margin-bottom:6px"><b>📝 コマンドの違い:</b></div>
+            <div style="font-size:12px;margin-bottom:4px">• <code style="background:var(--input-bg);padding:2px 4px;border-radius:3px">from:</code> — 指定アカウントが投稿したポスト</div>
+            <div style="font-size:12px;margin-bottom:4px">• <code style="background:var(--input-bg);padding:2px 4px;border-radius:3px">to:</code> — 指定アカウント<b>への返信（リプライ）</b>のみ</div>
+            <div style="font-size:12px">• <code style="background:var(--input-bg);padding:2px 4px;border-radius:3px">@</code> — 本文中に@ユーザー名が含まれる投稿（<b>メンション検索</b>、リプライ以外も含む）</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 投稿タイプモーダル -->
+      <div class="section-modal-overlay" id="modal_type">
+        <div class="section-modal">
+          <button class="section-modal-close" data-close="modal_type"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/toggle-left.svg" alt="" aria-hidden="true" /> 投稿タイプ</h3>
+          <div style="height:6px"></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="flex:1">
+              <label class="muted-small" for="q_url" style="display:block;margin-bottom:6px"><b>URL検索（url:）</b></label>
+              <input id="q_url" type="text" placeholder="例: reddit.com" style="width:100%;background:var(--input-bg);color:var(--text);padding:8px;border-radius:8px;border:1px solid var(--input-border);" />
             </div>
-        </div>
-      </div>
-
-      <!-- Appearance: Desktop layout selector removed (controlled via sidebar only) -->
-      <!-- Grid column count selector -->
-      <div id="gridColsSettingRow" style="margin-top:8px;">
-        <div class="form-row" style="margin-bottom:6px">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <label style="min-width:80px;font-weight:700">カラム数:</label>
-            <select id="gridColsSelect" style="padding:8px;border-radius:8px;min-width:160px;">
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-            </select>
+            <div style="flex:0 0 90px">
+              <button type="button" class="engagement-reset-btn" data-reset="q_url" style="width:100%">リセット</button>
+            </div>
+          </div>
+          <div style="height:10px"></div>
+          <div class="type-grid">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label class="muted-small" style="margin:0"><b>ツイートタイプ</b></label>
+              <button id="btn_type_reset" type="button" class="engagement-reset-btn" title="全てのフィルターを未指定に戻す">全てリセット</button>
+            </div>
+            <div class="type-row">
+              <span class="type-label">リプライ</span>
+              <div class="tri-toggle" data-filter="replies">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+            <div class="type-row">
+              <span class="type-label">引用</span>
+              <div class="tri-toggle" data-filter="quote">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+            <div class="type-row">
+              <span class="type-label">リンク</span>
+              <div class="tri-toggle" data-filter="links">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+            <div class="type-row">
+              <span class="type-label">メディア</span>
+              <div class="tri-toggle" data-filter="media">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+            <div class="type-row">
+              <span class="type-label">画像</span>
+              <div class="tri-toggle" data-filter="images">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+            <div class="type-row">
+              <span class="type-label">動画</span>
+              <div class="tri-toggle" data-filter="videos">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+          </div>
+          <div style="height:12px"></div>
+          <div class="type-grid">
+            <label class="muted-small" style="margin-bottom:4px"><b>アカウントタイプ</b></label>
+            <div class="type-row">
+              <span class="type-label">公式</span>
+              <div class="tri-toggle" data-filter="verified">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+            <div class="type-row">
+              <span class="type-label">フォロー中</span>
+              <div class="tri-toggle" data-filter="following">
+                <button type="button" data-val="none" class="active-none">未指定</button>
+                <button type="button" data-val="only">限定</button>
+                <button type="button" data-val="exclude">除外</button>
+              </div>
+            </div>
+          </div>
+          <div style="display:none">
+            <input type="checkbox" id="only_replies"><input type="checkbox" id="exclude_replies">
+            <input type="checkbox" id="only_quote"><input type="checkbox" id="exclude_quote">
+            <input type="checkbox" id="only_links"><input type="checkbox" id="exclude_links">
+            <input type="checkbox" id="only_media"><input type="checkbox" id="exclude_media">
+            <input type="checkbox" id="only_images"><input type="checkbox" id="exclude_images">
+            <input type="checkbox" id="only_videos"><input type="checkbox" id="exclude_videos">
+            <input type="checkbox" id="only_verified"><input type="checkbox" id="exclude_verified">
+            <input type="checkbox" id="only_following">
+            <input type="checkbox" id="exclude_following">
           </div>
         </div>
       </div>
-      <!-- Bottom nav visibility toggle -->
-      <div style="margin-top:8px;">
-        <div class="form-row" style="margin-bottom:6px">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <label style="min-width:80px;font-weight:700">表示</label>
-            <label style="display:flex;align-items:center;gap:8px;">
-              <input type="checkbox" id="bottomNavToggle" /> ボトムナビを表示
-            </label>
+
+      <!-- その他モーダル -->
+      <div class="section-modal-overlay" id="modal_other">
+        <div class="section-modal">
+          <button class="section-modal-close" data-close="modal_other"><img src="./image/x.svg" alt="" aria-hidden="true" /></button>
+          <h3><img class="icon-inline" src="./image/gear.svg" alt="" aria-hidden="true" /> その他</h3>
+                    
+          <div style="margin-top:10px">
+            <a href="https://note.com/5gkyu/n/nb27e77ff2315" target="_blank" rel="noopener noreferrer" style="color:var(--accent-1);font-weight:700">📘 コマンド説明（実用的なコマンド一覧）</a>
           </div>
+          <div style="margin-top:8px">
+            <a href="https://5gkyu.github.io/KyuLink/" target="_blank" rel="noopener noreferrer" style="color:var(--accent-1);font-weight:700">🔗 KyuLink</a>
+          </div>
+          <div style="margin-top:8px">
+            <a href="https://x.com/i/bookmarks" target="_blank" rel="noopener noreferrer" style="color:var(--accent-1);font-weight:700">🔖 ブックマーク</a>
+          </div>
+          <div style="margin-top:10px">
+            <label class="muted-small" style="display:block;margin-bottom:6px;color:var(--text)">📺 結果表示</label>
+            <div id="result_tabs" class="tabs" role="tablist" aria-label="結果表示タブ">
+              <button id="tab_top" class="tab" role="tab" aria-selected="false" tabindex="-1">話題</button>
+              <button id="tab_latest" class="tab" role="tab" aria-selected="true" tabindex="0">最新</button>
+              <button id="tab_media" class="tab" role="tab" aria-selected="false" tabindex="-1">メディア</button>
+            </div>
+            <div class="hint" style="color:var(--muted)">「話題」タブは関連性が薄いので基本は「最新」タブを使ってください。<br><b>注意:</b> アプリで検索を開くと `f=live`（最新）指定がアプリ側で無視され、結果が「話題」タブで表示される場合があります。</div>
+          </div>
+
         </div>
       </div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:20px;">
-        <!-- OGP プロキシ設定 UI は非表示（デフォルトで Worker を利用） -->
-        <button id="closeUserSettingsModal" class="small-btn">閉じる</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Firebase SDK（compat）: これを一度だけ読み込む -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    </div><!-- .card -->
+  </div><!-- .wrap -->
 
-  <!-- 外部スクリプト本体 -->
-  <script src="linklocal.js" defer></script>
-
-  <script>
-  // オーナーであれば常に右下にFABを表示する（mobile Safariのsafe-area考慮）
-  (function(){
-    const fab = document.getElementById('openAdd');
-    if(!fab) return;
-
-    function applyVisible(visible){
-      try{
-        if(visible){
-          fab.style.display = 'flex';
-          fab.setAttribute('aria-hidden','false');
-        }else{
-          fab.style.display = 'none';
-          fab.setAttribute('aria-hidden','true');
-        }
-      }catch(e){ /* ignore */ }
-    }
-
-    // 初期は非表示、linklocal.js 側でグローバル変数 `isReadOnlyMode` を設定します。
-    applyVisible(false);
-
-    // 変化をポーリングで監視（linklocal.js の処理が完了したら反映される）
-    let last;
-    const iv = setInterval(()=>{
-      let v;
-      try{
-        if(typeof isReadOnlyMode === 'boolean') v = isReadOnlyMode; // top-level let を参照
-        else if(typeof window.isReadOnlyMode === 'boolean') v = window.isReadOnlyMode; // もし var で公開されている場合
-      }catch(e){ v = undefined; }
-      if(typeof v === 'boolean' && v !== last){
-        last = v;
-        // オーナーなら編集可能 (= false の場合) として表示
-        applyVisible(!v);
-        // 値が確定したらポーリングは不要
-        clearInterval(iv);
-      }
-    }, 250);
-
-    // バックアップ: 30秒後に強制停止
-    setTimeout(()=> clearInterval(iv), 30000);
-  })();
-  </script>
-
-<!-- Cookie consent banner (inserted by assistant) -->
-<style>
-  #cookieBanner {
-    position:fixed;
-    left:16px;
-    right:16px;
-    bottom:18px;
-    z-index:1200;
-    background: rgba(15, 184, 191, 0.98);
-    color: #fff;
-    padding:12px 14px;
-    border-radius:12px;
-    box-shadow: 0 8px 24px rgba(2,18,22,0.12);
-    display:flex;
-    gap:12px;
-    align-items:center;
-    justify-content:space-between;
-    max-width:980px;
-    margin:0 auto;
-    box-sizing:border-box;
-    font-size:14px;
-  }
-  #cookieBanner .msg{flex:1;min-width:0; margin-right:12px; color: #02292c; font-weight:700}
-  #cookieBanner .actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
-  #cookieBanner .cookie-btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
-  #cookieBanner .cookie-accept{background:#fff;color:var(--text)}
-  #cookieBanner .cookie-more{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.3)}
-  @media(max-width:560px){
-    #cookieBanner{left:10px;right:10px;padding:10px;flex-direction:column;align-items:flex-start;gap:8px}
-    #cookieBanner .actions{align-self:stretch;justify-content:flex-end;width:100%}
-    #cookieBanner .msg{font-size:15px;font-weight:700;color:#fff}
-    #cookieBanner .cookie-accept{width:110px}
-  }
-</style>
-
-<div id="cookieBanner" role="region" aria-label="クッキーの利用について" hidden>
-<div id="cookieBanner" role="region" aria-label="クッキーの利用について" hidden>
-  <div class="msg">当サイトは正常な動作のためクッキーを使用します。続行することで同意したものとみなします。</div>
-  <div class="actions">
-    <button class="cookie-btn cookie-accept" id="cookieAccept">同意する</button>
-  </div>
-</div>
-
-<!-- テスト用コードは削除済み -->
-
-<script>
-(function(){
-  try{
-    const BANNER_KEY = 'cookie_consent_v1';
-    const banner = document.getElementById('cookieBanner');
-    const acceptBtn = document.getElementById('cookieAccept');
-    const moreBtn = document.getElementById('cookieMore');
-
-    // localStorage利用可否をチェック
-    function isStorageAvailable(){
-      try{
-        const test = '__storage_test__';
-        localStorage.setItem(test, test);
-        localStorage.removeItem(test);
-        return true;
-      }catch(e){ return false; }
-    }
-
-    function showBanner(){
-      if(!banner) return;
-      banner.hidden = false;
-      banner.style.display = '';
-      acceptBtn && acceptBtn.focus();
-    }
-    function hideBanner(){
-      if(!banner) return;
-      try{ banner.hidden = true; }catch(e){}
-      try{ banner.style.display = 'none'; }catch(e){}
-    }
-
-    function hasConsent(){
-      if(!isStorageAvailable()) return true; // ストレージが使えない場合は同意済みとみなす
-      try{ return localStorage.getItem(BANNER_KEY) === '1'; }catch(e){ return true; }
-    }
-    function setConsent(){
-      if(!isStorageAvailable()) return;
-      try{ localStorage.setItem(BANNER_KEY, '1'); }catch(e){}
-    }
-
-    // ストレージが使えない場合はバナーを表示しない
-    if(!isStorageAvailable()){ hideBanner(); }
-    else if(!hasConsent()) window.requestAnimationFrame(()=>{ showBanner(); }); 
-    else hideBanner();
-
-    // Use both addEventListener and onclick assignment to be robust
-    if(acceptBtn){
-      acceptBtn.addEventListener('click', onAccept);
-      acceptBtn.onclick = onAccept;
-    }
-
-    function onAccept(e){
-      // persist consent in localStorage only (cookie writing may be blocked by browser/privacy settings)
-      try{ setConsent(); }catch(e){}
-      try{ hideBanner(); }catch(e){}
-      try{ if(banner && banner.parentNode){ banner.parentNode.removeChild(banner); } }catch(e){}
-    }
-
-    document.addEventListener('keydown', (e)=>{ if((e.key==='Escape' || e.key==='Esc') && banner && !banner.hidden){ setConsent(); hideBanner(); } });
-  }catch(e){ console.warn('cookie banner init error', e); }
-})();
-</script>
-
-<!-- テスト用コードは削除されました -->
-
-<!-- Bottom Navigation for Mobile -->
-<nav class="bottom-nav" id="bottomNav">
-  <button class="bottom-nav-btn" id="bottomSearchBtn" type="button">
-    <span class="bottom-nav-icon">🔍</span>
-    <span class="bottom-nav-label">検索</span>
-  </button>
-  <button class="bottom-nav-btn" id="bottomTagsBtn" type="button">
-    <span class="bottom-nav-icon">🏷️</span>
-    <span class="bottom-nav-label">タグ</span>
-  </button>
-  <button class="bottom-nav-btn" id="bottomAddBtn" type="button">
-    <span class="bottom-nav-icon">➕</span>
-    <span class="bottom-nav-label">追加</span>
-  </button>
-</nav>
-
-<!-- Search overlay for mobile bottom nav -->
-<div class="search-overlay" id="searchOverlay">
-  <div class="search-overlay-content">
-    <input type="text" id="mobileSearchInput" placeholder="検索..." autocomplete="off" />
-    <button id="closeSearchOverlay" class="small-btn" type="button">閉じる</button>
-  </div>
-</div>
-
+  <script src="x_script.js"></script>
 </body>
 </html>
