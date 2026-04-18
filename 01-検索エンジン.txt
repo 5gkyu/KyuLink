@@ -1,0 +1,115 @@
+検索エンジン 重要サイト集
+================================
+カテゴリ: 情報・検索 > 検索エンジン
+作成: 2026-04-01
+================================
+
+凡例: サイト名 | URL | 概要
+
+────────────────────────────────────────────────
+【汎用検索エンジン】
+────────────────────────────────────────────────
+
+Google                  | https://www.google.co.jp                  | 世界シェア1位。国内でも圧倒的多数。検索精度・速度ともに最強クラス
+Yahoo! Japan            | https://www.yahoo.co.jp                   | 国内利用者数2位。検索エンジンはGoogleを採用。ポータル兼検索
+Microsoft Bing          | https://www.bing.com                      | Microsoftが提供。AI機能(Copilot)と統合
+DuckDuckGo              | https://duckduckgo.com                    | トラッキングなし・プライバシー重視の定番。バングス(!g等)機能
+Brave Search            | https://search.brave.com                  | 独自インデックスを持つ唯一のプライバシー特化検索
+Startpage               | https://www.startpage.com                 | Google検索結果をプライベートに取得。IPアドレス非送信
+Kagi                    | https://kagi.com                          | 有料・完全広告なし・高品質。月$5〜。重み付けカスタマイズ可
+Ecosia                  | https://www.ecosia.org                    | 収益の一部で植樹活動。環境配慮型検索。Bing採用
+Qwant                   | https://www.qwant.com                     | フランス発。GDPR完全準拠のプライバシー検索
+Mojeek                  | https://www.mojeek.com                    | 独自クロールの独立系検索エンジン。第三者不介在
+Yandex                  | https://yandex.com                        | ロシア最大の検索エンジン。画像・地図も充実
+Naver                   | https://www.naver.com                     | 韓国最大。Webtoon・知識iN等コンテンツも豊富
+Baidu                   | https://www.baidu.com                     | 中国最大。中国語コンテンツを探す場合に有用
+Goo 検索                | https://search.goo.ne.jp                  | NTTレゾナント運営。日本語コンテンツに強い国産検索
+Excite 検索             | https://www.excite.co.jp/search           | 国産ポータルの検索機能。日本語コンテンツ
+BIGLOBE 検索            | https://search.biglobe.ne.jp              | NEC系ポータル。シンプルな検索UI
+SearXNG (公開インスタンス)| https://searx.space                     | OSSのメタ検索。複数エンジンを束ねてプライバシー保護
+MetaGer                 | https://metager.org                       | ドイツ非営利団体運営。匿名プロキシ付きメタ検索
+
+────────────────────────────────────────────────
+【AI回答型 / AI統合検索】
+────────────────────────────────────────────────
+
+Perplexity AI           | https://www.perplexity.ai                 | AI回答+引用元付き検索。最も実用的なAI検索の筆頭
+ChatGPT (SearchGPT)     | https://chatgpt.com                       | ChatGPT内蔵のWeb検索機能。GPT-4oと統合
+Microsoft Copilot       | https://copilot.microsoft.com             | Bing+GPT-4統合。日本語対応・無料で使用可
+Google AI Overviews     | https://www.google.co.jp                  | Google検索結果上部に表示されるAI要約（Gemini採用）
+You.com                 | https://you.com                           | AI検索+アプリ切替（ChatGPT/Claude等を選択可能）
+Phind                   | https://www.phind.com                     | 開発者向けAI検索。コード・技術記事に特化
+Genspark                | https://www.genspark.ai                   | 「Sparkpages」として検索結果をAIが再構成して提示
+Exa (旧Metaphor)        | https://exa.ai                            | AI-firstの検索API。LLMアプリ組み込み向け
+Andi Search             | https://andisearch.com                    | 会話型AI検索。広告なし・プライバシー重視
+Komo Search             | https://komo.ai                           | AI検索+コミュニティQ&Aの融合
+Felo                    | https://felo.ai                           | 日本語UIで使いやすいAI検索。多言語対応
+iAsk.ai                 | https://iask.ai                           | シンプルなAI回答型検索。無料
+
+────────────────────────────────────────────────
+【逆画像検索】
+────────────────────────────────────────────────
+
+Google Lens             | https://lens.google.com                   | Googleの画像認識AI。商品・植物・翻訳なども可能
+Bing Visual Search      | https://www.bing.com/visualsearch         | Microsoftの逆画像検索。類似画像・出典を検出
+TinEye                  | https://tineye.com                        | 画像の完全一致・出所検索の元祖。改変追跡も可
+SauceNAO                | https://saucenao.com                      | アニメ・イラスト・同人特化の逆画像検索。精度高
+ASCII2D                 | https://ascii2d.net                       | 日本製の逆画像検索。SauceNAOとの併用推奨
+IQDB                    | https://iqdb.org                          | pixiv/Danbooru等アニメ系特化。複数DBを横断検索
+trace.moe               | https://trace.moe                         | アニメシーンの逆引き。何話の何秒か特定できる
+Yandex Images           | https://yandex.com/images                 | 人物・顔画像の逆引き精度が特に高いと評判
+
+────────────────────────────────────────────────
+【専門横断検索（バーティカルサーチ）】
+────────────────────────────────────────────────
+
+Google Scholar          | https://scholar.google.com                | 学術論文・引用・被引用検索。無料で利用可能
+Google Books            | https://books.google.com                  | 書籍全文・試し読み検索
+Google News             | https://news.google.com                   | ニュース特化。トピック別・地域フィルタあり
+Google Videos           | https://www.google.com/videohp            | 動画専門検索。YouTube以外も横断
+Google Shopping         | https://shopping.google.co.jp             | 商品比較・最安値検索
+Google Maps (検索)      | https://www.google.co.jp/maps             | 店舗・施設・地名の場所検索
+Wolfram|Alpha           | https://www.wolframalpha.com              | 数式・統計・単位変換・知識計算エンジン
+Internet Archive        | https://web.archive.org                   | 過去のWebページのアーカイブ検索（Wayback Machine）
+Semantic Scholar        | https://www.semanticscholar.org           | AI補助の学術検索。引用グラフ・要約付き
+OpenAlex                | https://openalex.org                      | オープンな学術メタデータ横断検索
+CORE                    | https://core.ac.uk                        | オープンアクセス論文の横断検索
+BASE Search             | https://base-search.net                   | ドイツ発・学術OAリポジトリ横断検索
+
+────────────────────────────────────────────────
+【コード・技術特化検索】
+────────────────────────────────────────────────
+
+GitHub Code Search      | https://github.com/search                 | GitHubリポジトリのコード全文検索（regex対応）
+grep.app                | https://grep.app                          | OSSコードをregexで横断検索。高速
+Searchcode              | https://searchcode.com                    | 複数ホスティングのコード横断検索
+Sourcegraph             | https://sourcegraph.com                   | 大規模コードベース向けインテリジェント検索
+Libraries.io            | https://libraries.io                      | 320万+オープンソースライブラリの依存関係検索
+
+────────────────────────────────────────────────
+【日本語情報特化検索】
+────────────────────────────────────────────────
+
+Weblio 辞書・百科        | https://www.weblio.jp                     | 辞書・百科・用語集を束ねた日本語情報検索
+Kotobank                | https://kotobank.jp                       | 百科事典・辞書コンテンツを横断検索
+ニコニコ大百科 検索      | https://dic.nicovideo.jp                  | ニコニコ発サブカル・ネット用語に強い辞典検索
+ピクシブ百科事典 検索    | https://dic.pixiv.net                     | 同人・オタク文化に特化した用語辞典検索
+はてな検索               | https://search.hatena.ne.jp               | はてなブックマーク等、はてなサービス横断検索
+2ちゃんねる/5ch 検索    | https://find.5ch.net                      | 5ch全スレッドの全文検索
+まとめ検索（オワコン検索）| https://uggc.pw                          | まとめサイト・ブログ横断検索
+
+────────────────────────────────────────────────
+【その他・ユニーク系】
+────────────────────────────────────────────────
+
+Million Short           | https://millionshort.com                  | 上位N件を除いた検索（埋もれた結果を発掘）
+Boardreader             | https://boardreader.com                   | フォーラム・掲示板専門の横断検索
+Shodan                  | https://www.shodan.io                     | ネット接続デバイスの検索エンジン（セキュリティ用途）
+Censys                  | https://search.censys.io                  | インターネット上の公開資産調査（セキュリティ用途）
+Common Crawl            | https://commoncrawl.org                   | Webのオープンクロールデータ（研究用途）
+Wiby                    | https://wiby.me                           | 個人サイト・テキスト重視のインディーウェブ検索
+Marginalia              | https://search.marginalia.nu              | 商業サイトを除いた小規模・個人サイト特化検索
+
+================================
+合計: 55サイト
+================================
