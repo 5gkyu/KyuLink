@@ -291,18 +291,16 @@ html.theme-dreamer{
 }
 
 html.theme-dreamer body{
-  background-image: linear-gradient(rgba(244,241,232,0.85), rgba(244,241,232,0.85)), url('backimage.png');
-  background-blend-mode: overlay;
   background-color: var(--bg);
 }
 
 html.theme-dreamer .desc{ color: rgba(92,90,82,0.88); }
 html.theme-dreamer .tag{ background: rgba(127,163,106,0.12); color: var(--text); border: 1px solid rgba(127,163,106,0.2); }
 
-html.theme-dreamer header.card{ background: linear-gradient(180deg, #EDE8DC, rgba(244,241,232,0.95)); }
+html.theme-dreamer header.card{ background: var(--card); }
 
 html.theme-dreamer .row{
-  background: linear-gradient(135deg, #EDE8DC, #E8E3D6);
+  background: var(--card);
   border: 1px solid rgba(127,163,106,0.15);
   box-shadow: 0 4px 12px rgba(127,163,106,0.08);
 }
@@ -314,7 +312,7 @@ html.theme-dreamer .open-btn,
 html.theme-dreamer .actions .open-btn,
 html.theme-dreamer .row .open-btn,
 html.theme-dreamer .panel .open-btn{
-  background: linear-gradient(90deg, var(--accent-1), #a8c896) !important;
+  background: var(--accent-1) !important;
   color: #ffffff !important;
   border: none !important;
   box-shadow: 0 4px 12px rgba(127,163,106,0.28) !important;
@@ -344,12 +342,12 @@ html.theme-dreamer .small-btn{
 }
 
 html.theme-dreamer .modal .panel{
-  background: linear-gradient(180deg, #EDE8DC, #E8E3D6);
+  background: var(--card);
   border: 1px solid rgba(127,163,106,0.2);
 }
 
 html.theme-dreamer .bottom-nav{
-  background: linear-gradient(180deg, #EDE8DC, #E8E3D6);
+  background: var(--card);
   border-top: 1px solid rgba(127,163,106,0.2);
 }
 
@@ -361,8 +359,92 @@ html.theme-dreamer .bottom-nav-btn:hover{
 }
 
 html.theme-dreamer .search-overlay-content{
-  background: #F4F1E8;
+  background: var(--bg);
   border: 1px solid rgba(127,163,106,0.25);
+}
+
+/* ベージュ + グリーン + くすみピンク 改 (Dreamer2) */
+html.theme-dreamer2{
+  --bg: #F4F1E8;
+  --card: #E9E4D6;
+  --card-rgb: 233,228,214;
+  --accent-1: #6E8F5C;
+  --accent-2: #E4A39A;
+  --text: #4F4D46;
+  --muted: #8E8B82;
+}
+
+html.theme-dreamer2 body{
+  background-color: var(--bg);
+}
+
+html.theme-dreamer2 .desc{ color: rgba(79,77,70,0.88); }
+html.theme-dreamer2 .tag{ background: rgba(110,143,92,0.12); color: var(--text); border: 1px solid rgba(110,143,92,0.2); }
+
+html.theme-dreamer2 header.card{ background: var(--card); }
+
+html.theme-dreamer2 .row{
+  background: var(--card);
+  border: 1px solid rgba(110,143,92,0.15);
+  box-shadow: 0 4px 12px rgba(110,143,92,0.08);
+}
+html.theme-dreamer2 .row:hover{
+  box-shadow: 0 8px 24px rgba(110,143,92,0.18);
+}
+
+html.theme-dreamer2 .open-btn,
+html.theme-dreamer2 .actions .open-btn,
+html.theme-dreamer2 .row .open-btn,
+html.theme-dreamer2 .panel .open-btn{
+  background: var(--accent-1) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(110,143,92,0.28) !important;
+}
+
+html.theme-dreamer2 .icon-wrap{ background: rgba(110,143,92,0.1); color: var(--text); }
+
+html.theme-dreamer2 select,
+html.theme-dreamer2 input[type="url"],
+html.theme-dreamer2 input,
+html.theme-dreamer2 textarea{
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid rgba(110,143,92,0.25);
+}
+
+html.theme-dreamer2 button:not(.open-btn):not(.bottom-nav-btn){
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid rgba(110,143,92,0.2);
+}
+
+html.theme-dreamer2 .chip,
+html.theme-dreamer2 .small-btn{
+  background: rgba(110,143,92,0.12);
+  border: 1px solid rgba(110,143,92,0.2);
+}
+
+html.theme-dreamer2 .modal .panel{
+  background: var(--card);
+  border: 1px solid rgba(110,143,92,0.2);
+}
+
+html.theme-dreamer2 .bottom-nav{
+  background: var(--card);
+  border-top: 1px solid rgba(110,143,92,0.2);
+}
+
+html.theme-dreamer2 .bottom-nav-btn{
+  color: var(--text);
+}
+html.theme-dreamer2 .bottom-nav-btn:hover{
+  background: rgba(110,143,92,0.12);
+}
+
+html.theme-dreamer2 .search-overlay-content{
+  background: var(--bg);
+  border: 1px solid rgba(110,143,92,0.25);
 }
 
 /* Dark-mode specific background overlay and text tweaks */
