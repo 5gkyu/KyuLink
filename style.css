@@ -1196,7 +1196,7 @@ body.modal-add-open { overflow: hidden; }
 
 /* ========== Bottom Navigation ========== */
 .bottom-nav {
-  display: flex;
+  display: none;
   position: fixed;
   left: 0;
   right: 0;
@@ -1261,9 +1261,15 @@ html.dark-mode .bottom-nav {
   font-weight: 600;
 }
 
-/* Add extra padding to list to avoid overlap with bottom nav */
-.list {
-  padding-bottom: calc(var(--row-h, 72px) + 80px + env(safe-area-inset-bottom, 0px)) !important;
+/* Show bottom nav only on mobile */
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex !important;
+  }
+  /* Add extra padding to list to avoid overlap with bottom nav */
+  .list {
+    padding-bottom: calc(var(--row-h, 72px) + 80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 /* bottom nav stays visible when add/edit modal is open */

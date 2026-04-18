@@ -375,15 +375,27 @@ function applyGridLayout(){
 // カラム数設定行の表示/非表示を更新
 function updateColsVisibility(){
   try{
-    const layout = localStorage.getItem('desktop_layout') || 'list';
+    const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+    let layout = localStorage.getItem('desktop_layout') || 'list';
+    if(isMobileViewport && layout !== 'list'){
+      layout = 'list';
+      try{ localStorage.setItem('desktop_layout', 'list'); }catch(e){}
+      if(el.sidebarLayout) el.sidebarLayout.value = 'list';
+      try{ applyGridLayout(); }catch(e){}
+    }
     const isGrid = layout === 'grid';
     const sidebarRow = document.getElementById('sidebarColsRow');
     const settingsRow = document.getElementById('gridColsSettingRow');
     if(sidebarRow) sidebarRow.style.display = isGrid ? '' : 'none';
-    if(settingsRow) settingsRow.style.display = isGrid ? '' : 'none';
-    // サイドバーの表示サイズ行はスマートフォン表示時のみ表示
+    if(settingsRow) settingsRow.style.display = (!isMobileViewport && isGrid) ? '' : 'none';
+    // サイドバーの表示サイズ行はスマートフォンレイアウト時のみ表示
     const viewSizeRow = document.getElementById('sidebarViewSizeRow');
     if(viewSizeRow) viewSizeRow.style.display = isGrid ? 'none' : '';
+    // ユーザー設定モーダル側の行を制御
+    const settingsLayoutRow = document.getElementById('settingsLayoutRow');
+    const settingsViewSizeRow = document.getElementById('settingsViewSizeRow');
+    if(settingsLayoutRow) settingsLayoutRow.style.display = isMobileViewport ? 'none' : '';
+    if(settingsViewSizeRow) settingsViewSizeRow.style.display = isGrid ? 'none' : '';
   }catch(e){}
 }
 
@@ -1823,7 +1835,7 @@ function openUserSettingsModal(){
       if(sel) sel.value = savedTheme;
       // sync desktop layout when opening modal
       const savedLayout = localStorage.getItem('desktop_layout') || 'list';
-      const layoutSel = document.getElementById('desktopLayoutSelect');
+      const layoutSel = document.getElementById('sidebarLayout');
       if(layoutSel) layoutSel.value = savedLayout;
       // sync grid cols when opening modal
       const savedCols = localStorage.getItem('grid_cols') || '5';
@@ -1843,7 +1855,7 @@ function openUserSettingsModal(){
 function closeUserSettingsModalFn(){
   try{
     // If desktop layout is tablet/PC (grid), ensure display size is set to 'medium' inside modal before closing
-    const layoutSel = document.getElementById('desktopLayoutSelect');
+    const layoutSel = document.getElementById('sidebarLayout');
     const layout = layoutSel ? layoutSel.value : (localStorage.getItem('desktop_layout') || 'list');
     if(layout === 'grid'){
       try{
@@ -2036,6 +2048,8 @@ try{
     if(sidebarCols) sidebarCols.value = savedCols;
     updateColsVisibility();
   }catch(e){}
+  // Keep settings rows in sync when viewport changes (desktop <-> mobile)
+  try{ window.addEventListener('resize', updateColsVisibility); }catch(e){}
 }catch(e){ /* ignore */ }
 
 // ログインセクション表示切替
@@ -2457,8 +2471,10 @@ if(el.bottomSearchBtn){
     closeAllModals();
     try{
       if(el.q){
-        el.q.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(()=>{ try{ el.q.focus(); }catch(e){} }, 100);
+        el.q.scrollIntoView({ behavior: 'auto', block: 'center' });
+        try{ el.q.focus({ preventScroll: true }); }catch(e){ el.q.focus(); }
+        try{ const len = (el.q.value || '').length; el.q.setSelectionRange(len, len); }catch(e){}
+        try{ el.q.click(); }catch(e){}
       }
     }catch(e){}
   });
