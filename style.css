@@ -291,6 +291,7 @@ html.theme-dreamer{
 }
 
 html.theme-dreamer body{
+  background-image: none;
   background-color: var(--bg);
 }
 
@@ -375,6 +376,7 @@ html.theme-dreamer2{
 }
 
 html.theme-dreamer2 body{
+  background-image: none;
   background-color: var(--bg);
 }
 
