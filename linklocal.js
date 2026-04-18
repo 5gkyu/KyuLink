@@ -1880,7 +1880,7 @@ if(userSettingsModal) userSettingsModal.addEventListener('click', (e)=>{ if(e.ta
 function applyTheme(themeName){
   try{
     // Remove all theme classes first
-    document.documentElement.classList.remove('dark-mode', 'theme-kohane', 'theme-lavender', 'theme-mint');
+    document.documentElement.classList.remove('dark-mode', 'theme-kohane', 'theme-lavender', 'theme-mint', 'theme-dreamer');
     
     if(themeName === 'dark'){
       document.documentElement.classList.add('dark-mode');
@@ -1896,6 +1896,8 @@ function applyTheme(themeName){
       document.documentElement.classList.add('theme-lavender');
     } else if(themeName === 'mint'){
       document.documentElement.classList.add('theme-mint');
+    } else if(themeName === 'dreamer'){
+      document.documentElement.classList.add('theme-dreamer');
     }
     // 'light' is default, no class needed
     localStorage.setItem('app_theme', themeName);
@@ -1908,6 +1910,7 @@ function applyTheme(themeName){
       else if(themeName === 'awake-dark') themeColor = '#07181a';
       else if(themeName === 'lavender') themeColor = '#e8d5f0';
       else if(themeName === 'mint') themeColor = '#d0f0ec';
+      else if(themeName === 'dreamer') themeColor = '#F4F1E8';
       else if(themeName === 'light') themeColor = getComputedStyle(document.documentElement).getPropertyValue('--bg') || themeColor;
 
       var meta = document.querySelector('meta[name="theme-color"]');
