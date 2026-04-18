@@ -19,6 +19,8 @@ function faviconFromUrl(u, size=64){
 function getImageProxy(imageUrl){
   // Use Worker's /img endpoint to proxy images, avoiding CORS/hotlink issues
   if(!imageUrl || !imageUrl.trim()) return '';
+  // Relative paths (e.g. assets/foo.png) are served locally — skip proxy
+  if(!/^https?:\/\//i.test(imageUrl.trim())) return imageUrl;
   try{
     const proxy = getOgpProxy(); // reuse OGP proxy base URL
     if(!proxy || !proxy.trim()) return imageUrl; // no proxy, return original
