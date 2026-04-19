@@ -17,16 +17,10 @@ function faviconFromUrl(u, size=64){
   try{ const url = new URL(u); return `https://www.google.com/s2/favicons?sz=${size}&domain=${url.hostname}`; } catch(e){ return '' }
 }
 function getImageProxy(imageUrl){
-  // Use Worker's /img endpoint to proxy images, avoiding CORS/hotlink issues
+  // Frontend policy: render images with their original URL during normal display.
+  // Worker is reserved for metadata fetch on add/edit flows.
   if(!imageUrl || !imageUrl.trim()) return '';
-  // Relative paths (e.g. assets/foo.png) are served locally — skip proxy
-  if(!/^https?:\/\//i.test(imageUrl.trim())) return imageUrl;
-  try{
-    const proxy = getOgpProxy(); // reuse OGP proxy base URL
-    if(!proxy || !proxy.trim()) return imageUrl; // no proxy, return original
-    const base = proxy.replace(/\/$/, '');
-    return base + '/img?url=' + encodeURIComponent(imageUrl);
-  }catch(e){ return imageUrl; }
+  return imageUrl;
 }
 /**
  * Clean/normalize titles returned from OGP/oEmbed
@@ -663,7 +657,7 @@ function renderList(){
         const heroSrc = item.og_image || item.icon_url;
         if(heroSrc){
           const img = document.createElement('img');
-          img.src = getImageProxy ? getImageProxy(heroSrc) : heroSrc;
+          img.src = heroSrc;
           img.alt = item.title + ' アイコン';
           img.className = 'hero';
           img.loading = 'lazy';
