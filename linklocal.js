@@ -152,6 +152,58 @@ const STORAGE_KEY = 'bookmark_data_v1';
 // Default OGP proxy (hidden; no UI required). Set to deployed Worker.
 const OGP_PROXY = 'https://ogp-proxy.kyu68002.workers.dev';
 function getOgpProxy(){ try{ return (localStorage.getItem('ogp_proxy') || OGP_PROXY || '').toString(); }catch(e){ return OGP_PROXY || ''; } }
+
+function unwrapProxyStoredUrl(v){
+  if(typeof v !== 'string') return v;
+  const raw = v.trim();
+  if(!raw) return raw;
+  try{
+    const u = new URL(raw, location.origin);
+    const wrapped = u.searchParams.get('url');
+    if(!wrapped) return raw;
+
+    const proxy = (getOgpProxy() || '').trim();
+    if(!proxy) return raw;
+
+    let p;
+    try{ p = new URL(proxy); }catch(_){ return raw; }
+
+    if(u.origin !== p.origin) return raw;
+    const isImagePath = (u.pathname === '/img') || (u.pathname === (p.pathname + '/img')) || (u.pathname === p.pathname);
+    if(!isImagePath) return raw;
+
+    let out = wrapped;
+    try{ out = decodeURIComponent(out); }catch(_){ }
+    if(!/^https?:\/\//i.test(out)) return raw;
+    return out;
+  }catch(e){
+    return raw;
+  }
+}
+
+function migrateLegacyProxyImageUrls(items){
+  const src = Array.isArray(items) ? items : [];
+  let changed = 0;
+  const out = src.map(item => {
+    if(!item || typeof item !== 'object') return item;
+    const next = { ...item };
+    let rowChanged = false;
+    ['og_image', 'icon_url', 'favicon_url'].forEach((key) => {
+      const nv = unwrapProxyStoredUrl(next[key]);
+      if(nv !== next[key]){
+        next[key] = nv;
+        rowChanged = true;
+      }
+    });
+    if(rowChanged){
+      next.updated_at = Date.now();
+      changed += 1;
+    }
+    return next;
+  });
+  return { items: out, changed };
+}
+
 function saveToStorage(){
   try{
     // ブックマーク関連はローカルに保存しない仕様に変更
@@ -1579,6 +1631,7 @@ const OWNER_UID = 'FTdtnAHu8tRdbqC7v2URX6NpZVI3';
 let firebaseUid = null;
 let currentRemoteRef = null;
 let isReadOnlyMode = true; // Will be set to false if logged-in user is the owner
+let remoteImageUrlMigrationDone = false;
 
 /* ------------------ ブックマークレット用URLパラメータ処理 ------------------ */
 function checkBookmarkletParams(){
@@ -1704,6 +1757,7 @@ function startSyncForUser(uid){
   if (!db) return;
   // Always use OWNER_UID for read-only public view
   firebaseUid = OWNER_UID;
+  remoteImageUrlMigrationDone = false;
   console.log('startSyncForUser owner uid=', OWNER_UID, 'readOnly=', isReadOnlyMode);
   const path = 'bookmarks/' + OWNER_UID;
   const ref = db.ref(path);
@@ -1748,6 +1802,21 @@ function startSyncForUser(uid){
       // If remoteVal is empty/null, do not overwrite local data to avoid accidental data loss
       if (remoteVal && ((Array.isArray(remoteVal) && remoteVal.length > 0) || (typeof remoteVal === 'object' && Object.keys(remoteVal).length > 0))) {
         let arr = mapToArray(arrayOrObjToMap(remoteVal)).sort((a,b)=> (b.updated_at||0)-(a.updated_at||0));
+
+        // One-time migration: unwrap legacy worker-proxied image URLs and persist direct URLs.
+        if(!remoteImageUrlMigrationDone){
+          const migrated = migrateLegacyProxyImageUrls(arr);
+          remoteImageUrlMigrationDone = true;
+          if(migrated.changed > 0){
+            arr = migrated.items;
+            setLocalBookmarks(arr);
+            ref.set(arr)
+              .then(()=>{ console.log('Firebase migration complete: normalized image URLs =', migrated.changed); _clearDataCache(); })
+              .catch((err)=>{ console.error('Firebase migration save failed', err); });
+            return;
+          }
+        }
+
         setLocalBookmarks(arr);
       } else {
         console.log('Remote snapshot empty — ignoring to avoid overwriting local data');
@@ -1769,6 +1838,11 @@ function saveBookmarksToRemote(){
   if (!firebaseUid || !db){ console.warn('saveBookmarksToRemote: no firebase uid/db'); return; }
   const ref = db.ref('bookmarks/' + firebaseUid);
   let local = (getLocalBookmarks() || []).map(it => ensureIdAndTsForSync(it));
+  const migrated = migrateLegacyProxyImageUrls(local);
+  if(migrated.changed > 0){
+    console.log('saveBookmarksToRemote: normalized legacy image URLs =', migrated.changed);
+  }
+  local = migrated.items;
   console.log('saveBookmarksToRemote uid=', firebaseUid, 'items=', local.length);
   // Safety guard: if local is empty but remote currently contains data, DO NOT overwrite (to avoid accidental deletion)
   try{
