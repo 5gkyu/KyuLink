@@ -13,15 +13,29 @@ function toHiragana(str){
 function normalizeForSearch(s){ if(!s) return ''; return toHiragana(s).replace(/\s+/g,'').toLowerCase(); }
 
 /* CSV parser removed (unused). Keep utilities small. */
-function getGridListFallbackIcon(urlObj, isGrid) {
-  const S2_URL = 'google.com/s2/favicons';
-  const customGrid = 'https://5gkyu.github.io/icon/404grid.png';
-  const customList = 'https://5gkyu.github.io/icon/404list.png';
-  
-  if (urlObj && (typeof urlObj === 'string') && urlObj.includes(S2_URL)) {
-    return isGrid ? customGrid : customList;
+function get404FallbackIconUrl(isGrid){
+  return isGrid ? 'https://5gkyu.github.io/icon/404grid.png' : 'https://5gkyu.github.io/icon/404list.png';
+}
+
+function show404FallbackIcon(iconWrap, isGrid, title){
+  if(!iconWrap) return;
+  const img = document.createElement('img');
+  img.className = 'fallback';
+  img.src = get404FallbackIconUrl(isGrid);
+  img.alt = title ? title + ' 画像なし' : '画像なし';
+  if(isGrid){
+    img.width = 64;
+    img.height = 64;
+  } else {
+    img.width = 40;
+    img.height = 40;
   }
-  return urlObj;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
+  img.onerror = ()=>{ img.remove(); };
+  iconWrap.innerHTML = '';
+  iconWrap.appendChild(img);
 }
 
 function faviconFromUrl(u, size=64){
@@ -421,7 +435,7 @@ function renderModalTags(all){
 function getActiveLayout(){
   const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
   if(isMobileViewport) return 'list';
-  return localStorage.getItem('desktop_layout') || 'list';
+  return localStorage.getItem('desktop_layout') || 'grid';
 }
 
 function applyGridLayout(){
@@ -433,7 +447,7 @@ function applyGridLayout(){
     // カラム数クラスを更新（タブレット/PC表示時のみ有効だが常に設定）
     el.list.classList.remove('cols-3', 'cols-4', 'cols-5', 'cols-6', 'cols-7');
     if(isGrid){
-      const cols = localStorage.getItem('grid_cols') || '5';
+      const cols = localStorage.getItem('grid_cols') || '4';
       el.list.classList.add('cols-' + cols);
     }
   }catch(e){ console.warn('applyGridLayout error', e); }
@@ -589,7 +603,7 @@ function initSidebar(){
     
     // サイドバーレイアウト
     if(el.sidebarLayout){
-      const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+      const savedLayout = localStorage.getItem('desktop_layout') || 'grid';
       el.sidebarLayout.value = savedLayout;
       el.sidebarLayout.addEventListener('change', (e) => {
         const v = e.target.value === 'grid' ? 'grid' : 'list';
@@ -638,7 +652,7 @@ function initSidebar(){
     // サイドバーカラム数
     const sidebarCols = document.getElementById('sidebarCols');
     if(sidebarCols){
-      const savedCols = localStorage.getItem('grid_cols') || '5';
+      const savedCols = localStorage.getItem('grid_cols') || '4';
       sidebarCols.value = savedCols;
       sidebarCols.addEventListener('change', (e) => {
         localStorage.setItem('grid_cols', e.target.value);
@@ -784,12 +798,12 @@ function renderList(){
             const f = document.createElement('img');
             f.className = 'fallback';
             const fSrc = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
-            f.src = getGridListFallbackIcon(fSrc, true);
+            f.src = fSrc;
             f.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
             f.width = 64; f.height = 64;
             f.loading = 'lazy'; f.decoding = 'async';
             try{ f.referrerPolicy = 'no-referrer'; }catch(_){ }
-            f.onerror = ()=>{ f.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">🐹</span>'; };
+            f.onerror = ()=>{ show404FallbackIcon(iconWrap, true, item.title); };
             iconWrap.appendChild(f);
           };
           iconWrap.appendChild(img);
@@ -797,26 +811,26 @@ function renderList(){
           // OGP画像もicon_urlもない場合はファビコン表示
           const img = document.createElement('img');
           const fSrc = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
-          img.src = getGridListFallbackIcon(fSrc, true);
+          img.src = fSrc;
           img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
           img.className = 'fallback';
           img.width = 64; img.height = 64;
           img.loading = 'lazy'; img.decoding = 'async';
           try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
-          img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">🐹</span>'; };
+          img.onerror = ()=>{ show404FallbackIcon(iconWrap, true, item.title); };
           iconWrap.appendChild(img);
         }
       } else {
         // スマートフォン表示: 必ずファビコンを表示（favicon_urlまたはGoogle s2）
         const img = document.createElement('img');
         const fSrc = item.favicon_url || faviconFromUrl(item.url, 64);
-        img.src = getGridListFallbackIcon(fSrc, false);
+        img.src = fSrc;
         img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
         img.className = 'fallback';
         img.width = 40; img.height = 40;
         img.loading = 'lazy'; img.decoding = 'async';
         try{ img.referrerPolicy = 'no-referrer'; }catch(_){ }
-        img.onerror = ()=>{ img.remove(); iconWrap.innerHTML = '<span style="font-size:28px;line-height:1;">🐹</span>'; };
+        img.onerror = ()=>{ show404FallbackIcon(iconWrap, false, item.title); };
         iconWrap.appendChild(img);
       }
     }catch(e){
@@ -824,8 +838,9 @@ function renderList(){
       try{ 
         const img = document.createElement('img'); 
         const fSrc = item.favicon_url || faviconFromUrl(item.url,64); 
-        img.src = getGridListFallbackIcon(fSrc, isGridLayout);
+        img.src = fSrc;
         img.alt=''; 
+        img.onerror = ()=>{ show404FallbackIcon(iconWrap, isGridLayout, item.title); };
         iconWrap.appendChild(img);
       }catch(_){}
     }
@@ -1990,11 +2005,11 @@ function openUserSettingsModal(){
       const sel = document.getElementById('themeSelect');
       if(sel) sel.value = savedTheme;
       // sync desktop layout when opening modal
-      const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+      const savedLayout = localStorage.getItem('desktop_layout') || 'grid';
       const layoutSel = document.getElementById('sidebarLayout');
       if(layoutSel) layoutSel.value = savedLayout;
       // sync grid cols when opening modal
-      const savedCols = localStorage.getItem('grid_cols') || '5';
+      const savedCols = localStorage.getItem('grid_cols') || '4';
       const colsSel = document.getElementById('gridColsSelect');
       if(colsSel) colsSel.value = savedCols;
       updateColsVisibility();
@@ -2012,7 +2027,7 @@ function closeUserSettingsModalFn(){
   try{
     // If desktop layout is tablet/PC (grid), ensure display size is set to 'medium' inside modal before closing
     const layoutSel = document.getElementById('sidebarLayout');
-    const layout = layoutSel ? layoutSel.value : (localStorage.getItem('desktop_layout') || 'list');
+    const layout = layoutSel ? layoutSel.value : (localStorage.getItem('desktop_layout') || 'grid');
     if(layout === 'grid'){
       try{
         const viewSel = document.getElementById('viewSizeSelect');
@@ -2086,6 +2101,7 @@ function applyTheme(themeName){
 // Font handling (font presets)
 function applyFont(fontName){
   try{
+    if(fontName === 'default') fontName = 'notojp';
     document.documentElement.classList.remove('font-dotgothic16','font-mplus','font-kosugi','font-yomogi','font-notojp');
     if(fontName === 'dotgothic16'){
       document.documentElement.classList.add('font-dotgothic16');
@@ -2102,7 +2118,7 @@ function applyFont(fontName){
       document.documentElement.classList.add('font-dotgothic16');
       fontName = 'dotgothic16';
     }
-    // 'default' uses the base stack defined in CSS
+    // 'default' is migrated to 'notojp' for consistent first-visit appearance
     try{ localStorage.setItem('app_font', fontName); }catch(e){}
   }catch(e){ console.warn('applyFont error', e); }
 }
@@ -2178,7 +2194,7 @@ try{
   // Grid columns select in settings modal
   const gridColsSelect = document.getElementById('gridColsSelect');
   if(gridColsSelect){
-    const savedCols = localStorage.getItem('grid_cols') || '5';
+    const savedCols = localStorage.getItem('grid_cols') || '4';
     gridColsSelect.value = savedCols;
     gridColsSelect.addEventListener('change', (e)=>{
       try{ localStorage.setItem('grid_cols', e.target.value); }catch(ex){}
@@ -2199,16 +2215,17 @@ try{
   // Sync select state
   if(themeSelect) themeSelect.value = localStorage.getItem('app_theme') || 'awake';
   // Apply persisted font preference
-  const savedFont = localStorage.getItem('app_font') || 'default';
+  let savedFont = localStorage.getItem('app_font') || 'notojp';
+  if(savedFont === 'default') savedFont = 'notojp';
   applyFont(savedFont);
   if(fontSelect) fontSelect.value = savedFont;
   // Apply persisted desktop layout and sync select
   try{
-    const savedLayout = localStorage.getItem('desktop_layout') || 'list';
+    const savedLayout = localStorage.getItem('desktop_layout') || 'grid';
     applyGridLayout();
     if(desktopLayoutSelect) desktopLayoutSelect.value = savedLayout;
     // カラム数セレクトも同期
-    const savedCols = localStorage.getItem('grid_cols') || '5';
+    const savedCols = localStorage.getItem('grid_cols') || '4';
     const gridColsSelect = document.getElementById('gridColsSelect');
     if(gridColsSelect) gridColsSelect.value = savedCols;
     const sidebarCols = document.getElementById('sidebarCols');
