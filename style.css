@@ -1092,7 +1092,7 @@ body.edit-mode .row .open-btn{display:none}
 .row.kyu-special {
   position: relative;
   /* border-color を透明にして背景グラデーションを border に適用する */
-  border: 1px solid transparent !important;
+  border: 3px solid transparent !important;
   background: 
     linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96)) padding-box,
     linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-1)) border-box !important;
@@ -1445,11 +1445,11 @@ html.dark-mode .bottom-nav {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 0;
   background: transparent;
   border: none;
   color: var(--text);
-  padding: 8px 4px;
+  padding: 0;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
   height: 100%;
