@@ -643,7 +643,7 @@ button, input, select, textarea, .bottom-nav, .bottom-nav-btn, .modal .panel, .s
   .wrap{box-sizing:border-box;padding-left:300px;max-width:none}
   /* ensure content row takes remaining width and doesn't overflow */
   .content-row{margin:0;max-width:100%;}
-  main{max-width:calc(100% - 10px);}
+  main{flex:1;max-width:calc(100% - 10px);}
 }
 
 /* Sidebar styling */

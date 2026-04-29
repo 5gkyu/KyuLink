@@ -81,6 +81,11 @@
   <div class="wrap">
     <header class="card" role="banner">
       <div class="top-row">
+        <div id="charLogoBtn" role="button" tabindex="0" title="KyuLink キャラクター" style="cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <!-- 仮アイコン。画像URLを適宜変更してください -->
+          <img src="https://5gkyu.github.io/icon/apple-touch-icon.png" alt="Logo" style="width:36px; height:36px; border-radius:50%; object-fit:cover; box-shadow:0 2px 6px rgba(0,0,0,0.1); border: 2px solid rgba(255,255,255,0.4);" />
+        </div>
+
         <div class="search" aria-hidden="false" style="flex:1;min-width:0;margin:0;">
           <input id="q" placeholder="検索" autocomplete="off" />
           <div class="icon" id="countText" style="font-size:12px;opacity:0.8;">0 件</div>
@@ -106,13 +111,6 @@
         <div class="sidebar-section">
           <h4 class="sidebar-title">⭐ ピン留めタグ</h4>
           <div class="sidebar-tags" id="pinnedTags"></div>
-        </div>
-        <div class="sidebar-section">
-          <h4 class="sidebar-title">📊 統計</h4>
-          <div class="sidebar-stats" id="sidebarStats">
-            <div class="stat-item"><span class="stat-label">全件数:</span><span class="stat-value" id="statTotal">0</span></div>
-            <div class="stat-item"><span class="stat-label">タグ数:</span><span class="stat-value" id="statTags">0</span></div>
-          </div>
         </div>
         <div class="sidebar-section">
           <h4 class="sidebar-title">🏷️ タグで絞り込み</h4>
