@@ -1088,6 +1088,55 @@ body.edit-mode .row .open-btn{display:none}
   .mid-row .selector{display:none}
 }
 
+/* ========== Kyu 特別仕様 (豪華装飾) ========== */
+.row.kyu-special {
+  position: relative;
+  /* border-color を透明にして背景グラデーションを border に適用する */
+  border: 2px solid transparent !important;
+  background: 
+    linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96)) padding-box,
+    linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-1)) border-box !important;
+  background-size: 100% 100%, 200% 200% !important;
+  animation: kyu-border-shimmer 3s linear infinite !important;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent-1) 25%, transparent),
+              0 0 0 1px color-mix(in srgb, var(--accent-2) 30%, transparent) inset !important;
+}
+.row.kyu-special:hover {
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--accent-1) 40%, transparent),
+              0 0 0 1px color-mix(in srgb, var(--accent-2) 50%, transparent) inset !important;
+  transform: translateY(-2px);
+}
+@keyframes kyu-border-shimmer {
+  0% { background-position: 0% 0%, 0% 50%; }
+  50% { background-position: 0% 0%, 100% 50%; }
+  100% { background-position: 0% 0%, 0% 50%; }
+}
+/* キラキラアイコンバッジ */
+.row.kyu-special::after {
+  content: "✨ Kyu";
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent-2) 40%, transparent);
+  z-index: 10;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
+/* Grid ビュー用調整 (オーバーフローによる見切れ防止) */
+.list.layout-grid .row.kyu-special {
+  overflow: visible; /* バッジがはみ出せるようにする */
+}
+.list.layout-grid .row.kyu-special .icon-wrap {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
 /* modal */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:10000}
 /* ensure modal small buttons are visible regardless of edit-mode */

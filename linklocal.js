@@ -721,6 +721,7 @@ function renderList(){
 
   arr.forEach(item=>{
     const row = document.createElement('div'); row.className = 'row';
+    if(item.tags && item.tags.includes('Kyu')){ row.classList.add('kyu-special'); }
 
     const iconWrap = document.createElement('div'); iconWrap.className = 'icon-wrap';
     // Show checkbox in edit mode if owner
@@ -1560,6 +1561,23 @@ renderTags(); renderList();
   }catch(e){}
 })();
 initSidebar(); // サイドバーを初期化
+
+try {
+  const charLogoBtn = document.getElementById('charLogoBtn');
+  if(charLogoBtn){
+    charLogoBtn.addEventListener('click', () => {
+      const targetTag = 'Kyu';
+      state.tags.clear();
+      state.tags.add(targetTag);
+      state.noTagFilter = false;
+      renderTags();
+      renderList();
+      renderSidebarTags();
+      // list表示等で画面トップにスクロール
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  }
+} catch(e){}
 
 function adjustWrapForHeader(){
   const hdr = document.querySelector('header.card');
