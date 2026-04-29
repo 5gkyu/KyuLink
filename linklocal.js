@@ -13,6 +13,17 @@ function toHiragana(str){
 function normalizeForSearch(s){ if(!s) return ''; return toHiragana(s).replace(/\s+/g,'').toLowerCase(); }
 
 /* CSV parser removed (unused). Keep utilities small. */
+function getGridListFallbackIcon(urlObj, isGrid) {
+  const S2_URL = 'google.com/s2/favicons';
+  const customGrid = 'https://5gkyu.github.io/icon/404grid.png';
+  const customList = 'https://5gkyu.github.io/icon/404list.png';
+  
+  if (urlObj && (typeof urlObj === 'string') && urlObj.includes(S2_URL)) {
+    return isGrid ? customGrid : customList;
+  }
+  return urlObj;
+}
+
 function faviconFromUrl(u, size=64){
   try{ const url = new URL(u); return `https://www.google.com/s2/favicons?sz=${size}&domain=${url.hostname}`; } catch(e){ return '' }
 }
@@ -772,7 +783,8 @@ function renderList(){
             img.remove();
             const f = document.createElement('img');
             f.className = 'fallback';
-            f.src = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
+            const fSrc = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
+            f.src = getGridListFallbackIcon(fSrc, true);
             f.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
             f.width = 64; f.height = 64;
             f.loading = 'lazy'; f.decoding = 'async';
@@ -784,7 +796,8 @@ function renderList(){
         } else {
           // OGP画像もicon_urlもない場合はファビコン表示
           const img = document.createElement('img');
-          img.src = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
+          const fSrc = item.favicon_url || item.icon_url || faviconFromUrl(item.url, 64);
+          img.src = getGridListFallbackIcon(fSrc, true);
           img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
           img.className = 'fallback';
           img.width = 64; img.height = 64;
@@ -796,7 +809,8 @@ function renderList(){
       } else {
         // スマートフォン表示: 必ずファビコンを表示（favicon_urlまたはGoogle s2）
         const img = document.createElement('img');
-        img.src = item.favicon_url || faviconFromUrl(item.url, 64);
+        const fSrc = item.favicon_url || faviconFromUrl(item.url, 64);
+        img.src = getGridListFallbackIcon(fSrc, false);
         img.alt = item.title ? item.title + ' ファビコン' : 'ファビコン';
         img.className = 'fallback';
         img.width = 40; img.height = 40;
@@ -807,7 +821,13 @@ function renderList(){
       }
     }catch(e){
       // フォールバック: 必ずファビコンのみ
-      try{ const img = document.createElement('img'); img.src = item.favicon_url || faviconFromUrl(item.url,64); img.alt=''; iconWrap.appendChild(img);}catch(_){}
+      try{ 
+        const img = document.createElement('img'); 
+        const fSrc = item.favicon_url || faviconFromUrl(item.url,64); 
+        img.src = getGridListFallbackIcon(fSrc, isGridLayout);
+        img.alt=''; 
+        iconWrap.appendChild(img);
+      }catch(_){}
     }
 
     const meta = document.createElement('div'); meta.className = 'meta';
@@ -1567,9 +1587,14 @@ try {
   if(charLogoBtn){
     charLogoBtn.addEventListener('click', () => {
       const targetTag = 'Kyu';
-      state.tags.clear();
-      state.tags.add(targetTag);
-      state.noTagFilter = false;
+      if (state.tags.has(targetTag)) {
+        state.tags.delete(targetTag);
+        if (state.tags.size === 0) state.noTagFilter = false; // Fix: should show all if nothing selected
+      } else {
+        state.tags.clear();
+        state.tags.add(targetTag);
+        state.noTagFilter = false;
+      }
       renderTags();
       renderList();
       renderSidebarTags();
