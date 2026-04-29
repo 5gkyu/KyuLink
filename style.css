@@ -1442,6 +1442,16 @@ html.dark-mode .bottom-nav {
   }
 }
 
+/* Show bottom nav on PC/tablet when user enables it */
+@media (min-width: 769px) {
+  html.bottom-nav-show-desktop .bottom-nav:not(.hidden-by-user) {
+    display: flex !important;
+  }
+  html.bottom-nav-show-desktop .list {
+    padding-bottom: calc(var(--row-h, 72px) + 80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 /* bottom nav stays visible when add/edit modal is open */
 
 /* User-controlled hide class: ensures JS can force-hide bottom nav even on mobile */

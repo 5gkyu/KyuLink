@@ -1025,7 +1025,14 @@ if(el.sortSelect){
 if(el.topOpenAdd) el.topOpenAdd.addEventListener('click', ()=>{ if(!isReadOnlyMode) openAddModal(); });
 if(el.openAdd) el.openAdd.addEventListener('click', ()=>{ if(!isReadOnlyMode) openAddModal(); });
 if(el.cancelAdd) el.cancelAdd.addEventListener('click', ()=>{ closeAddModal(); });
-if(el.addModal) el.addModal.addEventListener('click', (e)=>{ if(e.target === el.addModal) closeAddModal(); });
+if(el.addModal) el.addModal.addEventListener('click', (e)=>{
+  if(e.target === el.addModal){
+    // テキスト入力中はモーダル外クリックで閉じない
+    const active = document.activeElement;
+    if(active && el.addModal.contains(active) && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+    closeAddModal();
+  }
+});
 if(el.deleteInModal) el.deleteInModal.addEventListener('click', ()=>{
   try{
     const eid = el.saveAdd && el.saveAdd.dataset && el.saveAdd.dataset.editId ? Number(el.saveAdd.dataset.editId) : null;
@@ -2046,8 +2053,13 @@ try{
     function applyBottomNavVisible(v){
       try{
         if(!bottomNav) return;
-        if(v) bottomNav.classList.remove('hidden-by-user');
-        else bottomNav.classList.add('hidden-by-user');
+        if(v){
+          bottomNav.classList.remove('hidden-by-user');
+          document.documentElement.classList.add('bottom-nav-show-desktop');
+        } else {
+          bottomNav.classList.add('hidden-by-user');
+          document.documentElement.classList.remove('bottom-nav-show-desktop');
+        }
       }catch(e){}
     }
     // load persisted preference (default: visible)
