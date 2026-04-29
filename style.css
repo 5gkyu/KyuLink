@@ -638,7 +638,7 @@ button, input, select, textarea, .bottom-nav, .bottom-nav-btn, .modal .panel, .s
    there's no left gap and the right side doesn't get clipped. This only applies
    on sufficiently wide screens. */
 @media(min-width:881px){
-  .sidebar{position:fixed;left:0;top:var(--hdr-h,0px);height:calc(100vh - var(--hdr-h,0px));overflow:auto;z-index:994;border-radius:0;border-left:none;border-top:none}
+  .sidebar{display:flex;flex-direction:column;position:fixed;left:0;top:var(--hdr-h,0px);height:calc(100vh - var(--hdr-h,0px));overflow:hidden;z-index:994;border-radius:0;border-left:none;border-top:none}
   /* make the outer wrap reserve space for the fixed sidebar */
   .wrap{box-sizing:border-box;padding-left:300px;max-width:none}
   /* ensure content row takes remaining width and doesn't overflow */
@@ -647,7 +647,6 @@ button, input, select, textarea, .bottom-nav, .bottom-nav-btn, .modal .panel, .s
 }
 
 /* Sidebar styling */
-.sidebar{display:flex;flex-direction:column;height:calc(100vh - var(--hdr-h, 72px) - 30px);position:sticky;top:calc(var(--hdr-h, 72px) + 15px);overflow:hidden;}
 .sidebar-section{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(6,50,58,0.08)}
 .sidebar-section:last-child{border-bottom:none;margin-bottom:0;flex:1;display:flex;flex-direction:column;min-height:0;}
 .sidebar-title{font-size:13px;font-weight:700;color:var(--text);margin:0 0 10px 0;display:flex;align-items:center;gap:6px;flex-shrink:0;}
