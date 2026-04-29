@@ -139,6 +139,7 @@ const el = {
   sidebar: document.getElementById('sidebar'),
   sidebarTagSearch: document.getElementById('sidebarTagSearch'),
   sidebarTags: document.getElementById('sidebarTags'),
+  pinnedTags: document.getElementById('pinnedTags'),
   sidebarViewSize: document.getElementById('sidebarViewSize'),
   sidebarSort: document.getElementById('sidebarSort'),
   sidebarLayout: document.getElementById('sidebarLayout'),
@@ -405,10 +406,17 @@ function renderModalTags(all){
 
 /* ------------------ サイドバー ------------------ */
 // タブレット/PCレイアウトとカラム数クラスを適用
+// 実際の表示レイアウトを取得（モバイルなら強制リスト）
+function getActiveLayout(){
+  const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+  if(isMobileViewport) return 'list';
+  return localStorage.getItem('desktop_layout') || 'list';
+}
+
 function applyGridLayout(){
   try{
     if(!el.list) return;
-    const layout = localStorage.getItem('desktop_layout') || 'list';
+    const layout = getActiveLayout();
     const isGrid = layout === 'grid';
     el.list.classList.toggle('layout-grid', isGrid);
     // カラム数クラスを更新（タブレット/PC表示時のみ有効だが常に設定）
@@ -420,18 +428,22 @@ function applyGridLayout(){
   }catch(e){ console.warn('applyGridLayout error', e); }
 }
 
+let lastRenderedLayout = null; // リサイズでレイアウトが変化したか検知するため
+
 // カラム数設定行の表示/非表示を更新
 function updateColsVisibility(){
   try{
-    const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
-    let layout = localStorage.getItem('desktop_layout') || 'list';
-    if(isMobileViewport && layout !== 'list'){
-      layout = 'list';
-      try{ localStorage.setItem('desktop_layout', 'list'); }catch(e){}
-      if(el.sidebarLayout) el.sidebarLayout.value = 'list';
-      try{ applyGridLayout(); }catch(e){}
+    const layout = getActiveLayout();
+    // スマホで強制リストになったなど、レイアウトが切り替わったら再描画
+    if (lastRenderedLayout && lastRenderedLayout !== layout) {
+      applyGridLayout();
+      renderList();
     }
+    
+    // UIの表示制御（ユーザー設定は常に本来の設定値を基準にするか、現在のレイアウト基準にするか。ここでは実際レイアウトを基準にする）
+    const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
     const isGrid = layout === 'grid';
+
     const sidebarRow = document.getElementById('sidebarColsRow');
     const settingsRow = document.getElementById('gridColsSettingRow');
     if(sidebarRow) sidebarRow.style.display = isGrid ? '' : 'none';
@@ -449,6 +461,29 @@ function updateColsVisibility(){
 
 function renderSidebarTags(filterQuery){
   try{
+    // ピン留めタグ（仮実装）
+    if(el.pinnedTags){
+      el.pinnedTags.innerHTML = '';
+      const pinned = ['Kyu', 'Google', 'AI'];
+      const all = buildAllTags(DATA);
+      pinned.forEach(t => {
+        // 全タグに含まれていて件数があるものだけ表示、または件数0でも表示。今回は件数を表示。
+        const count = DATA.filter(d => (d.tags || []).includes(t)).length;
+        const tagBtn = document.createElement('div');
+        tagBtn.className = 'sidebar-tag' + (state.tags.has(t) ? ' active' : '');
+        tagBtn.innerHTML = `<span>⭐ ${t}</span><span class="tag-count">${count}</span>`;
+        tagBtn.addEventListener('click', () => {
+          const _n=Date.now(); if(_n-_tagClickGuard<350) return; _tagClickGuard=_n;
+          if(state.tags.has(t)){ state.tags.delete(t); } else { state.tags.clear(); state.tags.add(t); }
+          state.noTagFilter = false;
+          renderTags();
+          renderList();
+          renderSidebarTags(filterQuery);
+        });
+        el.pinnedTags.appendChild(tagBtn);
+      });
+    }
+
     if(!el.sidebarTags) return;
     el.sidebarTags.innerHTML = '';
     const all = buildAllTags(DATA);
@@ -667,9 +702,10 @@ function renderList(){
   el.list.innerHTML = '';
   if(el.countText) el.countText.textContent = `${arr.length} 件`;
 
-  // 保存されたレイアウト設定を取得
-  const savedLayout = localStorage.getItem('desktop_layout') || 'list';
-  const isGridLayout = savedLayout === 'grid';
+  // 保存されたレイアウト設定を取得して適用
+  const layout = getActiveLayout();
+  lastRenderedLayout = layout;
+  const isGridLayout = layout === 'grid';
 
   // 表示モードに応じて list 要素にクラスを付与（layout-gridを保持）
   // スマートフォン表示サイズクラスはタブレット/PCレイアウトに影響しないように分離

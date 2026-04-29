@@ -104,6 +104,10 @@
       <!-- Left Sidebar (Desktop only) -->
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-section">
+          <h4 class="sidebar-title">⭐ ピン留めタグ</h4>
+          <div class="sidebar-tags" id="pinnedTags"></div>
+        </div>
+        <div class="sidebar-section">
           <h4 class="sidebar-title">📊 統計</h4>
           <div class="sidebar-stats" id="sidebarStats">
             <div class="stat-item"><span class="stat-label">全件数:</span><span class="stat-value" id="statTotal">0</span></div>
@@ -428,9 +432,9 @@
 
 <!-- Bottom Navigation for Mobile -->
 <nav class="bottom-nav" id="bottomNav">
-  <button class="bottom-nav-btn" id="bottomSearchBtn" type="button">
-    <span class="bottom-nav-icon">🔍</span>
-    <span class="bottom-nav-label">検索</span>
+  <button class="bottom-nav-btn" id="bottomHubBtn" type="button">
+    <span class="bottom-nav-icon">📡</span>
+    <span class="bottom-nav-label">ハブ</span>
   </button>
   <button class="bottom-nav-btn" id="bottomTagsBtn" type="button">
     <span class="bottom-nav-icon">🏷️</span>
@@ -440,9 +444,9 @@
     <span class="bottom-nav-icon">➕</span>
     <span class="bottom-nav-label">追加</span>
   </button>
-  <button class="bottom-nav-btn" id="bottomHubBtn" type="button">
-    <span class="bottom-nav-icon">📡</span>
-    <span class="bottom-nav-label">ハブ</span>
+  <button class="bottom-nav-btn" id="bottomSearchBtn" type="button">
+    <span class="bottom-nav-icon">🔍</span>
+    <span class="bottom-nav-label">検索</span>
   </button>
 </nav>
 

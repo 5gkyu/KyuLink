@@ -342,6 +342,15 @@ html.theme-dreamer .small-btn{
   border: 1px solid rgba(127,163,106,0.2);
 }
 
+/* ドリーマーテーマ固有のグラデーション（緑とピンクの中間色が濁らないように補正） */
+html.theme-dreamer .chip.active,
+html.theme-dreamer .modal .chip.active,
+html.theme-dreamer .list.layout-grid .icon-wrap,
+html.theme-dreamer .layout-toggle-btn.active,
+html.theme-dreamer.bottom-nav-show-desktop .layout-toggle-btn.active {
+  background: linear-gradient(135deg, #7FA36A 0%, #C1C68E 50%, #E8AFA3 100%) !important;
+}
+
 html.theme-dreamer .modal .panel{
   background: var(--card);
   border: 1px solid rgba(127,163,106,0.2);
@@ -425,6 +434,15 @@ html.theme-dreamer2 .chip,
 html.theme-dreamer2 .small-btn{
   background: rgba(110,143,92,0.12);
   border: 1px solid rgba(110,143,92,0.2);
+}
+
+/* ドリーマー2テーマ固有のグラデーション補正 */
+html.theme-dreamer2 .chip.active,
+html.theme-dreamer2 .modal .chip.active,
+html.theme-dreamer2 .list.layout-grid .icon-wrap,
+html.theme-dreamer2 .layout-toggle-btn.active,
+html.theme-dreamer2.bottom-nav-show-desktop .layout-toggle-btn.active {
+  background: linear-gradient(135deg, #6E8F5C 0%, #A2AF7A 50%, #E4A39A 100%) !important;
 }
 
 html.theme-dreamer2 .modal .panel{
@@ -635,6 +653,7 @@ button, input, select, textarea, .bottom-nav, .bottom-nav-btn, .modal .panel, .s
 .sidebar-search input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(6,50,58,0.1);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box}
 .sidebar-search input::placeholder{color:var(--muted)}
 .sidebar-tags{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;margin-top:8px;padding-right:12px;box-sizing:border-box;scrollbar-gutter:stable}
+#pinnedTags{max-height:none;}
 .sidebar-tag{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:rgba(6,50,58,0.03);border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all 0.15s ease;box-sizing:border-box;min-width:0}
 .sidebar-tag:hover{background:rgba(15,184,191,0.08);border-color:rgba(15,184,191,0.2)}
 .sidebar-tag.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#fff;border-color:transparent}
