@@ -279,13 +279,13 @@ html.theme-mint .search-overlay-content{
   border: 1px solid rgba(77,208,192,0.25);
 }
 
-/* ベージュ + グリーン + くすみピンク (Dreamer) */
+/* ベージュ + グリーン系 (Dreamer) */
 html.theme-dreamer{
   --bg: #F4F1E8;
   --card: #E6E0D2;
   --card-rgb: 230,224,210;
   --accent-1: #7FA36A;
-  --accent-2: #E8AFA3;
+  --accent-2: #8EAE7B; /* changed from pink to lighter green */
   --text: #5C5A52;
   --muted: #9A978D;
 }
@@ -342,13 +342,13 @@ html.theme-dreamer .small-btn{
   border: 1px solid rgba(127,163,106,0.2);
 }
 
-/* ドリーマーテーマ固有のグラデーション（緑とピンクの中間色が濁らないように補正） */
+/* ドリーマーテーマ固有のグラデーション（緑単色系で統一） */
 html.theme-dreamer .chip.active,
 html.theme-dreamer .modal .chip.active,
 html.theme-dreamer .list.layout-grid .icon-wrap,
 html.theme-dreamer .layout-toggle-btn.active,
 html.theme-dreamer.bottom-nav-show-desktop .layout-toggle-btn.active {
-  background: linear-gradient(135deg, #7FA36A 0%, #C1C68E 50%, #E8AFA3 100%) !important;
+  background: linear-gradient(135deg, #7FA36A 0%, #8EAE7B 50%, #A5BA8C 100%) !important;
 }
 
 html.theme-dreamer .modal .panel{
@@ -442,7 +442,7 @@ html.theme-dreamer2 .modal .chip.active,
 html.theme-dreamer2 .list.layout-grid .icon-wrap,
 html.theme-dreamer2 .layout-toggle-btn.active,
 html.theme-dreamer2.bottom-nav-show-desktop .layout-toggle-btn.active {
-  background: linear-gradient(135deg, #6E8F5C 0%, #A2AF7A 50%, #E4A39A 100%) !important;
+  background: linear-gradient(135deg, #6E8F5C 0%, #7D966B 50%, #8B9D7A 100%) !important;
 }
 
 html.theme-dreamer2 .modal .panel{
@@ -653,7 +653,9 @@ button, input, select, textarea, .bottom-nav, .bottom-nav-btn, .modal .panel, .s
 .sidebar-search input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(6,50,58,0.1);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box}
 .sidebar-search input::placeholder{color:var(--muted)}
 .sidebar-tags{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;margin-top:8px;padding-right:12px;box-sizing:border-box;scrollbar-gutter:stable}
-#pinnedTags{max-height:none;}
+#pinnedTags{max-height:none;flex-direction:row;flex-wrap:wrap;}
+#pinnedTags .sidebar-tag{flex:1 1 calc(33.333% - 4px);justify-content:center;padding:6px;font-size:13px;text-align:center;}
+#pinnedTags .sidebar-tag span:not(.tag-count){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-tag{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:rgba(6,50,58,0.03);border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all 0.15s ease;box-sizing:border-box;min-width:0}
 .sidebar-tag:hover{background:rgba(15,184,191,0.08);border-color:rgba(15,184,191,0.2)}
 .sidebar-tag.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#fff;border-color:transparent}
@@ -881,7 +883,7 @@ header.card .selector{display:flex;align-items:center}
   }
 }
 
-.row{display:flex;align-items:center;height:var(--row-h);gap:0;padding:8px 6px;border-radius:12px;background:linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));border:1px solid rgba(6,50,58,0.04);box-shadow:0 2px 8px rgba(2,18,22,0.04)}
+.row{display:flex;align-items:center;width:100%;box-sizing:border-box;height:var(--row-h);gap:0;padding:8px 6px;border-radius:12px;background:linear-gradient(180deg, var(--card), rgba(var(--card-rgb),0.96));border:1px solid rgba(6,50,58,0.04);box-shadow:0 2px 8px rgba(2,18,22,0.04)}
 .row:hover{box-shadow:0 8px 24px rgba(6,50,58,0.08)}
 /* prevent selection from changing layout: ensure selected rows don't alter size */
 .row.selected{transform:none !important; box-sizing:border-box;}

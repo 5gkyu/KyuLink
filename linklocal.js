@@ -471,7 +471,7 @@ function renderSidebarTags(filterQuery){
         const count = DATA.filter(d => (d.tags || []).includes(t)).length;
         const tagBtn = document.createElement('div');
         tagBtn.className = 'sidebar-tag' + (state.tags.has(t) ? ' active' : '');
-        tagBtn.innerHTML = `<span>⭐ ${t}</span><span class="tag-count">${count}</span>`;
+        tagBtn.innerHTML = `<span>⭐ ${t}</span>`;
         tagBtn.addEventListener('click', () => {
           const _n=Date.now(); if(_n-_tagClickGuard<350) return; _tagClickGuard=_n;
           if(state.tags.has(t)){ state.tags.delete(t); } else { state.tags.clear(); state.tags.add(t); }
