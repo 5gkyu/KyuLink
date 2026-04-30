@@ -20,13 +20,13 @@ function get404FallbackIconUrl(isGrid){
 function show404FallbackIcon(iconWrap, isGrid, title){
   if(!iconWrap) return;
   const img = document.createElement('img');
-  img.className = 'fallback';
   img.src = get404FallbackIconUrl(isGrid);
   img.alt = title ? title + ' 画像なし' : '画像なし';
   if(isGrid){
-    img.width = 64;
-    img.height = 64;
+    // grid: fill the entire icon-wrap area like a hero image
+    img.className = 'fallback grid-fallback';
   } else {
+    img.className = 'fallback';
     img.width = 40;
     img.height = 40;
   }
@@ -489,7 +489,7 @@ function renderSidebarTags(filterQuery){
     // ピン留めタグ（仮実装）
     if(el.pinnedTags){
       el.pinnedTags.innerHTML = '';
-      const pinned = ['Kyu', 'Google', 'AI'];
+      const pinned = ['Google', 'AI'];
       const all = buildAllTags(DATA);
       pinned.forEach(t => {
         // 全タグに含まれていて件数があるものだけ表示、または件数0でも表示。今回は件数を表示。
@@ -629,8 +629,8 @@ function initSidebar(){
       });
       // Wire up the new 1-click layout toggle buttons if present
       try{
-        const btnPhone = document.getElementById('layoutBtnPhone');
-        const btnDesktop = document.getElementById('layoutBtnDesktop');
+        const btnPhone = document.getElementById('sidebarLayoutBtnPhone');
+        const btnDesktop = document.getElementById('sidebarLayoutBtnDesktop');
         function setLayoutButtonsActive(v){
           if(btnPhone) btnPhone.classList.toggle('active', v === 'list');
           if(btnDesktop) btnDesktop.classList.toggle('active', v === 'grid');
@@ -1581,15 +1581,54 @@ loadViewMode(); // 表示モードを localStorage から読み込み
 loadSort(); // ソート設定を localStorage から読み込み
 updateViewModeUI(); // ラジオボタンの状態を更新
 renderTags(); renderList();
-// ?tag= URL パラメータでタグ選択状態を起動（全ユーザー向け）
+// URL パラメータで状態を起動（全ユーザー向け）: ?tag= ?q= ?sort= ?layout= ?theme= ?notag=1
 ;(function(){
   try{
     const _p = new URLSearchParams(window.location.search);
     const _t = _p.get('tag');
+    const _q = _p.get('q');
+    const _sort = _p.get('sort');
+    const _layout = _p.get('layout');
+    const _theme = _p.get('theme');
+    const _notag = _p.get('notag');
+    let _changed = false;
     if(_t){
       state.tags.clear();
       state.noTagFilter = false;
       state.tags.add(decodeURIComponent(_t));
+      _changed = true;
+    }
+    if(_notag === '1'){
+      state.noTagFilter = true;
+      state.tags.clear();
+      _changed = true;
+    }
+    if(_q){
+      state.q = decodeURIComponent(_q);
+      const _qEl = document.getElementById('q');
+      if(_qEl) _qEl.value = state.q;
+      _changed = true;
+    }
+    const _validSorts = ['alpha_en_asc','alpha_en_desc','date-new','date-old'];
+    if(_sort && _validSorts.includes(_sort)){
+      state.sort = _sort;
+      const _sortEl = document.getElementById('sortSelect');
+      if(_sortEl) _sortEl.value = _sort;
+      _changed = true;
+    }
+    if(_layout === 'grid' || _layout === 'list'){
+      localStorage.setItem('desktop_layout', _layout);
+      if(typeof applyGridLayout === 'function') applyGridLayout();
+      _changed = true;
+    }
+    const _validThemes = ['light','dark','awake','muse','majesty','eof'];
+    if(_theme && _validThemes.includes(_theme)){
+      if(typeof applyTheme === 'function') applyTheme(_theme);
+      const _themeEl = document.getElementById('themeSelect');
+      if(_themeEl) _themeEl.value = _theme;
+      _changed = true;
+    }
+    if(_changed){
       try{ window.history.replaceState(null, '', window.location.pathname); }catch(e){}
       renderTags(); renderList(); renderSidebarTags();
     }
@@ -2051,26 +2090,27 @@ if(userSettingsModal) userSettingsModal.addEventListener('click', (e)=>{ if(e.ta
 function applyTheme(themeName){
   try{
     // Remove all theme classes first
-    document.documentElement.classList.remove('dark-mode', 'theme-kohane', 'theme-lavender', 'theme-mint', 'theme-dreamer', 'theme-dreamer2');
-    
+    document.documentElement.classList.remove('dark-mode', 'theme-awake', 'theme-muse', 'theme-majesty', 'theme-eof');
+
     if(themeName === 'dark'){
       document.documentElement.classList.add('dark-mode');
     } else if(themeName === 'awake'){
-      // 'Awake' maps to the previous kohane theme
-      document.documentElement.classList.add('theme-kohane');
-    } else if(themeName === 'awake-dark'){
-      document.documentElement.classList.add('theme-kohane');
-      document.documentElement.classList.add('dark-mode');
-    } else if(themeName === 'kohane'){
-      document.documentElement.classList.add('theme-kohane');
-    } else if(themeName === 'lavender'){
-      document.documentElement.classList.add('theme-lavender');
-    } else if(themeName === 'mint'){
-      document.documentElement.classList.add('theme-mint');
-    } else if(themeName === 'dreamer'){
-      document.documentElement.classList.add('theme-dreamer');
-    } else if(themeName === 'dreamer2'){
-      document.documentElement.classList.add('theme-dreamer2');
+      document.documentElement.classList.add('theme-awake');
+    } else if(themeName === 'muse'){
+      document.documentElement.classList.add('theme-muse');
+    } else if(themeName === 'majesty'){
+      document.documentElement.classList.add('theme-majesty');
+    } else if(themeName === 'eof'){
+      document.documentElement.classList.add('theme-eof');
+    } else if(themeName === 'kohane' || themeName === 'awake-dark'){
+      // Legacy aliases: map to awake
+      document.documentElement.classList.add('theme-awake');
+      if(themeName === 'awake-dark') document.documentElement.classList.add('dark-mode');
+      themeName = (themeName === 'awake-dark') ? 'dark' : 'awake'; // normalize
+    } else if(themeName === 'dreamer' || themeName === 'dreamer2'){
+      // Legacy aliases: map to muse
+      document.documentElement.classList.add('theme-muse');
+      themeName = 'muse'; // normalize
     }
     // 'light' is default, no class needed
     localStorage.setItem('app_theme', themeName);
@@ -2079,12 +2119,10 @@ function applyTheme(themeName){
     try{
       var themeColor = '#f6fbfb';
       if(themeName === 'dark') themeColor = '#07181a';
-      else if(themeName === 'awake' || themeName === 'kohane') themeColor = '#ffdada';
-      else if(themeName === 'awake-dark') themeColor = '#07181a';
-      else if(themeName === 'lavender') themeColor = '#e8d5f0';
-      else if(themeName === 'mint') themeColor = '#d0f0ec';
-      else if(themeName === 'dreamer') themeColor = '#F4F1E8';
-      else if(themeName === 'dreamer2') themeColor = '#F4F1E8';
+      else if(themeName === 'awake' || themeName === 'kohane' || themeName === 'awake-dark') themeColor = '#ffdada';
+      else if(themeName === 'muse' || themeName === 'dreamer' || themeName === 'dreamer2') themeColor = '#F4F1E8';
+      else if(themeName === 'majesty') themeColor = '#f0eef5';
+      else if(themeName === 'eof') themeColor = '#f5f2ee';
       else if(themeName === 'light') themeColor = getComputedStyle(document.documentElement).getPropertyValue('--bg') || themeColor;
 
       var meta = document.querySelector('meta[name="theme-color"]');

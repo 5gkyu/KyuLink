@@ -109,11 +109,22 @@
       <!-- Left Sidebar (Desktop only) -->
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-section">
-          <h4 class="sidebar-title">⭐ ピン留めタグ</h4>
+          <!-- <h4 class="sidebar-title">⭐ ピン留めタグ</h4> -->
           <div class="sidebar-tags" id="pinnedTags"></div>
         </div>
+        <div class="sidebar-section sidebar-layout-section">
+          <!-- <h4 class="sidebar-title">🖥️ レイアウト</h4> -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button id="sidebarLayoutBtnPhone" class="small-btn layout-toggle-btn" data-value="list" type="button">スマートフォン</button>
+            <button id="sidebarLayoutBtnDesktop" class="small-btn layout-toggle-btn" data-value="grid" type="button">タブレット/PC</button>
+          </div>
+          <select id="sidebarLayout" style="display:none;">
+            <option value="list">リスト</option>
+            <option value="grid">グリッド</option>
+          </select>
+        </div>
         <div class="sidebar-section">
-          <h4 class="sidebar-title">🏷️ タグで絞り込み</h4>
+          <!-- <h4 class="sidebar-title">🏷️ タグで絞り込み</h4> -->
           <div class="sidebar-search">
             <input type="text" id="sidebarTagSearch" placeholder="タグを検索..." />
           </div>
@@ -290,17 +301,7 @@
                 <option value="date-old">📅 古い順</option>
               </select>
             </div>
-            <div id="settingsLayoutRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <label style="min-width:80px;">レイアウト:</label>
-              <div id="layoutToggle" style="display:flex;gap:6px;">
-                <button id="layoutBtnPhone" class="small-btn layout-toggle-btn" data-value="list" type="button">スマートフォン</button>
-                <button id="layoutBtnDesktop" class="small-btn layout-toggle-btn" data-value="grid" type="button">タブレット/PC</button>
-              </div>
-              <select id="sidebarLayout" style="display:none;">
-                <option value="list">スマートフォン</option>
-                <option value="grid">タブレット/PC</option>
-              </select>
-            </div>
+
             <div id="settingsViewSizeRow" style="display:flex;align-items:center;gap:8px;">
               <label style="min-width:80px;">表示サイズ:</label>
               <select id="viewSizeSelect">
@@ -320,17 +321,16 @@
               <option value="light">Light</option>
               <option value="dark">Dark</option>
               <option value="awake">Awake</option>
-              <option value="lavender">Twilight</option>
-              <option value="mint">Ocean</option>
-              <option value="dreamer">Dreamer</option>
-              <option value="dreamer2">Dreamer2</option>
+              <option value="muse">Muse</option>
+              <option value="majesty">Majesty</option>
+              <option value="eof">EOF</option>
+
             </select>
           </div>
             <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
               <label style="min-width:80px;font-weight:700">フォント:</label>
               <select id="fontSelect" style="padding:8px;border-radius:8px;min-width:160px;">
-                <option value="default">Noto Sans JP（既定）</option>
-                <option value="notojp">Noto Sans JP</option>
+                <option value="notojp">Noto Sans JP（既定）</option>
                 <option value="dotgothic16">DotGothic16</option>
                 <option value="mplus">M PLUS Rounded 1c</option>
                 <option value="kosugi">Kosugi Maru</option>
